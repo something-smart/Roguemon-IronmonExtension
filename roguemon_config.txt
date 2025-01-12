@@ -4,9 +4,9 @@ Brock,200,5,Brock Prize
 Mt Moon FC,200,5,Mt Moon FC Prize
 Misty,300,5,Misty Prize
 Surge,350,6,Surge Prize
-Erika,400,7,Erika Prize
-Koga,450,7,Koga Prize
-Silph Co,450,7,Koga Prize
+Erika,450,6,Erika Prize
+Koga,500,7,Koga Prize
+Silph Co,500,7,Koga Prize
 Sabrina,550,8,Koga Prize
 Blaine,600,8,Koga Prize
 Giovanni,700,8,Koga Prize
