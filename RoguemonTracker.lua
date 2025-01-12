@@ -26,8 +26,8 @@ local function RoguemonTracker()
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
 		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one non-healing ground item before next gym (immediate decision)."},
-		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."}
-		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-healing ground item you find (immediate decision)."},
+		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
+		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-healing ground item you find (immediate decision)."}
 	}
 
 	local milestoneIds = {
@@ -1167,7 +1167,7 @@ local function RoguemonTracker()
 	end
 
 	function self.checkForUpdates()
-		local versionResponsePattern = '"tag_name":%s+"%w+(%d+%.%d+%.%d+%.?%d*)"' -- matches "1.0" in "tag_name": "v1.0"
+		local versionResponsePattern = '"tag_name":%s+"%w+(%d+%.%d+%.*%d*)"' -- matches "1.0" in "tag_name": "v1.0"
 		local versionCheckUrl = string.format("https://api.github.com/repos/%s/releases/latest", self.github or "")
 		local downloadUrl = string.format("%s/releases/latest", self.url or "")
 		local compareFunc = function(a, b) return a ~= b and not Utils.isNewerVersion(a, b) end -- if current version is *older* than online version
