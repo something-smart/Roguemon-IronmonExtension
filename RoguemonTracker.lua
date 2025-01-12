@@ -1,9 +1,9 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "0.2"
+	self.version = "0.3"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
-	self.description = "Tracker extension for tracking and automating Roguemon rewards and caps."
+	self.description = "Tracker extension for tracking & automating Roguemon rewards and caps."
 	self.github = "something-smart/Roguemon-IronmonExtension"
 	self.url = string.format("https://github.com/%s", self.github or "")
 
