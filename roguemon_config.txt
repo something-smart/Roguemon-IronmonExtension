@@ -1,0 +1,120 @@
+150,3
+Rival 1,150,3,It's Dangerous To Go Alone
+Brock,200,5,Brock Prize
+Mt Moon FC,200,5,Mt Moon FC Prize
+Misty,300,5,Misty Prize
+Surge,350,6,Surge Prize
+Erika,400,7,Erika Prize
+Koga,450,7,Koga Prize
+Silph Co,450,7,Koga Prize
+Sabrina,550,8,Koga Prize
+Blaine,600,8,Koga Prize
+Giovanni,700,8,Koga Prize
+Victory Road,700,8,Victory Road Prize
+-
+*It's Dangerous To Go Alone
+Potion & Parlyz Heal & Antidote|potionparaantidote.png
+Potion x2 & Parlyz Heal|potiontwopara.png
+Potion x2 & Antidote|potiontwoantidote.png
+HP Cap +50|healing-pocket.png
+Status Cap +1 & Potion & Any Status Heal|trifecta.png
+Fight up to 5 random wilds then PC heal: May be anywhere, but you're done once you run away or heal at a center.|exp-charm.png
+Potion & fight 1st wild in Routes 1/2/22: Fight the first encounter on each. You may PC heal anytime, but must stop there.|potionandexp.png
+Luck Incense: You may keep one HP heal that exceeds your cap until you can add it.|luck.png
+Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
+
+*Brock Prize
+Potion x2 & Ether|twopotionether.png
+Burn Heal & Awakening & Antidote & Parlyz Heal|allfourstatus.png
+Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
+Potion & Ether & Any Status Heal|potionstatusether.png
+Potion x2 & Any Status Heal|twopotionandchoice.png
+Potion & Any Status Heal x2|potiontwochoice.png
+HP Cap +100|healing-pocket.png
+Status Cap +1 & Any Status Heal & Potion|trifecta.png
+Duplicator: Purchase a copy of one HP/status heal found (immediate choice; must be shop available).|duplicator.png
+Luck Incense: You may keep one HP heal that exceeds your cap until you can add it.|luck.png
+Temporary TM Voucher: Teach one ground TM found before the next badge (immediate choice).|tempvoucher.png
+Potion x3|threepotion.png
+Potion & Potion Investment: Store Potion in PC; x2 value each badge. Withdraw to buy a heal up to its value in Buy Phase.|diamond.png
+
+*Mt Moon FC Prize
+Potion|potion.png
+Ether|ether.png
+One of Move Tutor Bros: You may use a Tutor outside Mt. Moon. Cannot pre-scout; see both and choose one (or none).|tmtwo.png
+
+*Misty Prize
+Super Potion x2|twosupers.png
+Antidote & Parlyz Heal & Awakening & Burn Heal|allfourstatus.png
+Potion x3 & Any Status Heal|threepotionandchoice.png
+Super Potion & Any Status Heal x2|superandchoice.png
+Temporary Held Item: Temporarily unlock an item in your bag for 1 gym badge.|grounditem.png
+HP Cap +100|healing-pocket.png
+Status Cap +1 & Any Status Heal & Potion|trifecta.png
+Super Potion & Any Status Heal & Ether|superstatusether.png
+Flutist & Super Potion: You may use flutes in battle (including Poke Flute).|flutesuper.png
+Temporary Item Voucher: Permanently unlock one non-healing ground item before next gym (immediate decision).|tempvoucher.png
+Teach 1 currently held TM|tm.png
+Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
+Potion & Potion Investment: Store Potion in PC; x2 value each badge. Withdraw to buy a heal up to its value in Buy Phase.|diamond.png
+
+*Surge Prize
+TM Voucher: Teach 1 Ground/Gift TM found in the future (immediate decision).|tmvoucher.png
+Super Potion x3|threesuper.png
+Super Potion x2 & Any Status Heal|twosuperandchoice.png
+HP Cap +100|healing-pocket.png
+HP Cap +50 & Any Status Heal|capandchoice.png
+HP Cap +50 & Super Potion|capandsuper.png
+Super Potion & Any Status Heal & Ether|superchoiceether.png
+Status Cap +1 & Any Status Heal & Potion|trifecta.png
+Flutist & Super Potion: You may use flutes in battle (including Poke Flute).|flutesuper.png
+Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
+Temporary Item Voucher: Permanently unlock one non-healing ground item before next gym (immediate decision).|tempvoucher.png
+Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
+
+*Erika Prize
+1 TM from the Department Store: Cannot pre-scout, but you may see them all and choose one (or none).|tm.png
+Hyper Potion & Move Tutor 3F: Cannot pre-scout. Teaching is optional.|hyperrelearner.png
+Hyper Potion & Any Vitamin|hypervitamin.png
+Full Heal x2 & Super Potion|twofull-heal-super.png
+Super Potion x2 & Full Heal|twosuperandfull.png
+Any Battle Item x2|twoxitems.png
+Any Vitamin x3 & Move Tutor 3F: Cannot pre-scout. Teaching is optional.|threevitaminsrelearner.png
+Super Potion x2 & Any Vitamin|twosupersandvitamin.png
+Super Potion & Any Battle Item|superandx.png
+Ground Item: Permanently unlock any item currently in the bag (before cleansing).|grounditem.png
+HP Cap +100|healing-pocket.png
+HP Cap +50 & Any Vitamin|healing-pocketandvitamin.png
+HP Cap +50 & Elixir|healing-pocketandelixir.png
+Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
+X Factor: You may keep and use Battle Items freely.|XFACTOR.png
+Temporary Item Voucher: Permanently unlock one non-healing ground item before next gym (immediate decision).|tempvoucher.png
+
+*Koga Prize
+Teach 1 currently held TM|tm.png
+Hyper Potion & Super Potion|hyperandsuper.png
+Hyper Potion & Full Heal|hyperandfull.png
+Hyper Potion & Elixir|hyperandelixir.png
+Any Battle Item x2 & Super Potion|twoXsuper.png
+Super Potion x2 & Any Battle Item|twosupersandx.png
+Super Potion & Full Heal & Elixir|superfullelixir.png
+Ground Item & Super Potion: Permanently unlock any item currently in the bag (before cleansing).|grounditemandsuper.png
+Ground Item & Full Heal: Permanently unlock any item currently in the bag (before cleansing).|grounditem-fullheal.png
+Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
+HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
+HP Cap +50 & Super Potion|healing-pocket-super.png
+Held Item Voucher: Permanently unlock one non-healing ground item you find (immediate decision).|tmvoucher.png
+Fight one of Route 12/13/14/15: Treat the route as a segment. Keep items found.|exp-charm.png
+
+*Victory Road Prize
+Full Restore|full-restore.png
+Max Potion & Full Heal|maxandfull.png
+1 found/given TM OR relearn one move|tmandheart.png
+Hyper Potion & Super Potion & Full Heal|hypersuperfull.png
+Ground Item & Super Potion: Permanently unlock any item currently in the bag (before cleansing).|grounditemandsuper.png
+Ground Item & Full Heal: Permanently unlock any item currently in the bag (before cleansing).|grounditem-fullheal.png
+Any Battle Items x2|twoxitems.png
+Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
+Full Heal x3|fullhealthree.png
+Full Heal x2 & Elixir x2|twofulltwoelixir.png
+Fight one of Route 12/13/14/15: Treat the route as a segment. Keep items found.|exp-charm.png
