@@ -1119,8 +1119,8 @@ local function RoguemonTracker()
 		-- Hijack the regular saving function to also save roguemon data
 		saveToFileOld = Tracker.AutoSave.saveToFile
 		Tracker.AutoSave.saveToFile = function()
-			saveToFileOld()
 			saveData()
+			saveToFileOld()
 		end
 
 		-- these don't count as status heals if Berry Pouch is active
