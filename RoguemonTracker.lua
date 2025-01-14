@@ -1025,7 +1025,7 @@ local function RoguemonTracker()
 	-- function self.configureOptions()
 	-- 	Program.changeScreenView(RewardScreen)
 	-- end
-
+	
 	-- Save roguemon data to file
 	function saveData()
 		local saveData = {
@@ -1070,6 +1070,9 @@ local function RoguemonTracker()
 		end
 	end
 
+	local saveToFileOld = nil
+	local drawPokemonInfoAreaOld = nil
+
 	function self.startup()
 		-- Read & populate configuration info
 		readConfig()
@@ -1112,6 +1115,51 @@ local function RoguemonTracker()
 
 		-- Load data from file if it exists
 		loadData()
+
+		-- Hijack the regular saving function to also save roguemon data
+		saveToFileOld = Tracker.AutoSave.saveToFile
+		Tracker.AutoSave.saveToFile = function()
+			saveToFileOld()
+			saveData()
+		end
+
+		-- these don't count as status heals if Berry Pouch is active
+		local statusBerries = {133, 134, 135, 136, 137, 140, 141}
+
+		-- hijack the main tracker drawing screen to add the cap information and the menu button
+		drawPokemonInfoAreaOld = TrackerScreen.drawPokemonInfoArea
+		TrackerScreen.drawPokemonInfoArea = function(data)
+			drawPokemonInfoAreaOld(data)
+			if Battle.isViewingOwn and data.p.id ~= 0 then
+				gui.drawRectangle(Constants.SCREEN.WIDTH + 6, 58, 95, 21, Theme.COLORS["Lower box background"], Theme.COLORS["Lower box background"])
+
+				local healsTextColor = data.x.healvalue > hpCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+				local healsValueText
+				if Options["Show heals as whole number"] then
+					healsValueText = string.format("%.0f/%.0f %s (%s)", data.x.healvalue, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+				else
+					healsValueText = string.format("%.0f%% %s (%s)", data.x.healperc, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+				end
+				Drawing.drawText(Constants.SCREEN.WIDTH + 6, 57, healsValueText, healsTextColor, shadowcolor)
+
+				local statusHealsInBagCount = 0
+
+				for id,ct in pairs(Program.GameData.Items.StatusHeals) do
+					if not (specialRedeems.unlocks["Berry Pouch"] and contains(statusBerries, id)) then
+						statusHealsInBagCount = statusHealsInBagCount + ct
+					end
+				end
+				local statusHealsTextColor = statusHealsInBagCount > statusCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+				local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
+				Drawing.drawText(Constants.SCREEN.WIDTH + 6, 68, statusHealsValueText, statusHealsTextColor, shadowcolor)
+				Drawing.drawButton(TrackerScreen.Buttons.RogueMenuButton)
+			end
+		end
+	end
+
+	function self.unload()
+		if saveToFileOld then Tracker.AutoSave.saveToFile = saveToFileOld end
+		if drawPokemonInfoAreaOld then TrackerScreen.drawPokemonInfoArea = drawPokemonInfoAreaOld end
 	end
 
 	function self.afterProgramDataUpdate()
@@ -1220,46 +1268,6 @@ local function RoguemonTracker()
 		local compareFunc = function(a, b) return a ~= b and not Utils.isNewerVersion(a, b) end -- if current version is *older* than online version
 		local isUpdateAvailable = Utils.checkForVersionUpdate(versionCheckUrl, self.version, versionResponsePattern, compareFunc)
 		return isUpdateAvailable, downloadUrl
-	end
-
-	-- Hijack the regular saving function to also save roguemon data
-	saveToFileOld = Tracker.AutoSave.saveToFile
-	Tracker.AutoSave.saveToFile = function()
-		saveData()
-		saveToFileOld()
-	end
-
-	 -- these don't count as status heals if Berry Pouch is active
-	local statusBerries = {133, 134, 135, 136, 137, 140, 141}
-
-	-- hijack the main tracker drawing screen to add the cap information and the menu button
-	local drawPokemonInfoAreaOld = TrackerScreen.drawPokemonInfoArea
-	TrackerScreen.drawPokemonInfoArea = function(data)
-		drawPokemonInfoAreaOld(data)
-		if Battle.isViewingOwn and data.p.id ~= 0 then
-			gui.drawRectangle(Constants.SCREEN.WIDTH + 6, 58, 95, 21, Theme.COLORS["Lower box background"], Theme.COLORS["Lower box background"])
-
-			local healsTextColor = data.x.healvalue > hpCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
-			local healsValueText
-			if Options["Show heals as whole number"] then
-				healsValueText = string.format("%.0f/%.0f %s (%s)", data.x.healvalue, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
-			else
-				healsValueText = string.format("%.0f%% %s (%s) bb", data.x.healperc, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
-			end
-			Drawing.drawText(Constants.SCREEN.WIDTH + 6, 57, healsValueText, healsTextColor, shadowcolor)
-
-			local statusHealsInBagCount = 0
-
-			for id,ct in pairs(Program.GameData.Items.StatusHeals) do
-				if not (specialRedeems.unlocks["Berry Pouch"] and contains(statusBerries, id)) then
-					statusHealsInBagCount = statusHealsInBagCount + ct
-				end
-			end
-			local statusHealsTextColor = statusHealsInBagCount > statusCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
-			local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
-			Drawing.drawText(Constants.SCREEN.WIDTH + 6, 68, statusHealsValueText, statusHealsTextColor, shadowcolor)
-			Drawing.drawButton(TrackerScreen.Buttons.RogueMenuButton)
-		end
 	end
 
 	return self
