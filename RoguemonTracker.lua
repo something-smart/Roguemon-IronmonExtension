@@ -7,11 +7,14 @@ local function RoguemonTracker()
 	self.github = "something-smart/Roguemon-IronmonExtension"
 	self.url = string.format("https://github.com/%s", self.github or "")
 
+	-- turn this on to have the reward screen accessible at any time
+	local DEBUG_MODE = false
+
 	-- STATIC OR READ IN AT LOAD TIME:
 
-	local CONFIG_FILE_PATH = "extensions/roguemon_config.txt"
-	local SAVED_DATA_PATH = "extensions/roguemon_data.tdat"
-	local IMAGES_DIRECTORY = "extensions/roguemon_images/"
+	local CONFIG_FILE_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_config.txt"
+	local SAVED_DATA_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_data.tdat"
+	local IMAGES_DIRECTORY = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_images" .. FileManager.slash
 
 	local prize_images = {} -- will get updated when config file is read
 
@@ -65,7 +68,7 @@ local function RoguemonTracker()
 		[87] = {["name"] = "Victory Road"}
 	}
 
-	-- Options for prizes that have multiple options. If a selected prize contains any of these, it will open the OptionSelectScreen.
+	-- Options for prizes that have multiple options. If a selected prize self.contains any of these, it will open the OptionSelectScreen.
 	-- Currently there is no support for a single prize having multiple DIFFERENT selections (e.g. 2x Any Vitamin is fine, Any Vitamin & Any Status Heal is not)
 	local prizeAdditionalOptions = {
 		["Any Status Heal"] = {"Antidote", "Parlyz Heal", "Awakening", "Burn Heal", "Ice Heal"},
@@ -175,10 +178,9 @@ local function RoguemonTracker()
 	local offeredMoonStoneFirst = 0
 
 	-- AddItems utility functions. Credit UTDZac, although AddItemsImproved was modified. --
-	AddItems = {}
 
 	-- Get item ID corresponding to an item name, if there is one
-	function AddItems.getItemId(itemName)
+	function self.getItemId(itemName)
 		if itemName == Constants.BLANKLINE then return 0 end
 		for id, item in pairs(MiscData.Items) do
 			if item == itemName then
@@ -189,7 +191,7 @@ local function RoguemonTracker()
 	end
 	
 	-- Get data for the back pocket that a particular item would be placed in
-	function AddItems.getBagPocketData(id)
+	function self.getBagPocketData(id)
 		-- Returns: Offset for bag pocket, capacity of bag pocket, whether to limit quantity to 1
 		local gameNumber = GameSettings.game
 		local itemsOffset = GameSettings.bagPocket_Items_offset
@@ -223,11 +225,11 @@ local function RoguemonTracker()
 	end
 
 	-- Add [quantity] of [item] to the bag if there's space. If the item is already present, add to the same stack; otherwise, add it to the next open slot.
-	function AddItems.addItemImproved(itemChoice, quantity)
+	function self.AddItemImproved(itemChoice, quantity)
 		if itemChoice == Constants.BLANKLINE or quantity == nil or quantity == 0 then return false end
 	
-		local itemID = AddItems.getItemId(itemChoice)
-		local bagPocketOffset, bagPocketCapacity, limitQuantity = AddItems.getBagPocketData(itemID)
+		local itemID = self.getItemId(itemChoice)
+		local bagPocketOffset, bagPocketCapacity, limitQuantity = self.getBagPocketData(itemID)
 		if bagPocketOffset == nil then return false end
 	
 		-- Limit quantity for key items / HMs, don't think it breaks if larger quantity but just in case
@@ -260,29 +262,11 @@ local function RoguemonTracker()
 
 	-- UTIL FUNCTIONS --
 
-	-- Remove whitespace from the beginning and/or end of a string.
-	function strip(input)
-		while string.sub(input, 1, 1) == ' ' do input = string.sub(input, 2, #input) end
-		while string.sub(input, #input, #input) == ' ' do input = string.sub(input, 1, #input - 1) end
-		return input
-	end
-
-	-- Works like the java split() function. Creates an array of the parts of an input string separated by the delimiter.
-	function splitOn(input, delim)
-		local ret = {}
-		if not input then return ret end
-		local split = string.gmatch(input, '([^' .. delim .. ']+)')
-		for s in split do
-			ret[#ret + 1] = strip(s)
-		end
-		return ret
-	end
-
 	-- Insert newlines into a string so that words are not split up and no line is longer than a specified number of pixels.
-	function wrapPixelsInline(input, limit)
+	function self.wrapPixelsInline(input, limit)
 		local ret = ""
 		local currentLine = ""
-		for _,word in pairs(splitOn(input, " ")) do
+		for _,word in pairs(Utils.split(input, " ", true)) do
 			if Utils.calcWordPixelLength(currentLine .. " " .. word) > limit then
 				ret = ret .. currentLine .. "\n"
 				currentLine = word
@@ -300,21 +284,10 @@ local function RoguemonTracker()
 		return ret
 	end
 
-	-- Determine whether a table contains an item as a value.
-	function contains(t, item)
+	-- Determine whether a table self.contains an item as a value.
+	function self.contains(t, item)
 		for _,i in pairs(t) do
 			if i == item then return true end
-		end
-		return false
-	end
-
-	-- Removes a particular element from a table.
-	function removeElement(table, element)
-		for i,e in pairs(table) do
-			if e == element then
-				table.remove(t, i)
-				return true
-			end
 		end
 		return false
 	end
@@ -322,18 +295,18 @@ local function RoguemonTracker()
 	-- DATA FUNCTIONS --
 
 	-- Read the config file. Executed once, on startup.
-	function readConfig()
+	function self.readConfig()
 		local linesRead = io.lines(CONFIG_FILE_PATH)
 		local lines = {}
 		for l in linesRead do lines[#lines + 1] = l end
 		local readIndex = 2
-		local startingVals = splitOn(lines[1], ",")
+		local startingVals = Utils.split(lines[1], ",", true)
 		startingHpCap = tonumber(startingVals[1])
 		startingStatusCap = tonumber(startingVals[2])
 		while true do
 			local line = lines[readIndex]
 			if line == "-" then break end
-			local info = splitOn(line, ",")
+			local info = Utils.split(line, ",", true)
 			milestones[#milestones + 1] = {['hpCap'] = tonumber(info[2]), ['statusCap'] = tonumber(info[3]), ['wheel'] = info[4], ['name'] = info[1]}
 			milestonesByName[info[1]] = {['hpCap'] = tonumber(info[2]), ['statusCap'] = tonumber(info[3]), ['wheel'] = info[4]}
 			readIndex = readIndex + 1
@@ -350,10 +323,10 @@ local function RoguemonTracker()
 				wheelName = string.sub(line, 2, #line)
 				currentWheel = {}
 			elseif not (line == "") and wheelName then
-				local parts = splitOn(line, "|")
+				local parts = Utils.split(line, "|", true)
 				currentWheel[#currentWheel + 1] = parts[1]
 				if parts[2] then
-					prize_images[splitOn(parts[1], ":")[1]] = parts[2]
+					prize_images[Utils.split(parts[1], ":", true)[1]] = parts[2]
 				end
 			end
 			readIndex = readIndex + 1
@@ -364,7 +337,7 @@ local function RoguemonTracker()
 	end
 
 	-- Autofill remaining information about segments.
-	function populateSegmentData()
+	function self.populateSegmentData()
 		for loc,data in pairs(segments) do
 			-- If trainers aren't hard-coded, autofill them from the routes listed.
 			if not data["trainers"] then
@@ -401,7 +374,7 @@ local function RoguemonTracker()
 	end
 
 	-- Move to the next segment.
-	function nextSegment()
+	function self.nextSegment()
 		currentSegment = currentSegment + 1
 		segmentStarted = false
 		trainersDefeated = 0
@@ -409,12 +382,12 @@ local function RoguemonTracker()
 	end
 
 	-- Get the number of trainers in the current segment. We subtract 2 if there's a rival in the segment because the rival has 3 trainer IDs.
-	function getSegmentTrainerCount(segment)
+	function self.getSegmentTrainerCount(segment)
 		return #segments[segmentOrder[segment]]['trainers'] - (segments[segmentOrder[segment]]['rival'] and 2 or 0)
 	end
 
 	-- Get the number of mandatory trainers in the current segment. See above, plus both trainers in a choice pair are marked mandatory when only one is.
-	function getSegmentMandatoryCount(segment)
+	function self.getSegmentMandatoryCount(segment)
 		local s = segments[segmentOrder[segment]]
 		return #s['mandatory'] - (s['rival'] and 2 or 0) - (s['choicePairs'] and #s['choicePairs'] or 0)
 	end
@@ -486,28 +459,28 @@ local function RoguemonTracker()
 		-- Option buttons
 		Option1 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return wrapPixelsInline(option1, BUTTON_WIDTH - WRAP_BUFFER) end,
+			getText = function() return self.wrapPixelsInline(option1, BUTTON_WIDTH - WRAP_BUFFER) end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + TOP_LEFT_X + IMAGE_WIDTH + IMAGE_GAP, TOP_BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT },
 			onClick = function()
-				selectOption(option1)
+				self.selectOption(option1)
 			end,
 		},
 		Option2 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return wrapPixelsInline(option2, BUTTON_WIDTH - WRAP_BUFFER) end,
+			getText = function() return self.wrapPixelsInline(option2, BUTTON_WIDTH - WRAP_BUFFER) end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + TOP_LEFT_X + IMAGE_WIDTH + IMAGE_GAP, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, 
 			BUTTON_WIDTH, BUTTON_HEIGHT },
 			onClick = function()
-				selectOption(option2)
+				self.selectOption(option2)
 			end,
 		},
 		Option3 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return wrapPixelsInline(option3, BUTTON_WIDTH - WRAP_BUFFER) end,
+			getText = function() return self.wrapPixelsInline(option3, BUTTON_WIDTH - WRAP_BUFFER) end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + TOP_LEFT_X + IMAGE_WIDTH + IMAGE_GAP, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, 
 			BUTTON_WIDTH, BUTTON_HEIGHT },
 			onClick = function()
-				selectOption(option3)
+				self.selectOption(option3)
 			end,
 		},
 		-- Description buttons (the ? button)
@@ -548,9 +521,9 @@ local function RoguemonTracker()
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 5, 7, 22, 12 },
 			onClick = function()
 				milestone = milestone + 1
-				spinReward(milestones[milestone]['name'])
+				self.spinReward(milestones[milestone]['name'])
 			end,
-			isVisible = function() return false end
+			isVisible = function() return DEBUG_MODE end
 		},
 		-- Reroll button-- only visible if the player has a Reroll Chip
 		RerollButton = {
@@ -559,7 +532,15 @@ local function RoguemonTracker()
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 7, 32, 12 },
 			onClick = function()
 				specialRedeems.consumable["Reroll Chip"] = nil
-				removeElement(specialRedeems.consumable, "Reroll Chip")
+				local rerollId = nil
+				for i,r in pairs(specialRedeems.consumable) do
+					if r == "Reroll Chip" then
+						rerollId = i
+						break
+					end
+				end
+				if rerollId then table.remove(specialRedeems.consumable, rerollId) end
+				self.spinReward(lastMilestone)
 			end,
 			isVisible = function() return 
 				specialRedeems.consumable["Reroll Chip"] 
@@ -568,7 +549,7 @@ local function RoguemonTracker()
 		-- Extra description text at the bottom
 		Description = {
 			type = Constants.ButtonTypes.NO_BORDER,
-			getText = function() return wrapPixelsInline(descriptionText, IMAGE_WIDTH + IMAGE_GAP + BUTTON_WIDTH + DESC_HORIZONTAL_GAP + DESC_WIDTH - WRAP_BUFFER) end,
+			getText = function() return self.wrapPixelsInline(descriptionText, IMAGE_WIDTH + IMAGE_GAP + BUTTON_WIDTH + DESC_HORIZONTAL_GAP + DESC_WIDTH - WRAP_BUFFER) end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + TOP_LEFT_X, TOP_BUTTON_Y + 3*BUTTON_VERTICAL_GAP + 3*BUTTON_HEIGHT, 
 			IMAGE_WIDTH + IMAGE_GAP + BUTTON_WIDTH + DESC_HORIZONTAL_GAP + DESC_WIDTH, DESC_TEXT_HEIGHT },
 		}
@@ -630,12 +611,12 @@ local function RoguemonTracker()
 			OptionSelectionScreen.Buttons[index] = {
 				type = Constants.ButtonTypes.FULL_BORDER,
 				getText = function() 
-					return (additionalOptionsRemaining > 0) and wrapPixelsInline(additionalOptions[index], OSS_BUTTON_WIDTH - OSS_WRAP_BUFFER) or ""
+					return (additionalOptionsRemaining > 0) and self.wrapPixelsInline(additionalOptions[index], OSS_BUTTON_WIDTH - OSS_WRAP_BUFFER) or ""
 				end,
 				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OSS_LEFT_TOP_LEFT_X + (i*(OSS_BUTTON_WIDTH + OSS_BUTTON_HORIZONTAL_GAP)), 
 				OSS_TOP_BUTTON_Y + (j*(OSS_BUTTON_HEIGHT + OSS_BUTTON_VERTICAL_GAP)), OSS_BUTTON_WIDTH, OSS_BUTTON_HEIGHT },
 				onClick = function()
-					selectAdditionalOption(splitOn(additionalOptions[index], "(")[1]) -- if a button has (), it's clarification text; we display it but don't read it
+					self.selectAdditionalOption(Utils.split(additionalOptions[index], "\(", true)[1]) -- if a button has (), it's clarification text; we display it but don't read it
 				end,
 				isVisible = function()
 					return additionalOptions[index] and additionalOptions[index] ~= "" -- Visible as long as it has text
@@ -720,7 +701,7 @@ local function RoguemonTracker()
 				if specialRedeemToDescribe == "Potion Investment" then
 					toReturn = toReturn .. " " .. specialRedeems.consumable["Potion Investment"]
 				end
-				return  wrapPixelsInline(toReturn, SRS_DESC_WIDTH - SRS_WRAP_BUFFER)
+				return  self.wrapPixelsInline(toReturn, SRS_DESC_WIDTH - SRS_WRAP_BUFFER)
 			end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + SRS_TOP_LEFT_X, SRS_TOP_Y + SRS_LINE_COUNT*SRS_LINE_HEIGHT, SRS_DESC_WIDTH, 70}
 		}
@@ -756,13 +737,12 @@ local function RoguemonTracker()
 				return ""
 			end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + SRS_TOP_LEFT_X, SRS_TOP_Y + (i-1)*SRS_LINE_HEIGHT, SRS_TEXT_WIDTH, SRS_LINE_HEIGHT },
-			onClick = function(self)
-				local redeem = self.getText()
+			onClick = function(this)
+				local redeem = this.getText()
 				if redeem ~= "" then 
 					specialRedeemToDescribe = redeem
 					Program.redraw(true)
 				end
-				
 			end
 		}
 	end
@@ -774,13 +754,13 @@ local function RoguemonTracker()
 	-- REWARD SPIN FUNCTIONS --
 	
 	-- Update caps to match the current milestone
-	function updateCaps()
+	function self.updateCaps()
 		hpCap = milestonesByName[lastMilestone]['hpCap'] + hpCapModifier
 		statusCap = milestonesByName[lastMilestone]['statusCap'] + statusCapModifier
 	end
 
 	-- Spin the reward for a given milestone.
-	function spinReward(milestoneName)
+	function self.spinReward(milestoneName)
 		if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
 			GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
 			LogOverlay.isGameOver = false
@@ -791,7 +771,7 @@ local function RoguemonTracker()
 		end
 
 		lastMilestone = milestoneName
-		updateCaps()
+		self.updateCaps()
 		local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
 		local choices = {}
 		while #choices < 3 do
@@ -807,13 +787,13 @@ local function RoguemonTracker()
 			end
 			if add then choices[#choices + 1] = choice end
 		end
-		option1Split = splitOn(rewardOptions[choices[1]], ":")
+		option1Split = Utils.split(rewardOptions[choices[1]], ":", true)
 		option1 = option1Split[1]
 		option1Desc = option1Split[2] or ""
-		option2Split = splitOn(rewardOptions[choices[2]], ":")
+		option2Split = Utils.split(rewardOptions[choices[2]], ":", true)
 		option2 = option2Split[1]
 		option2Desc = option2Split[2] or ""
-		option3Split = splitOn(rewardOptions[choices[3]], ":")
+		option3Split = Utils.split(rewardOptions[choices[3]], ":", true)
 		option3 = option3Split[1]
 		option3Desc = option3Split[2] or ""
 
@@ -822,10 +802,10 @@ local function RoguemonTracker()
 	end
 
 	-- Select a particular reward option.
-	function selectOption(option)
+	function self.selectOption(option)
 		local nextScreen = TrackerScreen -- by default we return to the main screen, unless the reward needs us to make another choice
 
-		local rewards = splitOn(option, '&') -- split the string up into its separate parts
+		local rewards = Utils.split(option, '&', true) -- split the string up into its separate parts
 		for _, reward in pairs(rewards) do
 			-- Cover the route reward separately
 			if reward == 'Fight one of Route 12/13/14/15' then
@@ -858,18 +838,18 @@ local function RoguemonTracker()
 
 				-- Determine item name and item count
 				local itemCount = 1
-				local split = splitOn(reward, " ")
+				local split = Utils.split(reward, " ", true)
 				if string.sub(split[#split], 1, 1) == 'x' then
 					local s = split[1]
 					for i = 2,#split-1 do s = s .. " " .. split[i] end
 					reward = s
 					itemCount = tonumber(string.sub(split[#split], 2, #(split[#split])))
 				end
-				local itemId = AddItems.getItemId(reward)
+				local itemId = self.getItemId(reward)
 				if reward == "Berry Pouch" then itemId = 0 end -- this is an item in the game, but not what we want
 				if itemId ~= 0 then
 					-- This reward simply yields items, so provide them
-					AddItems.addItemImproved(reward, itemCount)
+					self.AddItemImproved(reward, itemCount)
 				elseif string.sub(reward, 1, 3) == 'Any' then
 					-- This reward is a choice of items
 					for key,choices in pairs(prizeAdditionalOptions) do
@@ -901,7 +881,7 @@ local function RoguemonTracker()
 			end
 		end
 
-		updateCaps()
+		self.updateCaps()
 
 		Program.changeScreenView(nextScreen)
 
@@ -909,9 +889,9 @@ local function RoguemonTracker()
 	end
 
 	-- Select an option on the additional option screen. Usually this just yields an item.
-	function selectAdditionalOption(option)
+	function self.selectAdditionalOption(option)
 		if option ~= "" and additionalOptionsRemaining > 0 then
-			AddItems.addItemImproved(option, 1)
+			self.AddItemImproved(option, 1)
 			additionalOptionsRemaining = additionalOptionsRemaining - 1
 		end
 		if option == "Moon Stone" then
@@ -930,7 +910,7 @@ local function RoguemonTracker()
 	end
 
 	-- Draw special redeem images on the main screen.
-	function redrawScreenImages()
+	function self.redrawScreenImages()
 		--local dx = 180 - (#specialRedeems.unlocks + #specialRedeems.consumable)*30 - use this for top right display
 		local dx = 0
 		local dy = 0
@@ -942,17 +922,87 @@ local function RoguemonTracker()
 			Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx, dy)
 			dx = dx + 30
 		end
-		Program.redraw(true)
+		-- Program.redraw(true)
+	end
+
+	function self.drawCapsAndRoguemonMenu()
+		-- see Program.recalcLeadPokemonHealingInfo() if this needs to be changed for HP values
+		local data = DataHelper.buildTrackerScreenDisplay()
+		if Program.currentScreen == TrackerScreen and Battle.isViewingOwn and data.p.id ~= 0 then
+			local shadowcolor = Utils.calcShadowColor(Theme.COLORS["Upper box background"])
+			-- these don't count as status heals if Berry Pouch is active
+			local statusBerries = {133, 134, 135, 136, 137, 140, 141}
+
+			gui.drawRectangle(Constants.SCREEN.WIDTH + 6, 58, 94, 21, Theme.COLORS["Lower box background"], Theme.COLORS["Lower box background"])
+
+			local healsTextColor = data.x.healvalue > hpCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+			local healsValueText
+			if Options["Show heals as whole number"] then
+				healsValueText = string.format("%.0f/%.0f %s (%s)", data.x.healvalue, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+			else
+				healsValueText = string.format("%.0f%% %s (%s)", data.x.healperc, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+			end
+			Drawing.drawText(Constants.SCREEN.WIDTH + 6, 57, healsValueText, healsTextColor, shadowcolor)
+
+			local statusHealsInBagCount = 0
+
+			for id,ct in pairs(Program.GameData.Items.StatusHeals) do
+				if not (specialRedeems.unlocks["Berry Pouch"] and self.contains(statusBerries, id)) then
+					statusHealsInBagCount = statusHealsInBagCount + ct
+				end
+			end
+			local statusHealsTextColor = statusHealsInBagCount > statusCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+			local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
+			Drawing.drawText(Constants.SCREEN.WIDTH + 6, 68, statusHealsValueText, statusHealsTextColor, shadowcolor)
+			Drawing.drawButton(TrackerScreen.Buttons.RogueMenuButton)
+		end
+	end
+
+	-- Save roguemon data to file
+	function self.saveData()
+		local saveData = {
+			['romHash'] = GameSettings.getRomHash(),
+			['segmentOrder'] = segmentOrder,
+			['defeatedTrainerIds'] = defeatedTrainerIds,
+			['currentSegment'] = currentSegment,
+			['segmentStarted'] = segmentStarted,
+			['trainersDefeated'] = trainersDefeated,
+			['mandatoriesDefeated'] = mandatoriesDefeated,
+			['hpCap'] = hpCap,
+			['statusCap'] = statusCap,
+			['hpCapModifier'] = hpCapModifier,
+			['statusCapModifier'] = statusCapModifier,
+			['lastMilestone'] = lastMilestone,
+			['milestoneProgress'] = milestoneProgress,
+			['specialRedeems'] = specialRedeems,
+			['offeredMoonStoneFirst'] = offeredMoonStoneFirst
+		}
+		
+		FileManager.encodeToJsonFile(SAVED_DATA_PATH, saveData)
+	end
+
+	-- Load roguemon data from file
+	function self.loadData()
+		local saveData = FileManager.decodeJsonFile(SAVED_DATA_PATH)
+		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
+			segmentOrder = saveData['segmentOrder']
+			defeatedTrainerIds = saveData['defeatedTrainerIds']
+			currentSegment = saveData['currentSegment']
+			segmentStarted = saveData['segmentStarted']
+			trainersDefeated = saveData['trainersDefeated']
+			mandatoriesDefeated = saveData['mandatoriesDefeated']
+			hpCap = saveData['hpCap']
+			statusCap = saveData['statusCap']
+			hpCapModifier = saveData['hpCapModifier']
+			statusCapModifier = saveData['statusCapModifier']
+			lastMilestone = saveData['lastMilestone']
+			milestoneProgress = saveData['milestoneProgress']
+			specialRedeems = saveData['specialRedeems']
+			offeredMoonStoneFirst = saveData['offeredMoonStoneFirst']
+		end
 	end
 
 	-- EXTENSION FUNCTIONS --
-
-	function self.afterEachFrame()
-		-- Draw special redeems on screen if not in battle
-		if not Battle.inBattle then
-			redrawScreenImages()
-		end
-	end
 
 	function self.afterBattleEnds()
 		-- Determine if we have just defeated a trainer
@@ -985,7 +1035,7 @@ local function RoguemonTracker()
 
 		-- Add 4 potions after rival 1
 		if trainerId >= 326 and trainerId <= 328 then
-			AddItems.addItemImproved("Potion", 4)
+			self.AddItemImproved("Potion", 4)
 		end
 
 		-- Check if trainer was part of a milestone
@@ -997,21 +1047,12 @@ local function RoguemonTracker()
 				milestoneProgress[milestoneName] = 1
 			end
 			if milestoneProgress[milestoneName] == milestoneTrainers[trainerId]['count'] then
-				spinReward(milestoneName)
+				self.spinReward(milestoneName)
 			end
 		end
 
 		-- Check if trainer was part of the current segment
 		local segInfo = segments[segmentOrder[currentSegment]]
-		for _,t in pairs(segInfo["trainers"]) do
-			if t == trainerId then
-				segmentStarted = true
-				trainersDefeated = trainersDefeated + 1
-				if trainersDefeated == getSegmentTrainerCount(currentSegment) then
-					nextSegment()
-				end
-			end
-		end
 		for _,t in pairs(segInfo["mandatory"]) do
 			if t == trainerId then
 				if not (segInfo["choices"] and defeatedTrainerIds[segInfo["choices"][trainerId]]) then
@@ -1019,54 +1060,21 @@ local function RoguemonTracker()
 				end
 			end
 		end
+		for _,t in pairs(segInfo["trainers"]) do
+			if t == trainerId then
+				segmentStarted = true
+				trainersDefeated = trainersDefeated + 1
+				if trainersDefeated == self.getSegmentTrainerCount(currentSegment) then
+					self.nextSegment()
+				end
+			end
+		end
 	end
 
-	-- enable this for testing, since it allows switching to the reward screen at any time
-	-- function self.configureOptions()
-	-- 	Program.changeScreenView(RewardScreen)
-	-- end
-	
-	-- Save roguemon data to file
-	function saveData()
-		local saveData = {
-			['romHash'] = GameSettings.getRomHash(),
-			['segmentOrder'] = segmentOrder,
-			['defeatedTrainerIds'] = defeatedTrainerIds,
-			['currentSegment'] = currentSegment,
-			['segmentStarted'] = segmentStarted,
-			['trainersDefeated'] = trainersDefeated,
-			['mandatoriesDefeated'] = mandatoriesDefeated,
-			['hpCap'] = hpCap,
-			['statusCap'] = statusCap,
-			['hpCapModifier'] = hpCapModifier,
-			['statusCapModifier'] = statusCapModifier,
-			['lastMilestone'] = lastMilestone,
-			['milestoneProgress'] = milestoneProgress,
-			['specialRedeems'] = specialRedeems,
-			['offeredMoonStoneFirst'] = offeredMoonStoneFirst
-		}
-		
-		FileManager.writeTableToFile(saveData, SAVED_DATA_PATH)
-	end
-
-	-- Load roguemon data from file
-	function loadData()
-		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH)
-		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
-			segmentOrder = saveData['segmentOrder']
-			defeatedTrainerIds = saveData['defeatedTrainerIds']
-			currentSegment = saveData['currentSegment']
-			segmentStarted = saveData['segmentStarted']
-			trainersDefeated = saveData['trainersDefeated']
-			mandatoriesDefeated = saveData['mandatoriesDefeated']
-			hpCap = saveData['hpCap']
-			statusCap = saveData['statusCap']
-			hpCapModifier = saveData['hpCapModifier']
-			statusCapModifier = saveData['statusCapModifier']
-			lastMilestone = saveData['lastMilestone']
-			milestoneProgress = saveData['milestoneProgress']
-			specialRedeems = saveData['specialRedeems']
-			offeredMoonStoneFirst = saveData['offeredMoonStoneFirst']
+	-- enabled only for testing, since it allows switching to the reward screen at any time
+	if DEBUG_MODE then
+		self.configureOptions = function()
+			Program.changeScreenView(RewardScreen)
 		end
 	end
 
@@ -1075,25 +1083,25 @@ local function RoguemonTracker()
 
 	function self.startup()
 		-- Read & populate configuration info
-		readConfig()
-		populateSegmentData()
+		self.readConfig()
+		self.populateSegmentData()
 
 		-- Add the segment carousel item
 		local SEGMENT_CAROUSEL_INDEX = #TrackerScreen.CarouselTypes + 1
 		TrackerScreen.CarouselItems[SEGMENT_CAROUSEL_INDEX] = {
 			type = SEGMENT_CAROUSEL_INDEX,
 			framesToShow = 300,
-			canShow = function(self)
+			canShow = function(this)
 				return true
 			end,
-			getContentList = function(self)
+			getContentList = function(this)
 				if segmentStarted then
-					local text = wrapPixelsInline(segmentOrder[currentSegment] .. ": " .. mandatoriesDefeated .. "/" .. getSegmentMandatoryCount(currentSegment) .. " mandatory, " .. 
-					trainersDefeated .. "/" .. getSegmentTrainerCount(currentSegment) .. " total",
+					local text = self.wrapPixelsInline(segmentOrder[currentSegment] .. ": " .. mandatoriesDefeated .. "/" .. self.getSegmentMandatoryCount(currentSegment) .. " mandatory, " .. 
+					trainersDefeated .. "/" .. self.getSegmentTrainerCount(currentSegment) .. " total",
 					Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN) - 10)
 					return Main.IsOnBizhawk() and { text } or text
 				else
-					local text = wrapPixelsInline('Next Segment: ' .. segmentOrder[currentSegment],
+					local text = self.wrapPixelsInline('Next Segment: ' .. segmentOrder[currentSegment],
 					Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN) - 10)
 					return Main.IsOnBizhawk() and { text } or text
 				end
@@ -1114,52 +1122,15 @@ local function RoguemonTracker()
 		}
 
 		-- Load data from file if it exists
-		loadData()
+		self.loadData()
 
-		-- Hijack the regular saving function to also save roguemon data
-		saveToFileOld = Tracker.AutoSave.saveToFile
-		Tracker.AutoSave.saveToFile = function()
-			saveData()
-			saveToFileOld()
-		end
-
-		-- these don't count as status heals if Berry Pouch is active
-		local statusBerries = {133, 134, 135, 136, 137, 140, 141}
-
-		-- hijack the main tracker drawing screen to add the cap information and the menu button
-		drawPokemonInfoAreaOld = TrackerScreen.drawPokemonInfoArea
-		TrackerScreen.drawPokemonInfoArea = function(data)
-			drawPokemonInfoAreaOld(data)
-			if Battle.isViewingOwn and data.p.id ~= 0 then
-				gui.drawRectangle(Constants.SCREEN.WIDTH + 6, 58, 95, 21, Theme.COLORS["Lower box background"], Theme.COLORS["Lower box background"])
-
-				local healsTextColor = data.x.healvalue > hpCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
-				local healsValueText
-				if Options["Show heals as whole number"] then
-					healsValueText = string.format("%.0f/%.0f %s (%s)", data.x.healvalue, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
-				else
-					healsValueText = string.format("%.0f%% %s (%s)", data.x.healperc, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
-				end
-				Drawing.drawText(Constants.SCREEN.WIDTH + 6, 57, healsValueText, healsTextColor, shadowcolor)
-
-				local statusHealsInBagCount = 0
-
-				for id,ct in pairs(Program.GameData.Items.StatusHeals) do
-					if not (specialRedeems.unlocks["Berry Pouch"] and contains(statusBerries, id)) then
-						statusHealsInBagCount = statusHealsInBagCount + ct
-					end
-				end
-				local statusHealsTextColor = statusHealsInBagCount > statusCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
-				local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
-				Drawing.drawText(Constants.SCREEN.WIDTH + 6, 68, statusHealsValueText, statusHealsTextColor, shadowcolor)
-				Drawing.drawButton(TrackerScreen.Buttons.RogueMenuButton)
-			end
-		end
+		-- Set up a frame counter to save the roguemon data every 1 minute
+		Program.addFrameCounter("Roguemon Saving", 3600, self.saveData, nil, true)
 	end
 
-	function self.unload()
-		if saveToFileOld then Tracker.AutoSave.saveToFile = saveToFileOld end
-		if drawPokemonInfoAreaOld then TrackerScreen.drawPokemonInfoArea = drawPokemonInfoAreaOld end
+	function self.afterRedraw()
+		self.redrawScreenImages()
+		self.drawCapsAndRoguemonMenu()
 	end
 
 	function self.afterProgramDataUpdate()
@@ -1169,7 +1140,7 @@ local function RoguemonTracker()
 		if(milestoneAreas[mapId]) then
 			if not milestoneProgress[mapId] then
 				milestoneProgress[mapId] = 1
-				spinReward(milestoneAreas[mapId]['name'])
+				self.spinReward(milestoneAreas[mapId]['name'])
 			end
 		end
 		-- Check if we stepped onto the route for the segment we're supposed to do next
@@ -1182,12 +1153,12 @@ local function RoguemonTracker()
 		end
 		-- Check if we are in a Pokemon Center with full HP when all mandatory trainers in the current segment are defeated.
 		-- If so, the segment is assumed to be finished.
-		if Tracker.getPokemon(1, true, true) and Tracker.getPokemon(1, true, true).curHP == Tracker.getPokemon(1, true, true).stats.hp and mapId == 8 and segmentStarted 
-		and mandatoriesDefeated == getSegmentMandatoryCount(currentSegment) then
-			nextSegment()
+		local pokemon = TrackerAPI.getPlayerPokemon()
+		if pokemon and pokemon.curHP == pokemon.stats.hp and mapId == 8 and segmentStarted and mandatoriesDefeated == self.getSegmentMandatoryCount(currentSegment) then
+			self.nextSegment()
 		end
 		-- Check if we have entered Celadon for the first time with a pokemon that can evolve with a moon stone.
-		if offeredMoonStoneFirst == 0 and mapId == 84 and contains(PokemonData.Pokemon[Tracker.getPokemon(1, true, true).pokemonID].evolution.detailed, "Moon Stone") then
+		if offeredMoonStoneFirst == 0 and mapId == 84 and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "Moon Stone") then
 			offeredMoonStoneFirst = 1
 			-- Set up the options to offer the trade
 			additionalOptions[1] = "Moon Stone (-100 HP Cap)"
@@ -1199,10 +1170,10 @@ local function RoguemonTracker()
 			Program.changeScreenView(OptionSelectionScreen)
 		end
 		-- Check if we are in Celadon City with Hideout completed with a pokemon that can evolve with a moon stone.
-		if offeredMoonStoneFirst < 2 and mapId == 84 and defeatedTrainerIds[348] and contains(PokemonData.Pokemon[Tracker.getPokemon(1, true, true).pokemonID].evolution.detailed, "Moon Stone") then
+		if offeredMoonStoneFirst < 2 and mapId == 84 and defeatedTrainerIds[348] and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "Moon Stone") then
 			offeredMoonStoneFirst = 2
 			-- Give it for free
-			AddItems.addItemImproved("Moon Stone", 1)
+			self.AddItemImproved("Moon Stone", 1)
 		end
 
 		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to Moon Stone
