@@ -18,8 +18,8 @@ Potion x2 & Parlyz Heal|potiontwopara.png
 Potion x2 & Antidote|potiontwoantidote.png
 HP Cap +50|healing-pocket.png
 Status Cap +1 & Potion & Any Status Heal|trifecta.png
-Fight up to 5 random wilds then PC heal: May be anywhere, but you're done once you run away or heal at a center.|exp-charm.png
-Potion & fight 1st wild in Routes 1/2/22: Fight the first encounter on each. You may PC heal anytime, but must stop there.|potionandexp.png
+Fight up to 5 random wilds: May be anywhere, but you're done once you run away or heal at a center.|exp-charm.png
+Potion & Fight wilds in Rts 1/2/22: Fight the first encounter on each. You may PC heal anytime, but must stop there.|potionandexp.png
 Luck Incense: You may keep one HP heal that exceeds your cap until you can add it.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 

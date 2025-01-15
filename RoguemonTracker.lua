@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "0.4"
+	self.version = "0.6"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -30,7 +30,9 @@ local function RoguemonTracker()
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
 		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one non-healing ground item before next gym (immediate decision)."},
 		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
-		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-healing ground item you find (immediate decision)."}
+		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-healing ground item you find (immediate decision)."},
+		["Fight wilds in Rts 1/2/22"] = {consumable = "true", image = "exp-charm.png", description = "Fight the first encounter on each. You may PC heal anytime, but must stop there."},
+		["Fight up to 5 random wilds"] = {consumable = "true", image = "exp-charm.png", description = "May be anywhere, but you're done once you run away or heal at a center."}
 	}
 
 	local gymLeaders = {[414] = true, [415] = true, [416] = true, [417] = true, [418] = true, [420] = true, [419] = true, [350] = true}
@@ -123,7 +125,6 @@ local function RoguemonTracker()
 
 	-- DYNAMIC, but does not need to be saved (because the player should not quit while these are relevant)
 
-	local topText = "Reward Spin"
 	local option1 = ""
 	local option1Desc = ""
 	local option2 = ""
@@ -292,6 +293,24 @@ local function RoguemonTracker()
 		return false
 	end
 
+	-- strip whitespace from a string
+	function self.strip(input)
+		while string.sub(input, 1, 1) == ' ' do input = string.sub(input, 2, #input) end
+		while string.sub(input, #input, #input) == ' ' do input = string.sub(input, 1, #input - 1) end
+		return input
+	end
+
+	-- split a string on a delimiter (Utils.split doesn't work with a reserved character as a delimiter)
+	function self.splitOn(input, delim)
+		local ret = {}
+		if not input then return ret end
+		local split = string.gmatch(input, '([^' .. delim .. ']+)')
+		for s in split do
+			ret[#ret + 1] = self.strip(s)
+		end
+		return ret
+	end
+
 	-- DATA FUNCTIONS --
 
 	-- Read the config file. Executed once, on startup.
@@ -411,7 +430,7 @@ local function RoguemonTracker()
 	local IMAGE_WIDTH = 25
 	local IMAGE_GAP = 1
 	local BUTTON_WIDTH = 101
-	local TOP_BUTTON_Y = 22
+	local TOP_BUTTON_Y = 28
 	local BUTTON_HEIGHT = 25
 	local BUTTON_VERTICAL_GAP = 4
 	local DESC_WIDTH = 9
@@ -435,13 +454,11 @@ local function RoguemonTracker()
 
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
-		-- Draw the header text
-		local centeredX = Utils.getCenteredTextX(topText, canvas.w) - 2
-		Drawing.drawTransparentTextbox(canvas.x + centeredX, canvas.y + 2, topText, canvas.text, canvas.fill, canvas.shadow)
-
 		for _, button in pairs(RewardScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
+
+		self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 45, 5)
 
 		-- Draw the images
 		if option1 ~= "" then
@@ -518,7 +535,7 @@ local function RoguemonTracker()
 		NextButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "Next" end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 5, 7, 22, 12 },
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 110, 7, 22, 12 },
 			onClick = function()
 				milestone = milestone + 1
 				self.spinReward(milestones[milestone]['name'])
@@ -529,7 +546,7 @@ local function RoguemonTracker()
 		RerollButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "Reroll" end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 7, 32, 12 },
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 5, 7, 27, 12 },
 			onClick = function()
 				specialRedeems.consumable["Reroll Chip"] = nil
 				local rerollId = nil
@@ -616,7 +633,7 @@ local function RoguemonTracker()
 				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OSS_LEFT_TOP_LEFT_X + (i*(OSS_BUTTON_WIDTH + OSS_BUTTON_HORIZONTAL_GAP)), 
 				OSS_TOP_BUTTON_Y + (j*(OSS_BUTTON_HEIGHT + OSS_BUTTON_VERTICAL_GAP)), OSS_BUTTON_WIDTH, OSS_BUTTON_HEIGHT },
 				onClick = function()
-					self.selectAdditionalOption(Utils.split(additionalOptions[index], "\(", true)[1]) -- if a button has (), it's clarification text; we display it but don't read it
+					self.selectAdditionalOption(self.splitOn(additionalOptions[index], "(")[1]) -- if a button has (), it's clarification text; we display it but don't read it
 				end,
 				isVisible = function()
 					return additionalOptions[index] and additionalOptions[index] ~= "" -- Visible as long as it has text
@@ -717,8 +734,12 @@ local function RoguemonTracker()
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + SRS_TOP_LEFT_X + SRS_TEXT_WIDTH, SRS_TOP_Y + ((i-1)*(SRS_LINE_HEIGHT)), SRS_BUTTON_WIDTH, SRS_BUTTON_HEIGHT },
 			onClick = function()
 				local toRemove = specialRedeems.consumable[i-#specialRedeems.unlocks]
+				if specialRedeemToDescribe == toRemove then
+					specialRedeemToDescribe = nil
+				end
 				specialRedeems.consumable[toRemove] = nil
 				table.remove(specialRedeems.consumable, i-#specialRedeems.unlocks)
+				
 			end,
 			isVisible = function()
 				return specialRedeems.consumable[i-#specialRedeems.unlocks]
@@ -796,6 +817,7 @@ local function RoguemonTracker()
 		option3Split = Utils.split(rewardOptions[choices[3]], ":", true)
 		option3 = option3Split[1]
 		option3Desc = option3Split[2] or ""
+		descriptionText = ""
 
 		Program.redraw(true)
 		Program.changeScreenView(RewardScreen)
@@ -881,6 +903,8 @@ local function RoguemonTracker()
 			end
 		end
 
+		descriptionText = ""
+
 		self.updateCaps()
 
 		Program.changeScreenView(nextScreen)
@@ -925,35 +949,37 @@ local function RoguemonTracker()
 		-- Program.redraw(true)
 	end
 
+	function self.drawCapsAt(data, x, y)
+		local shadowcolor = Utils.calcShadowColor(Theme.COLORS["Upper box background"])
+		-- these don't count as status heals if Berry Pouch is active
+		local statusBerries = {133, 134, 135, 136, 137, 140, 141}
+
+		local healsTextColor = data.x.healvalue > hpCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+		local healsValueText
+		if Options["Show heals as whole number"] then
+			healsValueText = string.format("%.0f/%.0f %s (%s)", data.x.healvalue, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+		else
+			healsValueText = string.format("%.0f%%/%.0f %s (%s)", data.x.healperc, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+		end
+		Drawing.drawText(x, y, healsValueText, healsTextColor, shadowcolor)
+
+		local statusHealsInBagCount = 0
+
+		for id,ct in pairs(Program.GameData.Items.StatusHeals) do
+			if not (specialRedeems.unlocks["Berry Pouch"] and self.contains(statusBerries, id)) then
+				statusHealsInBagCount = statusHealsInBagCount + ct
+			end
+		end
+		local statusHealsTextColor = statusHealsInBagCount > statusCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+		local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
+		Drawing.drawText(x, y + 11, statusHealsValueText, statusHealsTextColor, shadowcolor)
+	end
+
 	function self.drawCapsAndRoguemonMenu()
-		-- see Program.recalcLeadPokemonHealingInfo() if this needs to be changed for HP values
 		local data = DataHelper.buildTrackerScreenDisplay()
 		if Program.currentScreen == TrackerScreen and Battle.isViewingOwn and data.p.id ~= 0 then
-			local shadowcolor = Utils.calcShadowColor(Theme.COLORS["Upper box background"])
-			-- these don't count as status heals if Berry Pouch is active
-			local statusBerries = {133, 134, 135, 136, 137, 140, 141}
-
 			gui.drawRectangle(Constants.SCREEN.WIDTH + 6, 58, 94, 21, Theme.COLORS["Lower box background"], Theme.COLORS["Lower box background"])
-
-			local healsTextColor = data.x.healvalue > hpCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
-			local healsValueText
-			if Options["Show heals as whole number"] then
-				healsValueText = string.format("%.0f/%.0f %s (%s)", data.x.healvalue, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
-			else
-				healsValueText = string.format("%.0f%% %s (%s)", data.x.healperc, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
-			end
-			Drawing.drawText(Constants.SCREEN.WIDTH + 6, 57, healsValueText, healsTextColor, shadowcolor)
-
-			local statusHealsInBagCount = 0
-
-			for id,ct in pairs(Program.GameData.Items.StatusHeals) do
-				if not (specialRedeems.unlocks["Berry Pouch"] and self.contains(statusBerries, id)) then
-					statusHealsInBagCount = statusHealsInBagCount + ct
-				end
-			end
-			local statusHealsTextColor = statusHealsInBagCount > statusCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
-			local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
-			Drawing.drawText(Constants.SCREEN.WIDTH + 6, 68, statusHealsValueText, statusHealsTextColor, shadowcolor)
+			self.drawCapsAt(data, Constants.SCREEN.WIDTH + 6, 57)
 			Drawing.drawButton(TrackerScreen.Buttons.RogueMenuButton)
 		end
 	end
@@ -977,13 +1003,17 @@ local function RoguemonTracker()
 			['specialRedeems'] = specialRedeems,
 			['offeredMoonStoneFirst'] = offeredMoonStoneFirst
 		}
-		
-		FileManager.encodeToJsonFile(SAVED_DATA_PATH, saveData)
+
+		-- FileManager.encodeToJsonFile(SAVED_DATA_PATH, saveData)
+		-- ^this requires no numerical keys anywhere in the table, so I'll need to make a converter if I want to use this
+		-- I'll stick with the old method for now
+		FileManager.writeTableToFile(saveData, SAVED_DATA_PATH)
 	end
 
 	-- Load roguemon data from file
 	function self.loadData()
-		local saveData = FileManager.decodeJsonFile(SAVED_DATA_PATH)
+		-- local saveData = FileManager.decodeJsonFile(SAVED_DATA_PATH)
+		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH)
 		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
 			segmentOrder = saveData['segmentOrder']
 			defeatedTrainerIds = saveData['defeatedTrainerIds']
@@ -1078,9 +1108,6 @@ local function RoguemonTracker()
 		end
 	end
 
-	local saveToFileOld = nil
-	local drawPokemonInfoAreaOld = nil
-
 	function self.startup()
 		-- Read & populate configuration info
 		self.readConfig()
@@ -1099,6 +1126,9 @@ local function RoguemonTracker()
 					local text = self.wrapPixelsInline(segmentOrder[currentSegment] .. ": " .. mandatoriesDefeated .. "/" .. self.getSegmentMandatoryCount(currentSegment) .. " mandatory, " .. 
 					trainersDefeated .. "/" .. self.getSegmentTrainerCount(currentSegment) .. " total",
 					Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN) - 10)
+					if string.sub(text, 1, 8) == "Mt. Moon" then
+						text = text + " (Full Clear = Prize)"
+					end
 					return Main.IsOnBizhawk() and { text } or text
 				else
 					local text = self.wrapPixelsInline('Next Segment: ' .. segmentOrder[currentSegment],
@@ -1124,8 +1154,8 @@ local function RoguemonTracker()
 		-- Load data from file if it exists
 		self.loadData()
 
-		-- Set up a frame counter to save the roguemon data every 1 minute
-		Program.addFrameCounter("Roguemon Saving", 3600, self.saveData, nil, true)
+		-- Set up a frame counter to save the roguemon data every 30 seconds
+		Program.addFrameCounter("Roguemon Saving", 1800, self.saveData, nil, true)
 	end
 
 	function self.afterRedraw()
