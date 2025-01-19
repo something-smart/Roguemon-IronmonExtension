@@ -99,7 +99,7 @@ local function RoguemonTracker()
 		["Erika"] = {["routes"] = {15}, ["allMandatory"] = true},
 		["Game Corner"] = {["routes"] = {27, 128, 129, 130, 131}, ["mandatory"] = {357, 368, 366, 367, 348}},
 		["Pokemon Tower"] = {["routes"] = {161, 163, 164, 165, 166, 167}, ["mandatory"] = {447, 453, 452, 369, 370, 371}},
-		["Cycling Rd/Rt 18/19"] = {["routes"] = {105, 106, 107}},
+		["Cycling Rd/Rt 18/19"] = {["routes"] = {104, 105, 106, 107}, ["trainers"] = {199, 201, 202, 249, 250, 251, 489, 203, 204, 205, 206, 252, 253, 254, 255, 256, 470, 307, 308, 309, 235, 236}},
 		["Koga"] = {["routes"] = {20}, ["allMandatory"] = true},
 		["Safari Zone"] = {["routes"] = {147, 148, 149, 150}},
 		["Silph Co"] = {["routes"] = {132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142}, ["mandatory"] = {432, 433, 434, 391, 349}, ["rival"] = true},
@@ -110,6 +110,7 @@ local function RoguemonTracker()
 		["Rival 7"] = {["routes"] = {110}, ["trainers"] = {435, 436, 437}, ["allMandatory"] = true, ["rival"] = true},
 		["Victory Road"] = {["routes"] = {125, 126, 127}},
 		["Pokemon League"] = {["routes"] = {212, 213, 214, 215, 216, 217}, ["allMandatory"] = true, ["rival"] = true},
+		["Congratulations!"] = {},
 		["Route 12"] = {["routes"] = {100}},
 		["Route 13"] = {["routes"] = {101}},
 		["Route 14"] = {["routes"] = {102}},
@@ -145,7 +146,7 @@ local function RoguemonTracker()
 	local segmentOrder = {
 		"Viridian Forest", "Rival 2", "Brock", "Route 3", "Mt. Moon", "Rival 3", "Route 24/25", "Misty", "Route 6/11", "Rival 4", "Lt. Surge",
 		"Route 9/10 N", "Rock Tunnel/Rt 10 S", "Rival 5", "Route 8", "Erika", "Game Corner", "Pokemon Tower", "Cycling Rd/Rt 18/19",
-		"Koga", "Silph Co", "Sabrina", "Rt 21/Pokemon Mansion", "Blaine", "Giovanni", "Rival 7", "Victory Road", "Pokemon League"
+		"Koga", "Silph Co", "Sabrina", "Rt 21/Pokemon Mansion", "Blaine", "Giovanni", "Rival 7", "Victory Road", "Pokemon League", "Congratulations!"
 	} -- this is dynamic because the Route 12/13/14/15 prize can alter it
 
 	local defeatedTrainerIds = {} -- ids of all trainers we have beaten
@@ -935,18 +936,19 @@ local function RoguemonTracker()
 
 	-- Draw special redeem images on the main screen.
 	function self.redrawScreenImages()
-		--local dx = 180 - (#specialRedeems.unlocks + #specialRedeems.consumable)*30 - use this for top right display
-		local dx = 0
-		local dy = 0
-		for _,r in ipairs(specialRedeems.unlocks) do
-			Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx, dy)
-			dx = dx + 30
+		if not Battle.inBattle then
+			--local dx = 180 - (#specialRedeems.unlocks + #specialRedeems.consumable)*30 - use this for top right display
+			local dx = 0
+			local dy = 0
+			for _,r in ipairs(specialRedeems.unlocks) do
+				Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx, dy)
+				dx = dx + 30
+			end
+			for _,r in ipairs(specialRedeems.consumable) do
+				Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx, dy)
+				dx = dx + 30
+			end
 		end
-		for _,r in ipairs(specialRedeems.consumable) do
-			Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx, dy)
-			dx = dx + 30
-		end
-		-- Program.redraw(true)
 	end
 
 	function self.drawCapsAt(data, x, y)
