@@ -110,7 +110,7 @@ local function RoguemonTracker()
 		["Rival 7"] = {["routes"] = {110}, ["trainers"] = {435, 436, 437}, ["allMandatory"] = true, ["rival"] = true},
 		["Victory Road"] = {["routes"] = {125, 126, 127}},
 		["Pokemon League"] = {["routes"] = {212, 213, 214, 215, 216, 217}, ["allMandatory"] = true, ["rival"] = true},
-		["Congratulations!"] = {},
+		["Congratulations!"] = {["routes"] = {}},
 		["Route 12"] = {["routes"] = {100}},
 		["Route 13"] = {["routes"] = {101}},
 		["Route 14"] = {["routes"] = {102}},
