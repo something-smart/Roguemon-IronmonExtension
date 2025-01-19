@@ -1129,7 +1129,7 @@ local function RoguemonTracker()
 					trainersDefeated .. "/" .. self.getSegmentTrainerCount(currentSegment) .. " total",
 					Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN) - 10)
 					if string.sub(text, 1, 8) == "Mt. Moon" then
-						text = text + " (Full Clear = Prize)"
+						text = text .. " (Full Clear = Prize)"
 					end
 					return Main.IsOnBizhawk() and { text } or text
 				else
