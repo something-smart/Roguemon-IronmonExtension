@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "0.7"
+	self.version = "0.8"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -8,7 +8,7 @@ local function RoguemonTracker()
 	self.url = string.format("https://github.com/%s", self.github or "")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = false
+	local DEBUG_MODE = true
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
@@ -25,14 +25,15 @@ local function RoguemonTracker()
 		["Temporary TM Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Teach one ground TM found before the next badge (immediate choice)."},
 		["Potion Investment"] = {consumable = true, image = "diamond.png", description = "Store Potion in PC; x2 value each badge. Withdraw to buy a heal up to its value in Buy Phase. Value:"},
 		["Temporary Held Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 1 gym badge."},
-		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute)."},
+		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Keep all flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
 		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one non-healing ground item before next gym (immediate decision)."},
 		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
 		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-healing ground item you find (immediate decision)."},
 		["Fight wilds in Rts 1/2/22"] = {consumable = "true", image = "exp-charm.png", description = "Fight the first encounter on each. You may PC heal anytime, but must stop there."},
-		["Fight up to 5 random wilds"] = {consumable = "true", image = "exp-charm.png", description = "May be anywhere, but you're done once you run away or heal at a center."}
+		["Fight up to 5 random wilds"] = {consumable = "true", image = "exp-charm.png", description = "May be anywhere, but you're done once you run away or heal at a center."},
+		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 Ground/Gift TM found in the future (immediate decision)."}
 	}
 
 	local gymLeaders = {[414] = true, [415] = true, [416] = true, [417] = true, [418] = true, [420] = true, [419] = true, [350] = true}
@@ -1087,7 +1088,7 @@ local function RoguemonTracker()
 		local segInfo = segments[segmentOrder[currentSegment]]
 		for _,t in pairs(segInfo["mandatory"]) do
 			if t == trainerId then
-				if not (segInfo["choices"] and defeatedTrainerIds[segInfo["choices"][trainerId]]) then
+				if not (segInfo["pairs"] and defeatedTrainerIds[segInfo["pairs"][trainerId]]) then
 					mandatoriesDefeated = mandatoriesDefeated + 1
 				end
 			end
@@ -1096,7 +1097,7 @@ local function RoguemonTracker()
 			if t == trainerId then
 				segmentStarted = true
 				trainersDefeated = trainersDefeated + 1
-				if trainersDefeated == self.getSegmentTrainerCount(currentSegment) then
+				if trainersDefeated >= self.getSegmentTrainerCount(currentSegment) then
 					self.nextSegment()
 				end
 			end
@@ -1186,7 +1187,7 @@ local function RoguemonTracker()
 		-- Check if we are in a Pokemon Center with full HP when all mandatory trainers in the current segment are defeated.
 		-- If so, the segment is assumed to be finished.
 		local pokemon = TrackerAPI.getPlayerPokemon()
-		if pokemon and pokemon.curHP == pokemon.stats.hp and mapId == 8 and segmentStarted and mandatoriesDefeated == self.getSegmentMandatoryCount(currentSegment) then
+		if pokemon and pokemon.curHP == pokemon.stats.hp and mapId == 8 and segmentStarted and mandatoriesDefeated >= self.getSegmentMandatoryCount(currentSegment) then
 			self.nextSegment()
 		end
 		-- Check if we have entered Celadon for the first time with a pokemon that can evolve with a moon stone.
