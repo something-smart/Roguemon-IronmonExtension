@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "0.9"
+	self.version = "0.9.1"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -1081,6 +1081,15 @@ local function RoguemonTracker()
 			end
 			if milestoneProgress[milestoneName] == milestoneTrainers[trainerId]['count'] then
 				self.spinReward(milestoneName)
+			end
+		end
+
+		if segmentOrder[currentSegment + 1] then
+			for _,t in pairs(segments[segmentOrder[currentSegment + 1]]["trainers"]) do
+				if t == trainerId then
+					self.nextSegment()
+					break
+				end
 			end
 		end
 
