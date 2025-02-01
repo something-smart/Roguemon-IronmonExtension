@@ -8,7 +8,7 @@ local function RoguemonTracker()
 	self.url = string.format("https://github.com/%s", self.github or "")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = false
+	local DEBUG_MODE = true
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
@@ -618,6 +618,10 @@ local function RoguemonTracker()
 
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
+		if additionalOptionsRemaining > 1 then
+			Drawing.drawText(Constants.SCREEN.WIDTH + 35, 5, "Choose " .. additionalOptionsRemaining .. " more", Theme.COLORS["Default text"], Utils.calcShadowColor(Theme.COLORS["Upper box background"]))
+		end
+
 		for _, button in pairs(OptionSelectionScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
@@ -1163,9 +1167,9 @@ local function RoguemonTracker()
 		self.populateSegmentData()
 
 		-- Add the segment carousel item
-		local SEGMENT_CAROUSEL_INDEX = #TrackerScreen.CarouselTypes + 1
-		TrackerScreen.CarouselItems[SEGMENT_CAROUSEL_INDEX] = {
-			type = SEGMENT_CAROUSEL_INDEX,
+		self.SEGMENT_CAROUSEL_INDEX = #TrackerScreen.CarouselTypes + 1
+		TrackerScreen.CarouselItems[self.SEGMENT_CAROUSEL_INDEX] = {
+			type = self.SEGMENT_CAROUSEL_INDEX,
 			framesToShow = 300,
 			canShow = function(this)
 				return true
@@ -1187,7 +1191,7 @@ local function RoguemonTracker()
 			end,
 		}
 
-		-- Add the button to access the Special Redeems menu
+		-- Add the button to access the Roguemon screens
 		TrackerScreen.Buttons.RogueMenuButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "!" end,
@@ -1205,6 +1209,12 @@ local function RoguemonTracker()
 
 		-- Set up a frame counter to save the roguemon data every 30 seconds
 		Program.addFrameCounter("Roguemon Saving", 1800, self.saveData, nil, true)
+	end
+
+	function self.unload()
+		TrackerScreen.CarouselItems[self.SEGMENT_CAROUSEL_INDEX] = nil
+		TrackerScreen.Buttons.RogueMenuButton = nil
+		Program.removeFrameCounter("Roguemon Saving")
 	end
 
 	function self.afterRedraw()
