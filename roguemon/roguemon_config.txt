@@ -74,12 +74,12 @@ Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|c
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and choose one (or none).|tm.png
-Hyper Potion & Move Tutor 3F: Cannot pre-scout. Teaching is optional.|hyperrelearner.png
+Hyper Potion & Move Tutor 3F: May teach the Move Tutor's move on the 3rd floor of Dept Store. Cannot pre-scout.|hyperrelearner.png
 Hyper Potion & Any Vitamin|hypervitamin.png
 Full Heal x2 & Super Potion|twofull-heal-super.png
 Super Potion x2 & Full Heal|twosuperandfull.png
 Any Battle Item x2|twoxitems.png
-Any Vitamin x3 & Move Tutor 3F: Cannot pre-scout. Teaching is optional.|threevitaminsrelearner.png
+Any Vitamin x3 & Move Tutor 3F: May teach the Move Tutor's move on the 3rd floor of Dept Store. Cannot pre-scout.|threevitaminsrelearner.png
 Super Potion x2 & Any Vitamin|twosupersandvitamin.png
 Super Potion & Any Battle Item|superandx.png
 Ground Item: Permanently unlock any item currently in the bag (before cleansing).|grounditem.png
@@ -103,7 +103,7 @@ Ground Item & Full Heal: Permanently unlock any item currently in the bag (befor
 Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Held Item Voucher: Permanently unlock one non-healing ground item you find (immediate decision).|tmvoucher.png
+Held Item Voucher: Permanently unlock one non-healing ground item found in the future (immediate decision).|tmvoucher.png
 Fight one of Route 12/13/14/15: Treat the route as a segment. Keep items found.|exp-charm.png
 
 *Victory Road Prize
