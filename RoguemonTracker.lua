@@ -8,7 +8,7 @@ local function RoguemonTracker()
 	self.url = string.format("https://github.com/%s", self.github or "")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = true
+	local DEBUG_MODE = false
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
