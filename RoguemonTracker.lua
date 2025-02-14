@@ -34,7 +34,7 @@ local function RoguemonTracker()
 		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-healing ground item found in the future (immediate decision)."},
 		["Fight wilds in Rts 1/2/22"] = {consumable = "true", image = "exp-charm.png", description = "Fight the first encounter on each. You may PC heal anytime, but must stop there."},
 		["Fight up to 5 random wilds"] = {consumable = "true", image = "exp-charm.png", description = "May be anywhere, but can't heal in between. Can run but counts as 1 of the 5."},
-		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 Ground/Gift TM found in the future (immediate decision)."},
+		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 Ground TM found in the future (immediate decision)."},
 		["Revive"] = {consumable = true, image = "revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."}
 	}
 
@@ -90,7 +90,7 @@ local function RoguemonTracker()
 	local prizeAdditionalOptions = {
 		["Any Status Heal"] = {"Antidote", "Parlyz Heal", "Awakening", "Burn Heal", "Ice Heal"},
 		["Any Battle Item"] = {"X Attack", "X Defend", "X Special", "X Speed", "Dire Hit", "Guard Spec."},
-		["Any Vitamin"] = {"Protein (Attack)", "Iron (Defense)", "Calcium (Sp. Atk)", "Zinc (Sp. Def)", "Carbos (Speed)"}
+		["Any Vitamin"] = {"Hp Up (HP)", "Protein (Attack)", "Iron (Defense)", "Calcium (Sp. Atk)", "Zinc (Sp. Def)", "Carbos (Speed)"}
 	}
 
 	-- Segments will autofill the required and optional trainers from the route info. Some segments encompass part of a route and must be hard-coded.
@@ -99,31 +99,31 @@ local function RoguemonTracker()
 		["Viridian Forest"] = {["routes"] = {117}, ["mandatory"] = {104}},
 		["Rival 2"] = {["routes"] = {110}, ["trainers"] = {329, 330, 331}, ["allMandatory"] = true, ["rival"] = true},
 		["Brock"] = {["routes"] = {28}, ["allMandatory"] = true},
-		["Route 3"] = {["routes"] = {91}, ["mandatory"] = {105, 106, 107}, ["cursable"] = true},
+		["Route 3"] = {["routes"] = {91}, ["mandatory"] = {105, 106, 107}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true}},
 		["Mt. Moon"] = {["routes"] = {114, 116}, ["mandatory"] = {351, 170}, ["cursable"] = true},
 		["Rival 3"] = {["routes"] = {81}, ["trainers"] = {332, 333, 334}, ["allMandatory"] = true, ["rival"] = true},
 		["Route 24/25"] = {["routes"] = {112, 113}, ["mandatory"] = {110, 123, 92, 122, 144, 356, 153, 125}, ["choicePairs"] = {{182, 184}, {183, 471}}, ["cursable"] = true},
 		["Misty"] = {["routes"] = {12}, ["allMandatory"] = true},
-		["Route 6/11"] = {["routes"] = {94, 99}, ["trainers"] = {355, 111, 112, 145, 146, 151, 152, 97, 98, 99, 100, 221, 222, 258, 259, 260, 261}, ["mandatory"] = {355, 146}, ["cursable"] = true},
+		["Route 6/11"] = {["routes"] = {182, 94, 99}, ["trainers"] = {355, 111, 112, 145, 146, 151, 152, 97, 98, 99, 100, 221, 222, 258, 259, 260, 261}, ["mandatory"] = {355, 146}, ["cursable"] = true},
 		["Rival 4"] = {["routes"] = {119, 120, 121, 122}, ["trainers"] = {426, 427, 428}, ["allMandatory"] = true, ["rival"] = true},
 		["Lt. Surge"] = {["routes"] = {25}, ["allMandatory"] = true},
 		["Route 9/10 N"] = {["routes"] = {97, 98}, ["trainers"] = {114, 115, 148, 149, 154, 155, 185, 186, 465, 156}, ["mandatory"] = {154, 115}, ["cursable"] = true},
-		["Rock Tunnel/Rt 10 S"] = {["routes"] = {154, 155}, ["trainers"] = {192, 193, 194, 168, 476, 475, 474, 158, 159, 189, 190, 191, 164, 165, 166, 157, 163, 187, 188}, ["mandatory"] = {168, 166, 159, 158, 189, 474}, ["choicePairs"] = {{191, 190}, {192, 193}}, ["cursable"] = true},
+		["Rock Tunnel/Rt 10 S"] = {["routes"] = {154, 155}, ["trainers"] = {192, 193, 194, 168, 476, 475, 474, 158, 159, 189, 190, 191, 164, 165, 166, 157, 163, 187, 188}, ["mandatory"] = {168, 166, 159, 158, 189, 474}, ["choicePairs"] = {{191, 190}, {192, 193}}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true}},
 		["Rival 5"] = {["routes"] = {161, 162}, ["trainers"] = {429, 430, 431}, ["allMandatory"] = true, ["rival"] = true},
-		["Route 8"] = {["routes"] = {96}, ["choicePairs"] = {{131, 264}}, ["cursable"] = true},
+		["Route 8"] = {["routes"] = {96}, ["choicePairs"] = {{131, 264}}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true}},
 		["Erika"] = {["routes"] = {15}, ["allMandatory"] = true},
 		["Game Corner"] = {["routes"] = {27, 128, 129, 130, 131}, ["mandatory"] = {357, 368, 366, 367, 348}, ["cursable"] = true},
-		["Pokemon Tower"] = {["routes"] = {161, 163, 164, 165, 166, 167}, ["mandatory"] = {447, 453, 452, 369, 370, 371}, ["cursable"] = true},
-		["Cycling Rd/Rt 18/19"] = {["routes"] = {104, 105, 106, 107}, ["trainers"] = {199, 201, 202, 249, 250, 251, 489, 203, 204, 205, 206, 252, 253, 254, 255, 256, 470, 307, 308, 309, 235, 236}, ["cursable"] = true},
+		["Pokemon Tower"] = {["routes"] = {161, 163, 164, 165, 166, 167}, ["mandatory"] = {447, 453, 452, 369, 370, 371}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true}},
+		["Cycling Rd/Rt 18/19"] = {["routes"] = {104, 105, 106, 107}, ["trainers"] = {199, 201, 202, 249, 250, 251, 203, 204, 205, 206, 252, 253, 254, 255, 256, 470, 307, 308, 309, 235, 236}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true}},
 		["Koga"] = {["routes"] = {20}, ["allMandatory"] = true},
 		["Safari Zone"] = {["routes"] = {147, 148, 149, 150}},
-		["Silph Co"] = {["routes"] = {132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142}, ["mandatory"] = {432, 433, 434, 391, 349}, ["rival"] = true, ["cursable"] = true},
+		["Silph Co"] = {["routes"] = {132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142}, ["mandatory"] = {432, 433, 434, 391, 349}, ["rival"] = true, ["cursable"] = true, ["bannedCurses"] = {["1000 Cuts"] = true}},
 		["Sabrina"] = {["routes"] = {34}, ["allMandatory"] = true},
 		["Rt 21/Pokemon Mansion"] = {["routes"] = {109, 219, 143, 144, 145, 146}, ["cursable"] = true},
 		["Blaine"] = {["routes"] = {36}, ["allMandatory"] = true},
 		["Giovanni"] = {["routes"] = {37}, ["allMandatory"] = true},
 		["Rival 7"] = {["routes"] = {110}, ["trainers"] = {435, 436, 437}, ["allMandatory"] = true, ["rival"] = true},
-		["Victory Road"] = {["routes"] = {125, 126, 127}, ["cursable"] = true},
+		["Victory Road"] = {["routes"] = {125, 126, 127}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true}},
 		["Pokemon League"] = {["routes"] = {212, 213, 214, 215, 216, 217}, ["allMandatory"] = true, ["rival"] = true},
 		["Congratulations!"] = {["routes"] = {}},
 		["Route 12"] = {["routes"] = {100}},
@@ -133,14 +133,25 @@ local function RoguemonTracker()
 	}
 
 	local curseInfo = {
-		["Placeholder 1"] = {description = "Curse 1 description"},
-		["Placeholder 2"] = {description = "Curse 2 description"},
-		["Placeholder 3"] = {description = "Curse 3 description"},
-		["Placeholder 4"] = {description = "Curse 4 description"},
-		["Placeholder 5"] = {description = "Curse 5 description"},
-		["Placeholder 6"] = {description = "Curse 6 description"},
-		["Placeholder 7"] = {description = "Curse 7 description"},
-		["Placeholder 8"] = {description = "Curse 8 description"}
+		["Forgetfulness"] = {description = "Must pick up and teach one TM"},
+		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap"},
+		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently"},
+		["Negative Energy"] = {description = "Cannot use the same move twice in a row"},
+		["Bad Connection"] = {description = "Cannot use healing items in battle"},
+		["Headwind"] = {description = "Start fights at -1 Speed"},
+		["Sharp Rocks"] = {description = "All enemies have +2 crit rate"},
+		["High Pressure"] = {description = "Start missing 50% PP on all moves"},
+		["Heavy Fog"] = {description = "All combatants have -1 Accuracy"},
+		["Unstable Ground"] = {description = "Flinch on the first turn of each fight"},
+		["1000 Cuts"] = {description = "Permanent -5 HP Cap when damage taken"},
+		["Acid Rain"] = {description = "Each fight has a random weather"},
+		["Toxic Fumes"] = {description = "Take 1 damage every 8 steps (can't faint)"},
+		["Narcolepsy"] = {description = "30% to fall asleep after each fight"},
+		["Clean Air"] = {description = "Enemies have permanent Mist and Safeguard"},
+		["Clouded Instincts"] = {description = "First move in battle must be 1st slot"},
+		["Unruly Spirit"] = {description = "10% to flinch on every turn"},
+		["Color Change"] = {description = "Typing is randomized each battle"},
+		["No Cover"] = {description = "Enemies cannot miss you"}
 	}
 
 	local notifyOnPickup = {
@@ -214,6 +225,7 @@ local function RoguemonTracker()
 	local specialRedeemToDescribe = nil
 
 	local patchedMoonStones = false
+	local foughtFirstTrainer = false
 
 	local currentRoguemonScreen = nil
 	local screenQueue = {}
@@ -221,12 +233,16 @@ local function RoguemonTracker()
 	local itemsPocket = {}
 	local berryPocket = {}
 	local pokeInfo = nil
+	local itemFromPrize = nil
 
 	local wildBattleCounter = 0
 	local wildBattlesStarted = false
 	local needToBuy = false
 	local needToCleanse = false
 	local shouldDismissNotification = nil
+	local curseAppliedThisFight = false
+	local inBattleTurnCount = 0
+	local lastAttackDamage = 0
 
 	local natureMintUp = nil
 
@@ -273,6 +289,12 @@ local function RoguemonTracker()
 
 	-- which routes are cursed, and what curses do they have
 	local cursedSegments = {}
+
+	-- true if the Downsizing curse has been triggered (-1 prize options)
+	local downsized = false
+
+	-- step count information for Toxic Fumes curse
+	local stepCounter = {lastCounted = 0, toxicFumesCycle = 0}
 
 	-- tracks if we have given the moon stone yet. 0 = not at all, 1 = initial trade was offered (-100 HP Cap), 2 = given for free
 	local offeredMoonStoneFirst = 0
@@ -405,6 +427,10 @@ local function RoguemonTracker()
 		if pokeInfo and newPokeInfo and pokeInfo.heldItem ~= newPokeInfo.heldItem then
 			itemToIgnore = pokeInfo.heldItem
 		end
+		local itemFromPrizeToIgnore = nil
+		if itemFromPrize then
+			itemFromPrizeToIgnore = self.getItemId(itemFromPrize, true)
+		end
 
 		-- Check for info that changed
 		local newItemsPocket, newBerryPocket = self.readBagInfo()
@@ -412,7 +438,7 @@ local function RoguemonTracker()
 		-- Check if items changed
 		for i,q in pairs(newItemsPocket) do
 			local oldq = itemsPocket[i] or 0
-			if q > oldq and i ~= itemToIgnore then
+			if q > oldq and i ~= itemToIgnore and i ~= itemFromPrizeToIgnore then
 				currentHPVal = data.x.healvalue
 				currentStatusVal = self.countStatusHeals()
 				if next(itemsPocket) ~= nil then
@@ -425,7 +451,7 @@ local function RoguemonTracker()
 		-- Check if berries changed
 		for i,q in pairs(newBerryPocket) do
 			local oldq = berryPocket[i] or 0
-			if q > oldq and i ~= itemToIgnore then
+			if q > oldq and i ~= itemToIgnore and i ~= itemFromPrizeToIgnore then
 				currentHPVal = data.x.healvalue
 				currentStatusVal = self.countStatusHeals()
 				if next(berryPocket) ~= nil then
@@ -437,13 +463,10 @@ local function RoguemonTracker()
 
 		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.pokemonID ~= newPokeInfo.pokemonID then
 			-- We evolved :D
-			local statInfo = "Stat gains: @ "
-			for _, statKey in ipairs(Constants.OrderedLists.STATSTAGES) do
-				statInfo = statInfo .. string.upper(statKey) .. ": +" .. (newPokeInfo.stats[statKey] - pokeInfo.stats[statKey]) .. " @ "
-			end
-			self.displayNotification(statInfo, "Rare Candy.png", nil)
+			self.showPrettyStatScreen(pokeInfo, newPokeInfo)
 		end
 		pokeInfo = newPokeInfo
+		itemFromPrize = nil
 	end
 
 	-- Read in encrypted pokemon data for the lead pokemon.
@@ -628,7 +651,14 @@ local function RoguemonTracker()
 				local parts = Utils.split(line, "|", true)
 				currentWheel[#currentWheel + 1] = parts[1]
 				if parts[2] then
-					prize_images[Utils.split(parts[1], ":", true)[1]] = parts[2]
+					local prizeName = Utils.split(parts[1], ":", true)[1]
+					prize_images[prizeName] = parts[2]
+					if prizeName == "Fight Route X" then
+						prize_images["Fight Route 12"] = parts[2]
+						prize_images["Fight Route 13"] = parts[2]
+						prize_images["Fight Route 14"] = parts[2]
+						prize_images["Fight Route 15"] = parts[2]
+					end
 				end
 			end
 			readIndex = readIndex + 1
@@ -715,8 +745,8 @@ local function RoguemonTracker()
 			evoItemIds = { 94, },
 		}
 		local extraEvo = {
-			abbreviation = "??",
-			short = {"Lv.??"},
+			abbreviation = "BST/10",
+			short = {"BST/10"},
 			detailed = {"Evo BST/10"}
 		}
 		local itemLevelEvoMethods = {
@@ -771,9 +801,15 @@ local function RoguemonTracker()
 
 	function self.uponItemAdded(item)
 		self.countAdjustedHeals()
+		if RoguemonOptions["Show reminders"] and item == "Moon Stone" and not TrackerAPI.hasDefeatedTrainer(414) then
+			return "Brock says: Nice stone. Unfortunately, you'll need to defeat me if you want to use it!", "brock.png", nil
+		end
+		if not foughtFirstTrainer then
+			return nil
+		end
 		if RoguemonOptions["Show reminders"] then
 			local itemId = self.getItemId(item)
-			if notifyOnPickup.consumables[item] then
+			if notifyOnPickup.consumables[item] and not (specialRedeems.unlocks["Berry Pouch"] and string.sub(item, string.len(item)-5, string.len(item)) == "Berry") then
 				if notifyOnPickup.consumables[item] == 2 then
 					return (item .. " must be used, equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
@@ -783,12 +819,12 @@ local function RoguemonTracker()
 				return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 			elseif notifyOnPickup.candies[item] and not specialRedeems.unlocks["Candy Jar"] then
 				return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
-			elseif RoguemonOptions["Show reminders over cap"] and MiscData.HealingItems[itemId] and adjustedHPVal > hpCap then
+			elseif RoguemonOptions["Show reminders over cap"] and MiscData.HealingItems[itemId] and adjustedHPVal > hpCap and not needToBuy then
 				return ("An HP healing item must be used or trashed"), "healing-pocket.png", function()
 					self.countAdjustedHeals()
 					return adjustedHPVal <= hpCap
 				end
-			elseif RoguemonOptions["Show reminders over cap"] and MiscData.StatusItems[itemId] and currentStatusVal > statusCap then
+			elseif RoguemonOptions["Show reminders over cap"] and MiscData.StatusItems[itemId] and currentStatusVal > statusCap and not needToBuy then
 				return ("A status healing item must be used or trashed"), "status-cap.png", function()
 					return self.countStatusHeals() <= statusCap
 				end
@@ -803,7 +839,7 @@ local function RoguemonTracker()
 		if s then
 			self.displayNotification(s, img, dismissFunc)
 		end
-		if MiscData.HealingItems[self.getItemId(item)] and specialRedeems.consumable["Luck Incense"] then
+		if MiscData.HealingItems[self.getItemId(item)] and specialRedeems.consumable["Luck Incense"] and adjustedHPVal > hpCap then
 			self.offerBinaryOption("Luck Incense on " .. item, "Skip")
 		end
 		if specialRedeems.consumable["Duplicator"] then
@@ -833,6 +869,16 @@ local function RoguemonTracker()
 
 	-- Move to the next segment.
 	function self.nextSegment()
+		if trainersDefeated < self.getSegmentTrainerCount(currentSegment) then
+			local curse = self.getActiveCurse()
+			if curse == "Claustrophobia" then
+				hpCap = hpCap - 50
+				hpCapModifier = hpCapModifier - 50
+			end
+			if curse == "Downsizing" then
+				downsized = true
+			end
+		end
 		currentSegment = currentSegment + 1
 		segmentStarted = false
 		trainersDefeated = 0
@@ -841,9 +887,22 @@ local function RoguemonTracker()
 
 	function self.startSegment()
 		segmentStarted = true
-		local curse = cursedSegments[segmentOrder[currentSegment]]
+		local curse = self.getActiveCurse()
 		if curse then
 			self.displayNotification("Curse: " .. curse .. " @ " .. curseInfo[curse].description, "Curse.png", nil)
+			if curse == "High Pressure" then
+				local pkmn = self.readLeadPokemonData()
+				local pp1 = Utils.getbits(pkmn.attack3, 0, 8) / 2
+				local pp2 = Utils.getbits(pkmn.attack3, 8, 8) / 2
+				local pp3 = Utils.getbits(pkmn.attack3, 16, 8) / 2
+				local pp4 = Utils.getbits(pkmn.attack3, 24, 8) / 2
+				pkmn.attack3 = pp1 + Utils.bit_lshift(pp2, 8)  + Utils.bit_lshift(pp3, 16) + Utils.bit_lshift(pp4, 24)
+				self.writeLeadPokemonData(pkmn)
+			end
+			if curse == "Toxic Fumes" then
+				stepCounter.lastCounted = Utils.getGameStat(Constants.GAME_STATS.STEPS)
+				stepCounter.toxicFumesCycle = 8
+			end
 		end
 	end
 
@@ -978,6 +1037,7 @@ local function RoguemonTracker()
 			onClick = function()
 				self.selectReward(option3)
 			end,
+			isVisible = function() return option3 ~= "" end
 		},
 		-- Description buttons (the ? button)
 		Option1Desc = {
@@ -1234,8 +1294,10 @@ local function RoguemonTracker()
 			onClick = function()
 				local curseInfoText = "Cursed Segments: @ "
 				for _,seg in ipairs(cursedSegments) do
-					curseInfoText = curseInfoText .. seg .. " @ "
-					self.displayNotification(curseInfoText, "Curse.png", nil)
+					if not (self.reachedSegment(seg) and not segmentOrder[currentSegment] == seg) then
+						curseInfoText = curseInfoText .. seg .. " @ "
+						self.displayNotification(curseInfoText, "Curse.png", nil)
+					end
 				end
 			end
 		}
@@ -1292,7 +1354,16 @@ local function RoguemonTracker()
 	-- Screen for showing random messages
 	local NotificationScreen = {
 		message = "",
-		image = nil
+		image = nil,
+		auxiliaryButtonInfo = {
+			["Buy Phase @ May trade heals for equal value @ May trade status heals 1:1 or 3:1 for Full Heals"] = {
+				name = "Heals",
+				onClick = function() 
+					HealsInBagScreen.changeTab(HealsInBagScreen.Tabs.All)
+					Program.changeScreenView(HealsInBagScreen) 
+				end
+			}
+		}
 	}
 
 	function NotificationScreen.drawScreen()
@@ -1313,11 +1384,17 @@ local function RoguemonTracker()
 
 		-- Image
 		if(NotificationScreen.image) then
-			Drawing.drawImage(NotificationScreen.image, canvas.x + 40, 17, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
+			Drawing.drawImage(NotificationScreen.image, canvas.x + 40, 15, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
 		end
 
 		-- Text
 		Drawing.drawText(canvas.x + 10, 64, self.wrapPixelsInline(NotificationScreen.message, canvas.w - 20))
+
+		local aux = NotificationScreen.auxiliaryButtonInfo[NotificationScreen.message]
+		if aux then
+			NotificationScreen.Buttons.AuxiliaryButton.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
+			Utils.calcWordPixelLength(aux.name) + 4, 10} 
+		end
 
 		for _, button in pairs(NotificationScreen.Buttons or {}) do
 			Drawing.drawButton(button)
@@ -1332,6 +1409,25 @@ local function RoguemonTracker()
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 8, 22, 10},
 			onClick = function()
 				Program.changeScreenView(TrackerScreen)
+			end
+		},
+		AuxiliaryButton = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			getText = function()
+				local i = NotificationScreen.auxiliaryButtonInfo[NotificationScreen.message]
+				if i then
+					return i.name
+				end
+			end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 30, 10},
+			onClick = function()
+				local i = NotificationScreen.auxiliaryButtonInfo[NotificationScreen.message]
+				if i then
+					return i.onClick()
+				end
+			end,
+			isVisible = function()
+				return NotificationScreen.auxiliaryButtonInfo[NotificationScreen.message]
 			end
 		}
 	}
@@ -1414,6 +1510,81 @@ local function RoguemonTracker()
 		Input.checkButtonsClicked(xmouse, ymouse, OptionsScreen.Buttons or {})
 	end
 
+	local PrettyStatScreen = {
+		oldPoke = nil,
+		newPoke = nil
+	}
+
+	local PSS_IMAGE_Y = 20
+	local PSS_STAT_X = 10
+	local PSS_LEFT_X = 30
+	local PSS_MID_X = 60
+	local PSS_RIGHT_X = 100
+	local PSS_TEXT_Y = 55
+	local PSS_TEXT_GAP = 11
+	local IMAGE_CENTERING = 10
+
+    function PrettyStatScreen.drawScreen()
+		local canvas = {
+			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
+			y = Constants.SCREEN.MARGIN,
+			w = Constants.SCREEN.RIGHT_GAP - (Constants.SCREEN.MARGIN * 2),
+			h = Constants.SCREEN.HEIGHT - (Constants.SCREEN.MARGIN * 2),
+			text = Theme.COLORS[OptionSelectionScreen.Colors.text],
+			border = Theme.COLORS[OptionSelectionScreen.Colors.border],
+			fill = Theme.COLORS[OptionSelectionScreen.Colors.fill],
+			shadow = Utils.calcShadowColor(Theme.COLORS[OptionSelectionScreen.Colors.fill]),
+		}
+		Drawing.drawBackgroundAndMargins()
+		gui.defaultTextBackground(canvas.fill)
+
+		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
+
+		if PrettyStatScreen.oldPoke and PrettyStatScreen.newPoke then
+			Drawing.drawImage(Drawing.getImagePath("PokemonIcon", tostring(PrettyStatScreen.oldPoke.pokemonID)), canvas.x + PSS_LEFT_X - IMAGE_CENTERING, PSS_IMAGE_Y)
+			Drawing.drawImage(Drawing.getImagePath("PokemonIcon", tostring(PrettyStatScreen.newPoke.pokemonID)), canvas.x + PSS_RIGHT_X - IMAGE_CENTERING, PSS_IMAGE_Y)
+			local dy = 0
+			for _, statKey in ipairs(Constants.OrderedLists.STATSTAGES) do
+				local oldStat = PrettyStatScreen.oldPoke.stats[statKey]
+				local newStat = PrettyStatScreen.newPoke.stats[statKey]
+				local statDiff = newStat - oldStat
+				local statText = string.upper(statKey)
+				gui.drawRectangle(canvas.x + PSS_STAT_X, PSS_TEXT_Y + dy, PSS_RIGHT_X - PSS_STAT_X + 15, PSS_TEXT_GAP, canvas.border)
+				Drawing.drawText(canvas.x + PSS_STAT_X, PSS_TEXT_Y + dy, statText)
+				Drawing.drawText(canvas.x + PSS_LEFT_X, PSS_TEXT_Y + dy, oldStat)
+				Drawing.drawText(canvas.x + PSS_MID_X, PSS_TEXT_Y + dy, "+" .. statDiff, Drawing.Colors.GREEN)
+				Drawing.drawText(canvas.x + PSS_RIGHT_X, PSS_TEXT_Y + dy, newStat)
+				dy = dy + PSS_TEXT_GAP
+			end
+		end
+
+		for _, button in pairs(PrettyStatScreen.Buttons or {}) do
+			Drawing.drawButton(button)
+		end
+	end
+
+	PrettyStatScreen.Buttons = {
+		-- Back to main screen button
+		BackButton = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			getText = function() return "Back" end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 8, 22, 10},
+			onClick = function()
+				Program.changeScreenView(TrackerScreen)
+			end,
+		},
+	}
+
+	function PrettyStatScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, PrettyStatScreen.Buttons or {})
+	end
+
+	function self.showPrettyStatScreen(oldmon, newmon)
+		PrettyStatScreen.oldPoke = oldmon
+		PrettyStatScreen.newPoke = newmon
+		Program.changeScreenView(PrettyStatScreen)
+	end
+
 	-- REWARD SPIN FUNCTIONS --
 	
 	-- Update caps to match the current milestone
@@ -1421,7 +1592,17 @@ local function RoguemonTracker()
 		local newHpCap = milestonesByName[lastMilestone]['hpCap'] + hpCapModifier
 		local newStatusCap = milestonesByName[lastMilestone]['statusCap'] + statusCapModifier
 		if (newHpCap ~= hpCap or newStatusCap ~= statusCap) and RoguemonOptions["Show reminders"] and fromMilestone then
-			self.displayNotification("Gained +" .. (newHpCap - hpCap) .. " HP Cap and +" .. (newStatusCap - statusCap) .. " Status Cap", "healing-pocket.png", nil)
+			local notif = "Gained "
+			if newHpCap - hpCap > 0 then
+				notif = notif .. "+" .. (newHpCap - hpCap) .. " HP Cap "
+			end
+			if newHpCap - hpCap > 0 and newStatusCap - statusCap > 0 then
+				notif = notif .. "and "
+			end
+			if newStatusCap - statusCap > 0 then
+				notif = notif .. "+" .. (newStatusCap - statusCap) .. " Status Cap"
+			end
+			self.displayNotification(notif, "healing-pocket.png", nil)
 		end
 		hpCap = newHpCap
 		statusCap = newStatusCap
@@ -1442,40 +1623,56 @@ local function RoguemonTracker()
 		self.updateCaps(true)
 		local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
 		local choices = {}
-		while #choices < 3 do
-			choice = math.random(#rewardOptions)
+		local choiceCount = downsized and 2 or 3
+		while #choices < choiceCount do
+			local choice = rewardOptions[math.random(#rewardOptions)]
+			local choiceName = Utils.split(choice, ":", true)[1]
 			local add = true
+			if specialRedeems.unlocks[choiceName] or specialRedeems.consumable[choiceName] or specialRedeems.internal[choiceName] or 
+				(choiceName == "Fight Route X" and specialRedeems.internal["Route 15"]) then
+				add = false
+			end
+			if choiceName == "Fight Route X" then
+				local routes = {"Route 12", "Route 13", "Route 14", "Route 15"}
+				local rInd = 1
+				while specialRedeems.internal[routes[rInd]] and rInd <= 4 do
+					rInd = rInd + 1
+				end
+				choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Keep items found."
+			end
+			if(choiceName == "Ability Capsule") then
+				choice = "Ability Capsule: Change ability to " .. AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name .. "."
+			end
 			for _, v in pairs(choices) do
 				if v == choice then
 					add = false
 				end
 			end
-			if specialRedeems.unlocks[rewardOptions[choice]] or specialRedeems.consumable[rewardOptions[choice]] or specialRedeems.internal[rewardOptions[choice]] then
-				add = false
-			end
-			if add then choices[#choices + 1] = choice end
+			if add and choice then choices[#choices + 1] = choice end
 		end
-		option1Split = Utils.split(rewardOptions[choices[1]], ":", true)
+
+		local option1Split = Utils.split(choices[1], ":", true)
 		option1 = option1Split[1]
 		option1Desc = option1Split[2] or ""
-		if(option1Desc == "Change ability to X") then
-			option1Desc = "Change ability to " .. AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name .. "."
-		end
-		option2Split = Utils.split(rewardOptions[choices[2]], ":", true)
+		local option2Split = Utils.split(choices[2], ":", true)
 		option2 = option2Split[1]
 		option2Desc = option2Split[2] or ""
-		if(option2Desc == "Change ability to X") then
-			option2Desc = "Change ability to " .. AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name .. "."
+		if downsized then
+			option3 = ""
+			option3Desc = ""
+		else
+			local option3Split = Utils.split(choices[3], ":", true)
+			option3 = option3Split[1]
+			option3Desc = option3Split[2] or ""
 		end
-		option3Split = Utils.split(rewardOptions[choices[3]], ":", true)
-		option3 = option3Split[1]
-		option3Desc = option3Split[2] or ""
-		if(option3Desc == "Change ability to X") then
-			option3Desc = "Change ability to " .. AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name .. "."
-		end
+
 		descriptionText = ""
 
-		Program.changeScreenView(RewardScreen)
+		if DEBUG_MODE then
+			Program.changeScreenView(RewardScreen)
+		else
+			self.readyScreen(RewardScreen)
+		end
 		currentRoguemonScreen = RewardScreen
 		Program.redraw(true)
 
@@ -1497,25 +1694,10 @@ local function RoguemonTracker()
 		local rewards = Utils.split(option, '&', true) -- split the string up into its separate parts
 		for _, reward in pairs(rewards) do
 			-- Cover the route reward separately
-			if reward == 'Fight one of Route 12/13/14/15' then
-				openRoutes = {}
-				for _,r in pairs({"Route 12", "Route 13", "Route 14", "Route 15"}) do
-					if not specialRedeems.internal[r] then openRoutes[#openRoutes + 1] = r end
-				end
-				if #openRoutes == 1 then
-					table.insert(segmentOrder, currentSegment, openRoutes[1])
-					specialRedeems.internal[reward] = true
-				elseif #openRoutes > 1 then
-					for i,_ in pairs(additionalOptions) do
-						if i > #openRoutes then 
-							additionalOptions[i] = ""
-						else 
-							additionalOptions[i] = openRoutes[i]
-						end
-					end
-					additionalOptionsRemaining = 1
-					nextScreen = OptionSelectionScreen
-				end
+			if string.sub(reward, 1, 11) == 'Fight Route' then
+				local route = string.sub(reward, 7)
+				specialRedeems.internal[route] = true
+				table.insert(segmentOrder, currentSegment, route)
 			else
 				-- Check cap increases first
 				if string.sub(reward, 1, 8) == 'HP Cap +' then
@@ -1549,6 +1731,9 @@ local function RoguemonTracker()
 				if reward == "Ability Capsule" then
 					self.flipAbility()
 					specialRedeems.internal["Ability Capsule"] = true
+				end
+				if reward == "Luck Incense" then
+					specialRedeems.internal["Luck Incense"] = true
 				end
 				if string.sub(reward, 1, 3) == 'Any' then
 					-- This reward is a choice of items
@@ -1670,6 +1855,7 @@ local function RoguemonTracker()
 		-- Regular item option
 		if not special and option ~= "" and additionalOptionsRemaining > 0 then
 			self.AddItemImproved(option, 1)
+			self.itemFromPrize = option
 			additionalOptionsRemaining = additionalOptionsRemaining - 1
 		end
 		if additionalOptionsRemaining <= 0 then
@@ -1682,12 +1868,9 @@ local function RoguemonTracker()
 				currentRoguemonScreen = SpecialRedeemScreen
 			end
 		end
-		if string.sub(option, 1, 5) == 'Route' then
-			-- Add the route if the option was a route segment
-			table.insert(segmentOrder, currentSegment, option)
-			specialRedeems.internal[option] = true
-		end
 	end
+
+	-- CURSE RELATED FUNCTIONS -- 
 
 	function self.determineCurses()
 		local availableCurses = {}
@@ -1697,8 +1880,11 @@ local function RoguemonTracker()
 		local added = 0
 		while added < 5 do
 			local seg = segmentOrder[math.random(#segmentOrder)]
-			if segments[seg].cursable and not cursedSegments[seg] then
+			if segments[seg]["cursable"] and not cursedSegments[seg] then
 				local curseIndex = math.random(#availableCurses)
+				while segments[seg]["bannedCurses"] and segments[seg]["bannedCurses"][availableCurses[curseIndex]] do
+					curseIndex = math.random(#availableCurses)
+				end
 				cursedSegments[seg] = table.remove(availableCurses, curseIndex)
 				added = added + 1
 			end
@@ -1710,9 +1896,254 @@ local function RoguemonTracker()
 		end
 	end
 
-	function self.curseActive(curse)
-		return curse == cursedSegments[segmentOrder[currentSegment]]
+	function self.getActiveCurse()
+		if not RoguemonOptions["Enable Curses (AS2+)"] then
+			return nil
+		end
+		if segmentStarted then
+			return cursedSegments[segmentOrder[currentSegment]]
+		end
 	end
+
+	function self.isFirstTurn()
+		local disableStructBase = GameSettings.gDisableStructs
+		return Memory.readword(disableStructBase + 0x16)
+	end
+
+	function self.applyStatus(index, bitPattern, useStatus3)
+		local address = useStatus3 and (GameSettings.gStatuses3 + index * BattleDetailsScreen.Addresses.sizeofStatus3) or
+		(GameSettings.gBattleMons + index * Program.Addresses.sizeofBattlePokemon + BattleDetailsScreen.Addresses.offsetBattleMonsStatus2)
+		local statusData = Memory.readdword(address)
+		statusData = Utils.bit_or(statusData, bitPattern)
+		Memory.writedword(address, statusData)
+	end
+
+	function self.applyStatusToTeam(ownSide, bitPattern, useStatus3)
+		local baseIndex = ownSide and 0 or 1
+		self.applyStatus(baseIndex, bitPattern, useStatus3)
+		if Battle.numBattlers == 4 then
+			self.applyStatus(baseIndex + 2, bitPattern, useStatus3)
+		end
+	end
+
+	function self.applyStatusToSide(ownSide, bitPattern, structIndex, value)
+		local index = ownSide and 0 or 1
+		local sideStatusesAddress = GameSettings.gSideStatuses + (index * BattleDetailsScreen.Addresses.sizeofSideStatuses)
+		local sideStatuses = Memory.readword(sideStatusesAddress)
+		sideStatuses = Utils.bit_or(sideStatuses, bitPattern)
+		Memory.writeword(sideStatusesAddress, sideStatuses)
+
+		local sideTimersBaseAddress = GameSettings.gSideTimers + (index * BattleDetailsScreen.Addresses.sizeofSideTimers)
+		Memory.writebyte(sideTimersBaseAddress + structIndex, value)
+	end
+
+	function self.setDisableStructByte(index, structIndex, value)
+		local disableStructBase = GameSettings.gDisableStructs + (index * BattleDetailsScreen.Addresses.sizeofDisableStruct)
+		Memory.writebyte(disableStructBase + structIndex, value)
+	end
+
+	function self.setDisableStructWord(index, structIndex, value)
+		local disableStructBase = GameSettings.gDisableStructs + (index * BattleDetailsScreen.Addresses.sizeofDisableStruct)
+		Memory.writeword(disableStructBase + structIndex, value)
+	end
+
+	function self.setWeather(bitValue, turns)
+		Memory.writebyte(GameSettings.gBattleWeather, bitValue)
+		if turns then
+			Memory.writebyte(GameSettings.gWishFutureKnock + 0x28, turns)
+		end
+	end
+
+	function self.setStatStageOnTeam(ownSide, stat, stage)
+		local baseIndex = ownSide and 0 or 1
+		self.setStatStage(baseIndex, stat, stage)
+		if Battle.numBattlers == 4 then
+			self.setStatStage(baseIndex + 2, stat, stage)
+		end
+	end
+
+	function self.setStatStage(index, stat, stage)
+		local startAddress = GameSettings.gBattleMons + Program.Addresses.sizeofBattlePokemon*index
+		local statStageOffset = Program.Addresses.offsetBattlePokemonStatStages
+		local hp_atk_def_speed = Memory.readdword(startAddress + statStageOffset)
+		local spatk_spdef_acc_evasion = Memory.readdword(startAddress + statStageOffset + 4)
+	
+		local statStages = {
+			["hp"] = Utils.getbits(hp_atk_def_speed, 0, 8),
+			["atk"] = Utils.getbits(hp_atk_def_speed, 8, 8),
+			["def"] = Utils.getbits(hp_atk_def_speed, 16, 8),
+			["spa"] = Utils.getbits(spatk_spdef_acc_evasion, 0, 8),
+			["spd"] = Utils.getbits(spatk_spdef_acc_evasion, 8, 8),
+			["spe"] = Utils.getbits(hp_atk_def_speed, 24, 8),
+			["acc"] = Utils.getbits(spatk_spdef_acc_evasion, 16, 8),
+			["eva"] = Utils.getbits(spatk_spdef_acc_evasion, 24, 8),
+		}
+
+		statStages[stat] = stage
+
+		hp_atk_def_speed = statStages["hp"] + Utils.bit_lshift(statStages["atk"], 8)  + Utils.bit_lshift(statStages["def"], 16) + Utils.bit_lshift(statStages["spe"], 24)
+		spatk_spdef_acc_evasion = statStages["spa"] + Utils.bit_lshift(statStages["spd"], 8)  + Utils.bit_lshift(statStages["acc"], 16) + Utils.bit_lshift(statStages["eva"], 24)
+		Memory.writedword(startAddress + statStageOffset, hp_atk_def_speed)
+		Memory.writedword(startAddress + statStageOffset + 4, spatk_spdef_acc_evasion)
+	end
+
+	function self.getStatStage(index, stat)
+		local startAddress = GameSettings.gBattleMons + Program.Addresses.sizeofBattlePokemon*index
+		local statStageOffset = Program.Addresses.offsetBattlePokemonStatStages
+		local hp_atk_def_speed = Memory.readdword(startAddress + statStageOffset)
+		local spatk_spdef_acc_evasion = Memory.readdword(startAddress + statStageOffset + 4)
+	
+		local statStages = {
+			["hp"] = Utils.getbits(hp_atk_def_speed, 0, 8),
+			["atk"] = Utils.getbits(hp_atk_def_speed, 8, 8),
+			["def"] = Utils.getbits(hp_atk_def_speed, 16, 8),
+			["spa"] = Utils.getbits(spatk_spdef_acc_evasion, 0, 8),
+			["spd"] = Utils.getbits(spatk_spdef_acc_evasion, 8, 8),
+			["spe"] = Utils.getbits(hp_atk_def_speed, 24, 8),
+			["acc"] = Utils.getbits(spatk_spdef_acc_evasion, 16, 8),
+			["eva"] = Utils.getbits(spatk_spdef_acc_evasion, 24, 8),
+		}
+
+		return statStages[stat]
+	end
+
+	function self.getLastAttackDamage()
+		-- attackerValue = 0 or 2 for player mons and 1 or 3 for enemy mons (2,3 are doubles partners)
+		self.attacker = Memory.readbyte(GameSettings.gBattlerAttacker)
+	
+		local currentTurn = Memory.readbyte(GameSettings.gBattleResults + Program.Addresses.offsetBattleResultsCurrentTurn)
+		local currDamageTotal = Memory.readword(GameSettings.gTakenDmg)
+	
+		-- As a new turn starts, note the previous amount of total damage, reset turn counters
+		if currentTurn ~= self.turnCount then
+			self.turnCount = currentTurn
+			self.prevDamageTotal = currDamageTotal
+			if self.turnCount > 0 then
+				lastAttackDamage = self.damageReceived or 0
+			end
+			self.damageReceived = 0
+		end
+	
+		self.damageDelta = currDamageTotal - self.prevDamageTotal
+		if self.damageDelta ~= 0 then
+			-- Check current and previous attackers to see if enemy attacked within the last 30 frames
+			if self.attacker % 2 ~= 0 then
+				local enemyMoveId = Memory.readword(GameSettings.gBattleResults + Program.Addresses.offsetBattleResultsEnemyMoveId)
+				if enemyMoveId ~= 0 then
+					-- If a new move is being used, reset the damage from the last move
+					if not self.enemyHasAttacked then
+						self.damageReceived = 0
+						self.enemyHasAttacked = true
+					end
+					self.damageReceived = self.damageReceived + self.damageDelta
+					self.prevDamageTotal = currDamageTotal
+				end
+			else
+				self.prevDamageTotal = currDamageTotal
+			end
+		end
+	end
+
+	function self.startOfBattleCurse(curse)
+		if curse == "Negative Energy" then
+			self.applyStatusToTeam(true, 0x80000000)
+		end
+		if curse == "Clean Air" then
+			self.applyStatusToSide(false, 0x0020, 6, 0xFF)
+			self.applyStatusToSide(false, 0x0100, 4, 0xFF)
+		end
+		if curse == "Acid Rain" then
+			local weathers = {
+				{0x04, nil}, -- Permanent rain
+				{0x10, nil}, -- Permanent sand
+				{0x40, nil}, -- Permanent sun
+				{0x80, 0xFF} -- Hail for 255 turns (permanent hail is not possible in gen 3)			
+			}
+			local rando = math.random(#weathers)
+			self.setWeather(weathers[rando][1], weathers[rando][2])
+		end
+		if curse == "Color Change" then
+			local types = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12}
+			local type1 = types[math.random(#types)]
+			local type2 = type1
+			if math.random(4) ~= 1 then
+				type2 = types[math.random(#types)]
+			end
+			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes, type1)
+			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + 1, type2)
+		end
+		if curse == "Headwind" then
+			self.setStatStageOnTeam(true, "spe", 5)
+		end
+		if curse == "1000 Cuts" then
+			Program.addFrameCounter("Last Attack Damage", 10, self.getLastAttackDamage)
+		end
+		if curse == "Clouded Instincts" then
+			local pkmn = self.readLeadPokemonData()
+			local moveId = Utils.getbits(pkmn.attack1, 0, 16)
+			self.setDisableStructWord(0, 0x06, moveId)
+			self.setDisableStructWord(0, 0x0C, 0)
+			self.setDisableStructWord(0, 0x0E, 1)
+			self.setDisableStructWord(0, 0x0F, 1)
+		end
+	end
+
+	function self.endOfBattleCurse(curse)
+		if curse == "1000 Cuts" then
+			if self.damageReceived > 0 then
+				hpCapModifier = hpCapModifier - 5
+				hpCap = hpCap - 5
+				self.damageReceived = 0
+			end
+			Program.removeFrameCounter("Last Attack Damage")
+		end
+		if curse == "Narcolepsy" then
+			local startAddress = GameSettings.pstats
+			local status_aux = Memory.readdword(startAddress + Program.Addresses.offsetPokemonStatus)
+			if math.random(10) <= 3 then
+				local sleepTurns = math.random(4)
+				Memory.writedword(startAddress + Program.Addresses.offsetPokemonStatus, sleepTurns)
+			end
+		end
+	end
+
+	function self.ongoingCurse(curse)
+		if curse == "Unstable Ground" then
+			if self.isFirstTurn() >= 1 then
+				self.applyStatusToTeam(true, 0x00000008)
+			end
+		end
+		if curse == "Sharp Rocks" then
+			self.applyStatusToTeam(false, 0x00100000)
+		end
+		if curse == "Heavy Fog" then
+			for i = 1, Battle.numBattlers do
+				if self.getStatStage(i-1, "acc") > 5 then
+					self.setStatStage(i-1, "acc", 5)
+				end
+			end
+		end
+	end
+
+	function self.everyTurnCurse(curse)
+		if curse == "1000 Cuts" and inBattleTurnCount > 0 then
+			if lastAttackDamage > 0 then
+				hpCapModifier = hpCapModifier - 5
+				hpCap = hpCap - 5
+			end
+		end
+		if curse == "Unruly Spirit" then
+			if math.random(10) == 1 then
+				self.applyStatusToTeam(true, 0x00000008)
+			end
+		end
+		if curse == "No Cover" then
+			self.applyStatus(0, 0x00000018, true)
+			self.setDisableStructWord(0, 0x15, 1)
+		end
+	end
+
+	-- DISPLAY/NOTIFICATION FUNCTIONS -- 
 
 	local gymMapIds = {
 		[12] = true, -- Cerulean
@@ -1878,7 +2309,9 @@ local function RoguemonTracker()
 			['specialRedeems'] = specialRedeems,
 			['offeredMoonStoneFirst'] = offeredMoonStoneFirst,
 			['cursedSegments'] = cursedSegments,
-			['unlockedHeldItems'] = unlockedHeldItems
+			['unlockedHeldItems'] = unlockedHeldItems,
+			['downsized'] = downsized,
+			['stepCounter'] = stepCounter
 		}
 
 		if not DEBUG_MODE then
@@ -1909,6 +2342,8 @@ local function RoguemonTracker()
 			offeredMoonStoneFirst = saveData['offeredMoonStoneFirst'] or offeredMoonStoneFirst
 			cursedSegments = saveData['cursedSegments'] or cursedSegments
 			unlockedHeldItems = saveData['unlockedHeldItems'] or unlockedHeldItems
+			downsized = saveData['downsized'] or downsized
+			stepCounter = saveData['stepCounter'] or stepCounter
 		end
 
 		RoguemonOptions = {}
@@ -1927,6 +2362,10 @@ local function RoguemonTracker()
 	-- EXTENSION FUNCTIONS --
 
 	function self.afterBattleEnds()
+		if TrackerAPI.getBattleOutcome() == 2 then
+			-- We lost :(
+			return
+		end
 		-- Determine if we have just defeated a trainer
 		local trainerId = Memory.readword(GameSettings.gTrainerBattleOpponent_A)
 		if defeatedTrainerIds[trainerId] then
@@ -1945,6 +2384,11 @@ local function RoguemonTracker()
 			return
 		else
 			defeatedTrainerIds[trainerId] = true
+		end
+
+		local curse = self.getActiveCurse()
+		if curse then
+			self.endOfBattleCurse(curse)
 		end
 
 		-- Checks for special redeems after gym leaders specifically
@@ -1996,7 +2440,9 @@ local function RoguemonTracker()
 		end
 		for _,t in pairs(segInfo["trainers"]) do
 			if t == trainerId then
-				self.startSegment()
+				if not segmentStarted then
+					self.startSegment()
+				end
 				trainersDefeated = trainersDefeated + 1
 				if trainersDefeated >= self.getSegmentTrainerCount(currentSegment) then
 					self.nextSegment()
@@ -2048,12 +2494,12 @@ local function RoguemonTracker()
 		self.CURSE_CAROUSEL_INDEX = #TrackerScreen.CarouselTypes + 2
 		TrackerScreen.CarouselItems[self.CURSE_CAROUSEL_INDEX] = {
 			type = self.CURSE_CAROUSEL_INDEX,
-			framesToShow = 180,
+			framesToShow = 240,
 			canShow = function(this)
-				return segmentStarted and cursedSegments[segmentOrder[currentSegment]]
+				return segmentStarted and self.getActiveCurse()
 			end,
 			getContentList = function(this)
-				local curse = cursedSegments[segmentOrder[currentSegment]]
+				local curse = self.getActiveCurse()
 				local text = "> " .. curse .. ": " .. curseInfo[curse].description
 				return Main.IsOnBizhawk() and { text } or text
 			end,
@@ -2141,11 +2587,59 @@ local function RoguemonTracker()
 			offeredMoonStoneFirst = 2
 			-- Give it for free
 			self.AddItemImproved("Moon Stone", 1)
+			self.displayNotification("A RogueStone has been added to your bag", "moon-stone.png", nil)
+		end
+
+		-- Check if we have fought a trainer in Viridian Forest
+		if not foughtFirstTrainer and (defeatedTrainerIds[102] or defeatedTrainerIds[103] or defeatedTrainerIds[104] or 
+		defeatedTrainerIds[531] or defeatedTrainerIds[532]) then
+			foughtFirstTrainer = true
 		end
 
 		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to Rogue Stone
 		if not patchedMoonStones and PokemonData.Pokemon[412] ~= nil then
 			self.patchStoneEvos()
+		end
+
+		-- Check if we are in battle for curses
+		local curse = self.getActiveCurse()
+		if curse then
+			if Battle.inBattle then
+				self.ongoingCurse(curse)
+				if not curseAppliedThisFight then
+					curseAppliedThisFight = true
+					self.startOfBattleCurse(curse)
+				end
+				if inBattleTurnCount ~= Battle.turnCount then
+					inBattleTurnCount = Battle.turnCount
+					self.everyTurnCurse(curse)
+				end
+			else
+				curseAppliedThisFight = false
+				inBattleTurnCount = -1
+				if curse == "Toxic Fumes" then
+					local steps = Utils.getGameStat(Constants.GAME_STATS.STEPS)
+					local stepDiff = steps - stepCounter.lastCounted
+					stepCounter.toxicFumesCycle = stepCounter.toxicFumesCycle - stepDiff
+					local hpToDeduct = 0
+					while stepCounter.toxicFumesCycle <= 0 do
+						stepCounter.toxicFumesCycle = stepCounter.toxicFumesCycle + 8
+						hpToDeduct = hpToDeduct + 1
+					end
+					if hpToDeduct > 0 then
+						local startAddress = GameSettings.pstats
+						local level_and_currenthp = Memory.readdword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp)
+						local levelPlusUnusedByte = Utils.getbits(level_and_currenthp, 0, 16)
+						local currentHP = Utils.getbits(level_and_currenthp, 16, 16)
+						currentHP = currentHP - hpToDeduct
+						if currentHP < 1 then
+							currentHP = 1
+						end
+						Memory.writedword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.bit_lshift(currentHP, 16) + levelPlusUnusedByte)
+					end
+					stepCounter.lastCounted = steps
+				end
+			end
 		end
 
 		-- Check updates to bag items and pokemon info
@@ -2191,8 +2685,6 @@ local function RoguemonTracker()
 			end
 		end
 
-		self.handleBuyCleanseNotifs(mapId)
-
 		-- if we haven't yet chosen the curses for this seed, choose them now
 		if next(cursedSegments) == nil and RoguemonOptions["Enable Curses (AS2+)"] then
 			self.determineCurses()
@@ -2201,6 +2693,8 @@ local function RoguemonTracker()
 		if Program.currentScreen == TrackerScreen and #screenQueue > 0 then
 			Program.changeScreenView(table.remove(screenQueue, 1))
 		end
+
+		self.handleBuyCleanseNotifs(mapId)
 	end
 
 	function self.checkForUpdates()
