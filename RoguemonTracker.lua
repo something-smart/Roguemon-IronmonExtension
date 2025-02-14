@@ -535,7 +535,7 @@ local function RoguemonTracker()
 	function self.changeNature(nature)
 		local pkmnData = self.readLeadPokemonData()
 		local currNature = pkmnData.personality % 25
-		pkmnData.personality = pkmnData.personality - (currNature - nature)*1024
+		pkmnData.personality = pkmnData.personality + (currNature - nature)*1024
 		self.writeLeadPokemonData(pkmnData)
 	end
 
