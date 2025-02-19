@@ -57,19 +57,7 @@ local function RoguemonTracker()
 		[350] = {["name"] = "Giovanni", ["count"] = 1},
 		["Mt. Moon"] = "Mt Moon FC",
 		["Silph Co"] = "Silph Co",
-		["Victory Road"] = "Victory Road",
-		-- [108] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [109] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [121] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [169] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [120] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [91] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [181] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [170] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [351] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [352] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [353] = {["name"] = "Mt Moon FC", ["count"] = 12},
-		-- [354] = {["name"] = "Mt Moon FC", ["count"] = 12}
+		["Victory Road"] = "Victory Road"
 	}
 
 	-- Milestones that require entering an area; in this case, only the Pokemon League.
@@ -731,12 +719,15 @@ local function RoguemonTracker()
 				end
 			end
 		end
-
+		local milestonesToUpdate = {}
 		for segName, milestoneName in pairs(milestoneTrainers) do
 			if segments[segName] then
-				for _,tid in pairs(segments[segName]["trainers"]) do
-					milestoneTrainers[tid] = {["name"] = milestoneName, ["count"] = #segments[segName]["trainers"]}
-				end
+				milestonesToUpdate[segName] = milestoneName
+			end
+		end
+		for segName, milestoneName in pairs(milestonesToUpdate) do
+			for _,tid in pairs(segments[segName]["trainers"]) do
+				milestoneTrainers[tid] = {["name"] = milestoneName, ["count"] = #segments[segName]["trainers"]}
 			end
 		end
 	end
@@ -870,7 +861,7 @@ local function RoguemonTracker()
 		local itemId = self.getItemId(item)
 		local s, img, dismissFunc = self.uponItemAdded(item)
 		if s then
-			if not (committed and item ~= "Moon Stone") then
+			if committed or item == "Moon Stone" then
 				self.displayNotification(s, img, dismissFunc)
 			else
 				if not (img == "healing-pocket.png" or img == "status-cap.png") then
@@ -2282,38 +2273,40 @@ local function RoguemonTracker()
 				imageGap = 18
 			end
 			local screen = Program.currentScreen
-			for _,r in ipairs(specialRedeems.unlocks) do
-				local imageButton = {
-					type = Constants.ButtonTypes.IMAGE,
-					box = {dx*imageGap, dy, imageSize, imageSize},
-					onClick = function()
-						specialRedeemToDescribe = r
-						Program.changeScreenView(SpecialRedeemScreen)
+			if screen ~= StartupScreen then
+				for _,r in ipairs(specialRedeems.unlocks) do
+					local imageButton = {
+						type = Constants.ButtonTypes.IMAGE,
+						box = {dx*imageGap, dy, imageSize, imageSize},
+						onClick = function()
+							specialRedeemToDescribe = r
+							Program.changeScreenView(SpecialRedeemScreen)
+						end
+					}
+					Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+					if screen.Buttons then
+						screen.Buttons["RoguemonPrize" .. dx] = imageButton
 					end
-				}
-				Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
-				if screen.Buttons then
-					screen.Buttons["RoguemonPrize" .. dx] = imageButton
+					dx = dx + 1
 				end
-				dx = dx + 1
-			end
-			for _,r in ipairs(specialRedeems.consumable) do
-				local imageButton = {
-					type = Constants.ButtonTypes.IMAGE,
-					box = {dx*imageGap, dy, imageSize, imageSize},
-					onClick = function()
-						specialRedeemToDescribe = r
-						Program.changeScreenView(SpecialRedeemScreen)
+				for _,r in ipairs(specialRedeems.consumable) do
+					local imageButton = {
+						type = Constants.ButtonTypes.IMAGE,
+						box = {dx*imageGap, dy, imageSize, imageSize},
+						onClick = function()
+							specialRedeemToDescribe = r
+							Program.changeScreenView(SpecialRedeemScreen)
+						end
+					}
+					Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+					if screen.Buttons then
+						screen.Buttons["RoguemonPrize" .. dx] = imageButton
 					end
-				}
-				Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
-				if screen.Buttons then
-					screen.Buttons["RoguemonPrize" .. dx] = imageButton
+					if r == "Fight wilds in Rts 1/2/22" or r == "Fight up to 5 random wilds" then
+						Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, Drawing.Colors.BLACK)
+					end
+					dx = dx + 1
 				end
-				if r == "Fight wilds in Rts 1/2/22" or r == "Fight up to 5 random wilds" then
-					Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, Drawing.Colors.BLACK)
-				end
-				dx = dx + 1
 			end
 			while dx < 8 do
 				screen.Buttons["RoguemonPrize" .. dx] = nil
@@ -2751,7 +2744,7 @@ local function RoguemonTracker()
 			caughtSomethingYet = true
 		end
 		-- Check if the player has previously caught something but deposited down to 1
-		if caughtSomethingYet and #Program.GameData.PlayerTeam == 1 then
+		if not committed and caughtSomethingYet and #Program.GameData.PlayerTeam == 1 then
 			committed = true
 		end
 		-- Check if we have fought a trainer in Viridian Forest
