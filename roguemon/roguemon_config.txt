@@ -32,17 +32,18 @@ Potion x2 & Any Status Heal|twopotionandchoice.png
 Potion & Any Status Heal x2|potiontwochoice.png
 HP Cap +100|healing-pocket.png
 Status Cap +1 & Any Status Heal & Potion|trifecta.png
-Duplicator: Purchase a copy of one future HP/status heal found (immediate choice; must be shop available).|duplicator.png
+Duplicator: Purchase a copy of one future HP/status heal found (immediate choice).|duplicator.png
 Luck Incense: You may keep one HP heal that exceeds your cap until you can add it.|luck.png
 Temporary TM Voucher: Teach one ground TM found before the next badge (immediate choice).|tempvoucher.png
 Potion x3|threepotion.png
 Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
 Nature Mint: Change your nature to one of your choice.|mint.png
 Ability Capsule: Change ability to X|ability-capsule.png
+Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 
 *Mt Moon FC Prize
-Potion|potion.png
-Ether|ether.png
+Super Potion|super-potion.png
+Elixir|elixir.png
 One of Move Tutor Bros: You may use a Tutor outside Mt. Moon. Cannot pre-scout; see both and choose one (or none).|tmtwo.png
 
 *Misty Prize
@@ -61,6 +62,7 @@ Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|c
 Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
 Nature Mint: Change your nature to one of your choice.|mint.png
 Ability Capsule: Change ability to X|ability-capsule.png
+Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 
 *Surge Prize
 TM Voucher: Teach 1 Ground TM found in the future (immediate decision).|tmvoucher.png
@@ -75,6 +77,7 @@ Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Kee
 Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
 Temporary Item Voucher: Permanently unlock one non-healing ground item before next gym (immediate decision).|tempvoucher.png
 Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
+Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and choose one (or none).|tm.png
