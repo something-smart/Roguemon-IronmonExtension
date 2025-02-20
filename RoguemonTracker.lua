@@ -17,6 +17,8 @@ local function RoguemonTracker()
 	local SAVED_OPTIONS_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_options.tdat"
 	local IMAGES_DIRECTORY = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_images" .. FileManager.slash
 
+	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
+
 	local prize_images = {} -- will get updated when config file is read
 
 	local specialRedeemInfo = {
@@ -26,7 +28,7 @@ local function RoguemonTracker()
 		["Temporary TM Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Teach one ground TM found before the next badge (immediate choice)."},
 		["Potion Investment"] = {consumable = true, image = "diamond.png", description = "Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase. Value:"},
 		["Temporary Held Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 1 gym badge."},
-		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Keep all flutes."},
+		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Don't cleanse flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
 		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one non-healing ground item before next gym (immediate decision)."},
@@ -477,6 +479,21 @@ local function RoguemonTracker()
 			berryPocket = newBerryPocket
 		end
 
+		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.level + 1 == newPokeInfo.level then
+			-- We leveled up. Check caps again
+			self.countAdjustedHeals()
+			if RoguemonOptions["Show reminders over cap"] and MiscData.HealingItems[itemId] and adjustedHPVal > hpCap and not needToBuy then
+				self.displayNotification("An HP healing item must be used or trashed", "healing-pocket.png", function()
+					self.countAdjustedHeals()
+					return adjustedHPVal <= hpCap
+				end)
+			end
+			if RoguemonOptions["Show reminders over cap"] and MiscData.StatusItems[itemId] and currentStatusVal > statusCap and not needToBuy then
+				self.displayNotification("A status healing item must be used or trashed", "status-cap.png", function()
+					return self.countStatusHeals() <= statusCap
+				end)
+			end
+		end
 		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.pokemonID ~= newPokeInfo.pokemonID then
 			-- We evolved :D
 			self.showPrettyStatScreen(pokeInfo, newPokeInfo)
@@ -833,7 +850,7 @@ local function RoguemonTracker()
 		end
 		if RoguemonOptions["Show reminders"] then
 			local itemId = self.getItemId(item)
-			if notifyOnPickup.consumables[item] and not (specialRedeems.unlocks["Berry Pouch"] and string.sub(item, string.len(item)-5, string.len(item)) == "Berry") then
+			if notifyOnPickup.consumables[item] and not (specialRedeems.unlocks["Berry Pouch"] and string.sub(item, string.len(item)-4, string.len(item)) == "Berry") then
 				if notifyOnPickup.consumables[item] == 2 then
 					return (item .. " must be used, equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
@@ -924,7 +941,7 @@ local function RoguemonTracker()
 		if curse then
 			if RoguemonOptions["Alternate Curse theme"] then
 				previousTheme = Theme.exportThemeToText()
-				Theme.importThemeFromText("FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0", true)
+				Theme.importThemeFromText(CURSE_THEME, true)
 			end
 			self.displayNotification("Curse: " .. curse .. " @ " .. curseInfo[curse].description, "Curse.png", nil)
 			if curse == "High Pressure" then
@@ -964,7 +981,7 @@ local function RoguemonTracker()
 
 	-- Handle the buy phase.
 	function self.buyPhase()
-		self.displayNotification("Buy Phase @ May trade heals for equal value @ May trade status heals 1:1 or 3:1 for Full Heals", "Poke_Mart.png", nil)
+		self.displayNotification("Buy Phase @ May trade heals for equal value @ May trade status heals 1:1, or 3:1 for Full Heals or vice versa", "Poke_Mart.png", nil)
 		if specialRedeems.consumable["Potion Investment"] then
 			local buyable = "Potion"
 			if specialRedeems.consumable["Potion Investment"] >= 50 then
@@ -1635,7 +1652,7 @@ local function RoguemonTracker()
 	function self.showPrettyStatScreen(oldmon, newmon)
 		PrettyStatScreen.oldPoke = oldmon
 		PrettyStatScreen.newPoke = newmon
-		Program.changeScreenView(PrettyStatScreen)
+		self.readyScreen(PrettyStatScreen)
 	end
 
 	-- REWARD SPIN FUNCTIONS --
@@ -2154,7 +2171,7 @@ local function RoguemonTracker()
 			end
 		end
 		if curse == "Unruly Spirit" then
-			if math.random(10) <= 10 then
+			if math.random(10) <= 1 then
 				unrulySpiritFirstTurn = true
 			end
 		end
@@ -2400,7 +2417,7 @@ local function RoguemonTracker()
 		if Program.currentScreen == TrackerScreen and Battle.isViewingOwn and data.p.id ~= 0 then
 			gui.drawRectangle(Constants.SCREEN.WIDTH + 6, 58, 94, 21, Theme.COLORS["Lower box background"], Theme.COLORS["Lower box background"])
 			self.drawCapsAt(data, Constants.SCREEN.WIDTH + 6, 57)
-			TrackerScreen.Buttons.RogueMenuButton.textColor = (currentRoguemonScreen == SpecialRedeemScreen) and Drawing.Colors.YELLOW or Drawing.Colors.RED
+			TrackerScreen.Buttons.RogueMenuButton.textColor = (currentRoguemonScreen == SpecialRedeemScreen) and Theme.COLORS["Intermediate text"] or Theme.COLORS["Negative text"]
 			Drawing.drawButton(TrackerScreen.Buttons.RogueMenuButton)
 			Drawing.drawButton(TrackerScreen.Buttons.CurseMenuButton)
 			if DEBUG_MODE then
@@ -2605,7 +2622,7 @@ local function RoguemonTracker()
 				if segmentStarted then
 					local text = segmentOrder[currentSegment] .. ": " .. mandatoriesDefeated .. "/" .. self.getSegmentMandatoryCount(currentSegment) .. " mandatory, " .. 
 					trainersDefeated .. "/" .. self.getSegmentTrainerCount(currentSegment) .. " total"
-					if string.sub(text, 1, 8) == "Mt. Moon" then
+					if milestoneTrainers[segmentOrder[currentSegment]] then
 						text = text .. " (Full Clear = Prize)"
 					end
 					return Main.IsOnBizhawk() and { text } or text
@@ -2640,7 +2657,7 @@ local function RoguemonTracker()
 			{1,1,1,1,1,1,1,1,1},
 			{1,0,0,0,0,0,0,0,1},
 			{1,0,0,0,0,0,0,0,1},
-			{1,0,0,0,0,0,0,0,1},
+			{1,0,0,1,1,1,0,0,1},
 			{1,0,1,1,1,1,1,0,1},
 			{1,0,1,0,1,0,1,0,1},
 			{1,0,1,1,1,1,1,0,1},
@@ -2705,6 +2722,14 @@ local function RoguemonTracker()
 		-- Load data from file if it exists
 		self.loadData()
 
+		local curse = self.getActiveCurse()
+		if curse then
+			if RoguemonOptions["Alternate Curse theme"] then
+				previousTheme = Theme.exportThemeToText()
+				Theme.importThemeFromText(CURSE_THEME, true)
+			end
+		end
+
 		-- Set up a frame counter to save the roguemon data every 30 seconds
 		Program.addFrameCounter("Roguemon Saving", 1800, self.saveData, nil, true)
 	end
@@ -2744,7 +2769,7 @@ local function RoguemonTracker()
 			caughtSomethingYet = true
 		end
 		-- Check if the player has previously caught something but deposited down to 1
-		if not committed and caughtSomethingYet and #Program.GameData.PlayerTeam == 1 then
+		if not committed and caughtSomethingYet and #Program.GameData.PlayerTeam == 1 and mapId ~= 8 then
 			committed = true
 		end
 		-- Check if we have fought a trainer in Viridian Forest

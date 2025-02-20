@@ -55,7 +55,7 @@ Temporary Held Item: Temporarily unlock an item in your bag for 1 gym badge.|gro
 HP Cap +100|healing-pocket.png
 Status Cap +1 & Any Status Heal & Potion|trifecta.png
 Super Potion & Any Status Heal & Ether|superstatusether.png
-Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Keep all flutes.|flutesuper.png
+Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
 Temporary Item Voucher: Permanently unlock one non-healing ground item before next gym (immediate decision).|tempvoucher.png
 Teach 1 currently held TM|tm.png
 Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
@@ -73,7 +73,7 @@ HP Cap +50 & Any Status Heal|capandchoice.png
 HP Cap +50 & Super Potion|capandsuper.png
 Super Potion & Any Status Heal & Ether|superchoiceether.png
 Status Cap +1 & Any Status Heal & Potion|trifecta.png
-Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Keep all flutes.|flutesuper.png
+Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
 Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
 Temporary Item Voucher: Permanently unlock one non-healing ground item before next gym (immediate decision).|tempvoucher.png
 Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
