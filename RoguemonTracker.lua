@@ -2540,15 +2540,9 @@ local function RoguemonTracker()
 		-- Add 4 potions after rival 1
 		if trainerId >= 326 and trainerId <= 328 then
 			self.AddItemImproved("Potion", 4)
+			self.AddItemImproved("Lucky Egg", 1)
 			if RoguemonOptions["Show reminders"] then
-				if RoguemonOptions["Ascension 2+"] then
-					self.displayNotification("4 Potions and a nice egg have been added to your bag", "potion.png", nil)
-				else
-					self.displayNotification("4 Potions have been added to your bag", "potion.png", nil)
-				end
-			end
-			if RoguemonOptions["Ascension 2+"] then
-				self.AddItemImproved("Lucky Egg", 1)
+				self.displayNotification("4 Potions and a nice egg have been added to your bag", "potion.png", nil)
 			end
 		end
 
