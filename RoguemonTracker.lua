@@ -31,9 +31,9 @@ local function RoguemonTracker()
 		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Don't cleanse flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
-		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one non-healing ground item before next gym (immediate decision)."},
+		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one ground item before next gym (immediate decision)."},
 		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
-		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-healing ground item found in the future (immediate decision)."},
+		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one ground item found in the future (immediate decision)."},
 		["Fight wilds in Rts 1/2/22"] = {consumable = "true", image = "exp-charm.png", description = "Fight the first encounter on each. You may PC heal anytime, but must stop there."},
 		["Fight up to 5 random wilds"] = {consumable = "true", image = "exp-charm.png", description = "May be anywhere, but can't heal in between. Can run but counts as 1 of the 5."},
 		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 Ground TM found in the future (immediate decision)."},
@@ -64,7 +64,7 @@ local function RoguemonTracker()
 
 	-- Milestones that require entering an area; in this case, only the Pokemon League.
 	local milestoneAreas = {
-		[87] = {["name"] = "Victory Road"}
+		
 	}
 
 	local phases = {
@@ -144,7 +144,7 @@ local function RoguemonTracker()
 		["Clean Air"] = {description = "Enemies have permanent Mist and Safeguard"},
 		["Clouded Instincts"] = {description = "First move in battle must be 1st slot"},
 		["Unruly Spirit"] = {description = "10% to flinch on every turn"},
-		["Color Change"] = {description = "Typing is randomized each battle"},
+		["Chameleon"] = {description = "Typing is randomized each battle"},
 		["No Cover"] = {description = "Enemies cannot miss you"}
 	}
 
@@ -743,8 +743,12 @@ local function RoguemonTracker()
 			end
 		end
 		for segName, milestoneName in pairs(milestonesToUpdate) do
+			local trainerCount = #segments[segName]["trainers"]
+			if segments[segName]["rival"] then
+				trainerCount = trainerCount - 2
+			end
 			for _,tid in pairs(segments[segName]["trainers"]) do
-				milestoneTrainers[tid] = {["name"] = milestoneName, ["count"] = #segments[segName]["trainers"]}
+				milestoneTrainers[tid] = {["name"] = milestoneName, ["count"] = trainerCount}
 			end
 		end
 	end
@@ -1138,7 +1142,7 @@ local function RoguemonTracker()
 			onClick = function()
 				Program.changeScreenView(TrackerScreen)
 				milestone = milestone + 1
-				self.spinReward(milestones[milestone]['name'])
+				self.spinReward(milestones[milestone]['name'], true)
 			end,
 			isVisible = function() return DEBUG_MODE end
 		},
@@ -1157,7 +1161,7 @@ local function RoguemonTracker()
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 5, 7, 27, 12 },
 			onClick = function()
 				self.removeSpecialRedeem("Reroll Chip")
-				self.spinReward(lastMilestone)
+				self.spinReward(lastMilestone, true)
 			end,
 			isVisible = function() return 
 				specialRedeems.consumable["Reroll Chip"] 
@@ -1679,7 +1683,7 @@ local function RoguemonTracker()
 	end
 
 	-- Spin the reward for a given milestone.
-	function self.spinReward(milestoneName)
+	function self.spinReward(milestoneName, rerolled)
 		if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
 			GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
 			LogOverlay.isGameOver = false
@@ -1744,7 +1748,7 @@ local function RoguemonTracker()
 
 		descriptionText = ""
 
-		if DEBUG_MODE then
+		if rerolled then
 			Program.changeScreenView(RewardScreen)
 		else
 			self.readyScreen(RewardScreen)
@@ -2140,7 +2144,7 @@ local function RoguemonTracker()
 			self.setWeather(weathers[rando][1], weathers[rando][2])
 			weatherApplied = weathers[rando][3]
 		end
-		if curse == "Color Change" then
+		if curse == "Chameleon" then
 			local types = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12}
 			local type1 = types[math.random(#types)]
 			local type2 = type1
@@ -2389,7 +2393,7 @@ local function RoguemonTracker()
 		-- these don't count as status heals if Berry Pouch is active
 		local statusHealsInBagCount = self.countStatusHeals()
 
-		local healsTextColor = data.x.healvalue > hpCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+		local healsTextColor = data.x.healvalue > hpCap and Theme.COLORS["Negative text"] or Theme.COLORS["Default text"]
 		if specialRedeems.consumable["luckIncenseItem"] then
 			self.countAdjustedHeals()
 			if adjustedHPVal <= hpCap then
@@ -2406,7 +2410,7 @@ local function RoguemonTracker()
 		Drawing.drawText(x, y, healsValueText, healsTextColor, shadowcolor)
 		currentHPVal = data.x.healvalue
 
-		local statusHealsTextColor = statusHealsInBagCount > statusCap and Drawing.Colors.RED or Theme.COLORS["Default text"]
+		local statusHealsTextColor = statusHealsInBagCount > statusCap and Theme.COLORS["Negative text"] or Theme.COLORS["Default text"]
 		local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
 		Drawing.drawText(x, y + 11, statusHealsValueText, statusHealsTextColor, shadowcolor)
 		currentStatusVal = statusHealsInBagCount
@@ -2555,7 +2559,7 @@ local function RoguemonTracker()
 				milestoneProgress[milestoneName] = 1
 			end
 			if milestoneProgress[milestoneName] == milestoneTrainers[trainerId]['count'] then
-				self.spinReward(milestoneName)
+				self.spinReward(milestoneName, false)
 			end
 		end
 
@@ -2675,8 +2679,8 @@ local function RoguemonTracker()
 			isVisible = function()
 				return Program.currentScreen == TrackerScreen and Battle.isViewingOwn
 			end,
-			textColor = Drawing.Colors.YELLOW,
-			boxColors = {Drawing.Colors.WHITE}
+			textColor = Theme.COLORS["Intermediate text"],
+			boxColors = {Theme.COLORS["Default text"]}
 		}
 
 		TrackerScreen.Buttons.CurseMenuButton = {
@@ -2724,6 +2728,18 @@ local function RoguemonTracker()
 			end
 		end
 
+		-- Set up a frame counter for using the "Next" button (R by default) to dismiss notifications
+		Program.addFrameCounter("Roguemon Notification Input Check", 1, function()
+			if Program.currentScreen == NotificationScreen then
+				local joypad = Input.getJoypadInputFormatted()
+				CustomCode.inputCheckMGBA()
+				local nextBtn = Options.CONTROLS["Next page"] or ""
+				if joypad[nextBtn] then
+					Program.changeScreenView(TrackerScreen)
+				end
+			end
+		end, nil, true)
+
 		-- Set up a frame counter to save the roguemon data every 30 seconds
 		Program.addFrameCounter("Roguemon Saving", 1800, self.saveData, nil, true)
 	end
@@ -2733,6 +2749,7 @@ local function RoguemonTracker()
 		TrackerScreen.Buttons.RogueMenuButton = nil
 		TrackerScreen.Buttons.CurseMenuButton = nil
 		Program.removeFrameCounter("Roguemon Saving")
+		Program.removeFrameCounter("Roguemon Notification Input Check")
 	end
 
 	function self.afterRedraw()
@@ -2747,7 +2764,7 @@ local function RoguemonTracker()
 		if(milestoneAreas[mapId]) then
 			if not milestoneProgress[mapId] then
 				milestoneProgress[mapId] = 1
-				self.spinReward(milestoneAreas[mapId]['name'])
+				self.spinReward(milestoneAreas[mapId]['name'], false)
 			end
 		end
 		-- Check if we stepped onto the route for the segment we're supposed to do next
@@ -2878,13 +2895,6 @@ local function RoguemonTracker()
 		if committed and Program.currentScreen == TrackerScreen and #suppressedNotifications > 0 then
 			local n = table.remove(suppressedNotifications, 1)
 			self.displayNotification(n.message, n.image, n.dismissFunction)
-		end
-
-		-- Check if the notification should be dismissed
-		if Program.currentScreen == NotificationScreen then
-			if shouldDismissNotification and shouldDismissNotification() then
-				Program.changeScreenView(TrackerScreen)
-			end
 		end
 
 		-- if we haven't yet chosen the curses for this seed, choose them now
