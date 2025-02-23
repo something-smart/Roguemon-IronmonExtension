@@ -2179,7 +2179,7 @@ local function RoguemonTracker()
 		if curse == "Clouded Instincts" then
 			local pkmn = self.readLeadPokemonData()
 			local pps = {Utils.getbits(pkmn.attack3, 0, 8), Utils.getbits(pkmn.attack3, 8, 8), Utils.getbits(pkmn.attack3, 16, 8), Utils.getbits(pkmn.attack3, 24, 8)}
-			local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(attack1, 16, 16), Utils.getbits(attack2, 0, 16), Utils.getbits(attack2, 16, 16)}
+			local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
 			for i = 1,4 do
 				if pps[i] > 0 then
 					self.setDisableStructWord(0, 0x06, moves[i])
