@@ -226,6 +226,7 @@ local function RoguemonTracker()
 	local currentRoguemonScreen = nil
 	local screenQueue = {}
 	local suppressedNotifications = {}
+	local givenMoonStoneNotification = false
 
 	local itemsPocket = {}
 	local berryPocket = {}
@@ -413,7 +414,9 @@ local function RoguemonTracker()
 			if key ~= nil then
 				readQuantity = Utils.bit_xor(readQuantity, key)
 			end
-			newItems[readItemID] = readQuantity
+			if readQuantity > 0 and readQuantity < 999 then
+				newItems[readItemID] = readQuantity
+			end
 		end
 		for i = 0,GameSettings.bagPocket_Berries_Size - 1 do
 			local itemid_and_quantity = Memory.readdword(address + berriesOffset + i * 4)
@@ -422,7 +425,9 @@ local function RoguemonTracker()
 			if key ~= nil then
 				readQuantity = Utils.bit_xor(readQuantity, key)
 			end
-			newBerries[readItemID] = readQuantity
+			if readQuantity > 0 and readQuantity < 999 then
+				newBerries[readItemID] = readQuantity
+			end
 		end
 		return newItems, newBerries
 	end
@@ -445,6 +450,7 @@ local function RoguemonTracker()
 
 		-- Check for info that changed
 		local newItemsPocket, newBerryPocket = self.readBagInfo()
+		local empty = (next(itemsPocket) == nil and next(berryPocket) == nil)
 
 		local size = 0
 		-- Check if items changed
@@ -454,7 +460,7 @@ local function RoguemonTracker()
 			if q > oldq and i ~= itemToIgnore and i ~= itemFromPrizeToIgnore then
 				currentHPVal = data.x.healvalue
 				currentStatusVal = self.countStatusHeals()
-				if next(itemsPocket) ~= nil then
+				if not empty then
 					self.processItemAdded(TrackerAPI.getItemName(i, true))
 				end
 			end
@@ -470,7 +476,7 @@ local function RoguemonTracker()
 			if q > oldq and i ~= itemToIgnore and i ~= itemFromPrizeToIgnore then
 				currentHPVal = data.x.healvalue
 				currentStatusVal = self.countStatusHeals()
-				if next(berryPocket) ~= nil then
+				if not empty then
 					self.processItemAdded(TrackerAPI.getItemName(i, true))
 				end
 			end
@@ -849,7 +855,8 @@ local function RoguemonTracker()
 
 	function self.uponItemAdded(item)
 		self.countAdjustedHeals()
-		if RoguemonOptions["Show reminders"] and item == "Moon Stone" and not TrackerAPI.hasDefeatedTrainer(414) then
+		if RoguemonOptions["Show reminders"] and item == "Moon Stone" and not TrackerAPI.hasDefeatedTrainer(414) and not givenMoonStoneNotification then
+			givenMoonStoneNotification = true
 			return "Brock says: Nice stone. Unfortunately, you'll need to defeat me if you want to use it!", "brock.png", nil
 		end
 		if RoguemonOptions["Show reminders"] then
@@ -886,7 +893,15 @@ local function RoguemonTracker()
 				self.displayNotification(s, img, dismissFunc)
 			else
 				if not (img == "healing-pocket.png" or img == "status-cap.png") then
-					suppressedNotifications[#suppressedNotifications + 1] = {message = s, image = img, dismissFunction = dismissFunc}
+					local shouldAdd = true
+					for _,notif in pairs(suppressedNotifications) do
+						if notif.message == s then
+							shouldAdd = false
+						end
+					end
+					if shouldAdd then
+						suppressedNotifications[#suppressedNotifications + 1] = {message = s, image = img, dismissFunction = dismissFunc}
+					end
 				end
 			end
 		end
@@ -1263,6 +1278,7 @@ local function RoguemonTracker()
 			additionalOptions[i] = ""
 		end
 		additionalOptionsRemaining = 1
+		currentRoguemonScreen = OptionSelectionScreen
 		self.readyScreen(OptionSelectionScreen)
 	end
 
@@ -2365,7 +2381,7 @@ local function RoguemonTracker()
 	
 		for itemID, quantity in pairs(Program.GameData.Items.HPHeals or {}) do
 			-- An arbitrary max value to prevent erroneous game data reads
-			if quantity <= 999 then
+			if quantity >= 0 and quantity <= 999 then
 				if(specialRedeems.consumable["luckIncenseItem"] and specialRedeems.consumable["luckIncenseItem"] == TrackerAPI.getItemName(itemID, true)) then
 					quantity = quantity - 1
 				end
@@ -2745,6 +2761,9 @@ local function RoguemonTracker()
 	end
 
 	function self.unload()
+		if curse and RoguemonOptions["Alternate Curse theme"] then
+			Theme.importThemeFromText(previousTheme, true)
+		end
 		TrackerScreen.CarouselItems[self.SEGMENT_CAROUSEL_INDEX] = nil
 		TrackerScreen.Buttons.RogueMenuButton = nil
 		TrackerScreen.Buttons.CurseMenuButton = nil
@@ -2876,6 +2895,13 @@ local function RoguemonTracker()
 				if hadV then
 					unlockedHeldItems[heldItem] = true
 				end
+			end
+		end
+
+		-- Check if the notification should be dismissed
+		if Program.currentScreen == NotificationScreen then
+			if shouldDismissNotification and shouldDismissNotification() then
+				Program.changeScreenView(TrackerScreen)
 			end
 		end
 
