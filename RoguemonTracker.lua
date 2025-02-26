@@ -974,7 +974,7 @@ local function RoguemonTracker()
 			end
 			if curse == "Toxic Fumes" then
 				stepCounter.lastCounted = Utils.getGameStat(Constants.GAME_STATS.STEPS)
-				stepCounter.toxicFumesCycle = 8
+				stepCounter.toxicFumesCycle = 0
 			end
 		end
 	end
@@ -1005,9 +1005,6 @@ local function RoguemonTracker()
 			local buyable = "Potion"
 			if specialRedeems.consumable["Potion Investment"] >= 50 then
 				buyable = "Super Potion"
-			end
-			if specialRedeems.consumable["Potion Investment"] >= 80 and self.reachedSegment("Route 8") then
-				buyable = "Lemonade"
 			end
 			if specialRedeems.consumable["Potion Investment"] >= 200 then
 				buyable = "Hyper Potion"
@@ -2562,7 +2559,7 @@ local function RoguemonTracker()
 			self.AddItemImproved("Potion", 4)
 			self.AddItemImproved("Lucky Egg", 1)
 			if RoguemonOptions["Show reminders"] then
-				self.displayNotification("4 Potions and a nice egg have been added to your bag", "potion.png", nil)
+				self.displayNotification("4 Potions and a nice egg have been added to your bag", "4potegg.png", nil)
 			end
 		end
 
@@ -2851,25 +2848,25 @@ local function RoguemonTracker()
 				inBattleTurnCount = -1
 				if curse == "Toxic Fumes" then
 					local steps = Utils.getGameStat(Constants.GAME_STATS.STEPS)
-					local stepDiff = steps - stepCounter.lastCounted
-					stepCounter.toxicFumesCycle = stepCounter.toxicFumesCycle - stepDiff
-					local hpToDeduct = 0
-					while stepCounter.toxicFumesCycle <= 0 do
-						stepCounter.toxicFumesCycle = stepCounter.toxicFumesCycle + 8
-						hpToDeduct = hpToDeduct + 1
-					end
-					if hpToDeduct > 0 then
-						local startAddress = GameSettings.pstats
-						local level_and_currenthp = Memory.readdword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp)
-						local levelPlusUnusedByte = Utils.getbits(level_and_currenthp, 0, 16)
-						local currentHP = Utils.getbits(level_and_currenthp, 16, 16)
-						currentHP = currentHP - hpToDeduct
-						if currentHP < 1 then
-							currentHP = 1
+					local stepDiff = (steps - stepCounter.lastCounted) % (2^32)
+					stepCounter.toxicFumesCycle = stepCounter.toxicFumesCycle + stepDiff
+					local hpToDeduct = math.floor(stepCounter.toxicFumesCycle / 8)
+					if hpToDeduct >= 0 and hpToDeduct <= 3 then
+						-- Guard against garbage/erroneous reads
+						if hpToDeduct > 0 then
+							stepCounter.toxicFumesCycle = stepCounter.toxicFumesCycle - 8*hpToDeduct
+							local startAddress = GameSettings.pstats
+							local level_and_currenthp = Memory.readdword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp)
+							local levelPlusUnusedByte = Utils.getbits(level_and_currenthp, 0, 16)
+							local currentHP = Utils.getbits(level_and_currenthp, 16, 16)
+							currentHP = currentHP - hpToDeduct
+							if currentHP < 1 then
+								currentHP = 1
+							end
+							Memory.writedword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.bit_lshift(currentHP, 16) + levelPlusUnusedByte)
 						end
-						Memory.writedword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.bit_lshift(currentHP, 16) + levelPlusUnusedByte)
+						stepCounter.lastCounted = steps
 					end
-					stepCounter.lastCounted = steps
 				end
 			end
 		end
