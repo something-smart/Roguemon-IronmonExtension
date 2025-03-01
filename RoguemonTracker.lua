@@ -13,7 +13,7 @@ local function RoguemonTracker()
 	-- STATIC OR READ IN AT LOAD TIME:
 
 	local CONFIG_FILE_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_config.txt"
-	local SAVED_DATA_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_data.tdat"
+	local SAVED_DATA_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_data-"
 	local SAVED_OPTIONS_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_options.tdat"
 	local IMAGES_DIRECTORY = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_images" .. FileManager.slash
 
@@ -31,9 +31,9 @@ local function RoguemonTracker()
 		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Don't cleanse flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
-		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one ground item before next gym (immediate decision)."},
+		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one found item before next gym (immediate decision)."},
 		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
-		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one ground item found in the future (immediate decision)."},
+		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one found item found in the future (immediate decision)."},
 		["Fight wilds in Rts 1/2/22"] = {consumable = "true", image = "exp-charm.png", description = "Fight the first encounter on each. You may PC heal anytime, but must stop there."},
 		["Fight up to 5 random wilds"] = {consumable = "true", image = "exp-charm.png", description = "May be anywhere, but can't heal in between. Can run but counts as 1 of the 5."},
 		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 Ground TM found in the future (immediate decision)."},
@@ -130,8 +130,8 @@ local function RoguemonTracker()
 		["Forgetfulness"] = {description = "Must pick up and teach one TM"},
 		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap"},
 		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently"},
-		["Negative Energy"] = {description = "Cannot use the same move twice in a row"},
-		["Bad Connection"] = {description = "Cannot use healing items outside of battle"},
+		["Tormented Soul"] = {description = "Cannot use the same move twice in a row"},
+		["Kaizo Curse"] = {description = "Cannot use healing items outside of battle"},
 		["Headwind"] = {description = "Start fights at -1 Speed"},
 		["Sharp Rocks"] = {description = "All enemies have +2 crit rate"},
 		["High Pressure"] = {description = "Start missing 50% PP on all moves"},
@@ -1275,7 +1275,7 @@ local function RoguemonTracker()
 			additionalOptions[i] = ""
 		end
 		additionalOptionsRemaining = 1
-		currentRoguemonScreen = OptionSelectionScreen
+		self.setCurrentRoguemonScreen(OptionSelectionScreen)
 		self.readyScreen(OptionSelectionScreen)
 	end
 
@@ -1724,6 +1724,9 @@ local function RoguemonTracker()
 				if part == "Warding Charm" and not RoguemonOptions["Ascension 2+"] then
 					add = false
 				end
+				if(part == "Ability Capsule") then
+					choice = choice .. ": Change ability to " .. AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name .. "."
+				end
 			end
 			if choiceName == "Fight Route X" then
 				local routes = {"Route 12", "Route 13", "Route 14", "Route 15"}
@@ -1732,9 +1735,6 @@ local function RoguemonTracker()
 					rInd = rInd + 1
 				end
 				choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Keep items found."
-			end
-			if(choiceName == "Ability Capsule") then
-				choice = "Ability Capsule: Change ability to " .. AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name .. "."
 			end
 			for _, v in pairs(choices) do
 				if v == choice then
@@ -1766,7 +1766,7 @@ local function RoguemonTracker()
 		else
 			self.readyScreen(RewardScreen)
 		end
-		currentRoguemonScreen = RewardScreen
+		self.setCurrentRoguemonScreen(RewardScreen)
 		Program.redraw(true)
 
 		if phases[milestoneName] then
@@ -1958,7 +1958,9 @@ local function RoguemonTracker()
 				Program.redraw(true)
 			else
 				Program.changeScreenView(TrackerScreen)
-				currentRoguemonScreen = SpecialRedeemScreen
+				if currentRoguemonScreen == OptionSelectionScreen then
+					currentRoguemonScreen = SpecialRedeemScreen
+				end
 			end
 		end
 	end
@@ -2139,7 +2141,7 @@ local function RoguemonTracker()
 	end
 
 	function self.startOfBattleCurse(curse)
-		if curse == "Negative Energy" then
+		if curse == "Tormented Soul" then
 			self.applyStatusToTeam(true, 0x80000000)
 		end
 		if curse == "Clean Air" then
@@ -2267,6 +2269,17 @@ local function RoguemonTracker()
 	end
 
 	-- DISPLAY/NOTIFICATION FUNCTIONS -- 
+
+	local screenPriorities = {
+		[SpecialRedeemScreen] = 1,
+		[OptionSelectionScreen] = 2,
+		[RewardScreen] = 3
+	}
+	function self.setCurrentRoguemonScreen(newScreen)
+		if screenPriorities[newScreen] > screenPriorities[currentRoguemonScreen] then
+			currentRoguemonScreen = newScreen
+		end
+	end
 
 	local gymMapIds = {
 		[12] = true, -- Cerulean
@@ -2469,7 +2482,7 @@ local function RoguemonTracker()
 		}
 
 		if not DEBUG_MODE then
-			FileManager.writeTableToFile(saveData, SAVED_DATA_PATH)
+			FileManager.writeTableToFile(saveData, SAVED_DATA_PATH .. QuickloadScreen.getActiveProfile().Name .. ".tdat")
 		end
 
 		FileManager.writeTableToFile(RoguemonOptions, SAVED_OPTIONS_PATH)
@@ -2477,8 +2490,7 @@ local function RoguemonTracker()
 
 	-- Load roguemon data from file
 	function self.loadData()
-		-- local saveData = FileManager.decodeJsonFile(SAVED_DATA_PATH)
-		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH)
+		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH .. QuickloadScreen.getActiveProfile().Name .. ".tdat")
 		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
 			segmentOrder = saveData['segmentOrder'] or segmentOrder
 			defeatedTrainerIds = saveData['defeatedTrainerIds'] or defeatedTrainerIds
@@ -2692,8 +2704,7 @@ local function RoguemonTracker()
 			isVisible = function()
 				return Program.currentScreen == TrackerScreen and Battle.isViewingOwn
 			end,
-			textColor = Theme.COLORS["Intermediate text"],
-			boxColors = {Theme.COLORS["Default text"]}
+			textColor = Theme.COLORS["Intermediate text"]
 		}
 
 		TrackerScreen.Buttons.CurseMenuButton = {
@@ -2755,6 +2766,9 @@ local function RoguemonTracker()
 
 		-- Set up a frame counter to save the roguemon data every 30 seconds
 		Program.addFrameCounter("Roguemon Saving", 1800, self.saveData, nil, true)
+
+		-- Add a setting so Roguemon seeds default to being over when the entire party faints
+		QuickloadScreen.SettingsKeywordToGameOverMap["Roguemon"] = "EntirePartyFaints"
 	end
 
 	function self.unload()
@@ -2766,6 +2780,7 @@ local function RoguemonTracker()
 		TrackerScreen.Buttons.CurseMenuButton = nil
 		Program.removeFrameCounter("Roguemon Saving")
 		Program.removeFrameCounter("Roguemon Notification Input Check")
+		QuickloadScreen.SettingsKeywordToGameOverMap["Roguemon"] = nil
 	end
 
 	function self.afterRedraw()
