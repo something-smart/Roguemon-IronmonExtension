@@ -183,7 +183,8 @@ local function RoguemonTracker()
 		["Liechi Berry"] = true, ["Ganlon Berry"] = true, ["Petaya Berry"] = true, ["Apicot Berry"] = true, ["Salac Berry"] = true,
 		["Lansat Berry"] = true, ["Starf Berry"] = true, ["Berry Juice"] = true, ["White Herb"] = true, ["Mental Herb"] = true
 	}
-
+	
+	local seedNumber = 1
 	local milestones = {} -- Milestones stored in order
 	local milestonesByName = {} -- Milestones keyed by name for easy access
 	local wheels = {}
@@ -313,6 +314,26 @@ local function RoguemonTracker()
 
 	-- Data editing functions. Credit to UTDZac for the AddItems functions, although AddItemsImproved was modified. --
 
+	-- Returns the seed number (as a string) found in the auto-generated log file
+	local function generateSeed()
+		-- Auto-determine the log file name & path that includes "AutoRandomized"
+		local logpath = LogOverlay.getLogFileAutodetected() or LogOverlay.getLogFileFromPrompt()
+		local file = io.open(logpath, "r")
+		if file == nil then
+			local seedNumber = math.random(1, 999999999999999) -- To fit same size as the game randomizer seeds
+			self.seedNumber = seedNumber
+			math.randomseed(seedNumber)
+			return
+		end
+		-- Read in the entire file as a single string
+		local fileContents = file:read("*a") or ""
+		file:close()
+		-- Check for first match of Random Seed, should be near the first few lines
+		local seedNumber = string.match(fileContents, "Random Seed:%s*(%d+)")
+		self.seedNumber = seedNumber
+		math.randomseed(seedNumber)
+	end
+	
 	-- Get item ID corresponding to an item name, if there is one
 	function self.getItemId(itemName)
 		if itemName == Constants.BLANKLINE then return 0 end
@@ -2459,6 +2480,7 @@ local function RoguemonTracker()
 	-- Save roguemon data to file
 	function self.saveData()
 		local saveData = {
+			['seed'] = seedNumber,
 			['romHash'] = GameSettings.getRomHash(),
 			['segmentOrder'] = segmentOrder,
 			['defeatedTrainerIds'] = defeatedTrainerIds,
@@ -2492,6 +2514,7 @@ local function RoguemonTracker()
 	function self.loadData()
 		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH .. QuickloadScreen.getActiveProfile().Name .. ".tdat")
 		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
+			seedNumber = saveData['seedNumber'] or generateSeed()
 			segmentOrder = saveData['segmentOrder'] or segmentOrder
 			defeatedTrainerIds = saveData['defeatedTrainerIds'] or defeatedTrainerIds
 			currentSegment = saveData['currentSegment'] or currentSegment
@@ -2743,6 +2766,7 @@ local function RoguemonTracker()
 
 		-- Load data from file if it exists
 		self.loadData()
+		math.randomseed(randomSeed)
 
 		local curse = self.getActiveCurse()
 		if curse then
