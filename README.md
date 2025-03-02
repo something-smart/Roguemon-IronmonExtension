@@ -11,9 +11,14 @@ This extension only works with Pokemon FireRed, and is intended for use with the
 - At any time, the player may press the ! button on the main screen to view the list of stored prizes, and remove them when they have been used.
 - Pokemon with item-based evolutions that have been changed to Moon Stone will display as Moon Stone. The tracker will offer the player a Moon Stone at the appropriate times.
 - Segments are automatically tracked, and the main screen will display total and mandatory trainers in the current segment, as well as the next segment when the player is between segments.
+- Curses are automatically determined at the beginning of the run and applied, giving unique negative effects in certain sections of the game.
 
 ## Installation
-Go to the [latest release](https://github.com/something-smart/Roguemon-IronmonExtension/releases/latest) and download the zip file. Place the contents of the zip file in the "extensions" folder inside the tracker folder. Then go to the Extensions menu in the tracker, and click "Install New", and the Roguemon extension should show up.
+1. Click the Gear icon on the Tracker screen to access the settings, then click the "Extensions" button
+2. Click the "General" tab
+3. Click "Install a new extension"
+4. Copy/Paste the following url into the textbox: https://github.com/something-smart/Roguemon-IronmonExtension
+5. Click "Install Extension"
 
 ## Contact
 To discuss Roguemon, or for troubleshooting/feedback, join the [Roguemon Discord](https://discord.gg/C88N88yfCP). We'd love to have you!
