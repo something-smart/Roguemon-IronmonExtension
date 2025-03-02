@@ -137,7 +137,7 @@ local function RoguemonTracker()
 		["High Pressure"] = {description = "Start missing 50% PP on all moves"},
 		["Heavy Fog"] = {description = "All combatants have -1 Accuracy"},
 		["Unstable Ground"] = {description = "Flinch on the first turn of each fight"},
-		["1000 Cuts"] = {description = "Permanent -5 HP Cap when damage taken"},
+		["1000 Cuts"] = {description = "Permanent -5 HP Cap when hit by an attack"},
 		["Acid Rain"] = {description = "Each fight has a random weather"},
 		["Toxic Fumes"] = {description = "Take 1 damage every 8 steps (can't faint)"},
 		["Narcolepsy"] = {description = "30% to fall asleep after each fight"},
@@ -184,7 +184,7 @@ local function RoguemonTracker()
 		["Lansat Berry"] = true, ["Starf Berry"] = true, ["Berry Juice"] = true, ["White Herb"] = true, ["Mental Herb"] = true
 	}
 	
-	local seedNumber = 1
+	local seedNumber = -1
 	local milestones = {} -- Milestones stored in order
 	local milestonesByName = {} -- Milestones keyed by name for easy access
 	local wheels = {}
@@ -315,23 +315,22 @@ local function RoguemonTracker()
 	-- Data editing functions. Credit to UTDZac for the AddItems functions, although AddItemsImproved was modified. --
 
 	-- Returns the seed number (as a string) found in the auto-generated log file
-	local function generateSeed()
+	function self.generateSeed()
 		-- Auto-determine the log file name & path that includes "AutoRandomized"
-		local logpath = LogOverlay.getLogFileAutodetected() or LogOverlay.getLogFileFromPrompt()
+		local logpath = LogOverlay.getLogFileAutodetected() or nil
 		local file = io.open(logpath, "r")
-		if file == nil then
-			local seedNumber = math.random(1, 999999999999999) -- To fit same size as the game randomizer seeds
-			self.seedNumber = seedNumber
-			math.randomseed(seedNumber)
-			return
+		if file ~= nil then
+			-- Read in the entire file as a single string
+			local fileContents = file:read("*a") or ""
+			file:close()
+			-- Check for first match of Random Seed, should be near the first few lines
+			local seed = string.match(fileContents, "Random Seed:%s*(%d+)")
+			if seed then
+				return seed
+			end
 		end
-		-- Read in the entire file as a single string
-		local fileContents = file:read("*a") or ""
-		file:close()
-		-- Check for first match of Random Seed, should be near the first few lines
-		local seedNumber = string.match(fileContents, "Random Seed:%s*(%d+)")
-		self.seedNumber = seedNumber
-		math.randomseed(seedNumber)
+
+		return math.random(1, 999999999999999) -- To fit same size as the game randomizer seeds
 	end
 	
 	-- Get item ID corresponding to an item name, if there is one
@@ -488,6 +487,9 @@ local function RoguemonTracker()
 		end
 		if size > 0 then
 			itemsPocket = newItemsPocket
+		end
+		if not itemsPocket[24] and specialRedeems.consumable["Revive"] then
+			self.removeSpecialRedeem("Revive")
 		end
 
 		-- Check if berries changed
@@ -1182,7 +1184,7 @@ local function RoguemonTracker()
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "Back" end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 105, 8, 22, 10},
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 108, 8, 22, 10},
 			onClick = function()
 				Program.changeScreenView(TrackerScreen)
 			end,
@@ -1541,7 +1543,11 @@ local function RoguemonTracker()
 	function self.displayNotification(message, image, dismissFunction)
 		NotificationScreen.message = message
 		NotificationScreen.image = IMAGES_DIRECTORY .. image
-		Program.changeScreenView(NotificationScreen)
+		if Program.currentScreen == PrettyStatScreen then
+			self.readyScreen(NotificationScreen)
+		else
+			Program.changeScreenView(NotificationScreen)
+		end
 		Program.redraw(true)
 		shouldDismissNotification = dismissFunction
 	end
@@ -2514,7 +2520,7 @@ local function RoguemonTracker()
 	function self.loadData()
 		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH .. QuickloadScreen.getActiveProfile().Name .. ".tdat")
 		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
-			seedNumber = saveData['seedNumber'] or generateSeed()
+			seedNumber = saveData['seedNumber'] or self.generateSeed()
 			segmentOrder = saveData['segmentOrder'] or segmentOrder
 			defeatedTrainerIds = saveData['defeatedTrainerIds'] or defeatedTrainerIds
 			currentSegment = saveData['currentSegment'] or currentSegment
@@ -2535,6 +2541,10 @@ local function RoguemonTracker()
 			stepCounter = saveData['stepCounter'] or stepCounter
 			previousTheme = saveData['previousTheme'] or Theme.exportThemeToText()
 		end
+		if seedNumber == -1 then
+			seedNumber = self.generateSeed()
+		end
+		math.randomseed(seedNumber)
 
 		RoguemonOptions = {}
 		for _,o in pairs(optionsList) do
@@ -2575,6 +2585,9 @@ local function RoguemonTracker()
 		else
 			defeatedTrainerIds[trainerId] = true
 		end
+
+		-- Check bag updates before doing anything else
+		self.checkBagUpdates()
 
 		local curse = self.getActiveCurse()
 		if curse then
@@ -2727,7 +2740,8 @@ local function RoguemonTracker()
 			isVisible = function()
 				return Program.currentScreen == TrackerScreen and Battle.isViewingOwn
 			end,
-			textColor = Theme.COLORS["Intermediate text"]
+			textColor = Theme.COLORS["Intermediate text"],
+			boxColors = {Theme.COLORS["Default text"]}
 		}
 
 		TrackerScreen.Buttons.CurseMenuButton = {
@@ -2766,7 +2780,6 @@ local function RoguemonTracker()
 
 		-- Load data from file if it exists
 		self.loadData()
-		math.randomseed(randomSeed)
 
 		local curse = self.getActiveCurse()
 		if curse then
@@ -2792,7 +2805,7 @@ local function RoguemonTracker()
 		Program.addFrameCounter("Roguemon Saving", 1800, self.saveData, nil, true)
 
 		-- Add a setting so Roguemon seeds default to being over when the entire party faints
-		QuickloadScreen.SettingsKeywordToGameOverMap["Roguemon"] = "EntirePartyFaints"
+		QuickloadScreen.SettingsKeywordToGameOverMap["Ascension"] = "EntirePartyFaints"
 	end
 
 	function self.unload()
@@ -2850,13 +2863,13 @@ local function RoguemonTracker()
 			self.nextSegment()
 		end
 		-- Check if we have entered Celadon for the first time with a pokemon that can evolve with a moon stone.
-		if offeredMoonStoneFirst == 0 and mapId == 84 and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
+		if offeredMoonStoneFirst == 0 and mapId == 84 and PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
 			offeredMoonStoneFirst = 1
 			-- Set up the options to offer the trade
 			self.offerBinaryOption("RogueStone (-100 HP Cap)", "Skip")
 		end
 		-- Check if we are in Celadon City with Hideout completed with a pokemon that can evolve with a moon stone.
-		if offeredMoonStoneFirst < 2 and mapId == 84 and defeatedTrainerIds[348] and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
+		if offeredMoonStoneFirst < 2 and mapId == 84 and defeatedTrainerIds[348] and PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
 			offeredMoonStoneFirst = 2
 			-- Give it for free
 			self.AddItemImproved("Moon Stone", 1)
