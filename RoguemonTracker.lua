@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.0.2"
+	self.version = "1.0.3"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -27,7 +27,7 @@ local function RoguemonTracker()
 		["Duplicator"] = {consumable = true, image = "duplicator.png", description = "Purchase a copy of one future HP/status heal found (immediate choice)."},
 		["Temporary TM Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Teach one ground TM found before the next badge (immediate choice)."},
 		["Potion Investment"] = {consumable = true, image = "diamond.png", description = "Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase. Value:"},
-		["Temporary Held Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 1 gym badge."},
+		["Temporary Held Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 2 gym badges."},
 		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Don't cleanse flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
@@ -2512,7 +2512,7 @@ local function RoguemonTracker()
 		}
 
 		if not DEBUG_MODE then
-			FileManager.writeTableToFile(saveData, SAVED_DATA_PATH .. QuickloadScreen.getActiveProfile().Name .. ".tdat")
+			FileManager.writeTableToFile(saveData, SAVED_DATA_PATH .. GameSettings.getRomName() .. ".tdat")
 		end
 
 		FileManager.writeTableToFile(RoguemonOptions, SAVED_OPTIONS_PATH)
@@ -2520,7 +2520,7 @@ local function RoguemonTracker()
 
 	-- Load roguemon data from file
 	function self.loadData()
-		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH .. QuickloadScreen.getActiveProfile().Name .. ".tdat")
+		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH .. GameSettings.getRomName() .. ".tdat")
 		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
 			seedNumber = saveData['seedNumber'] or self.generateSeed()
 			segmentOrder = saveData['segmentOrder'] or segmentOrder
