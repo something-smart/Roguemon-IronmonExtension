@@ -332,7 +332,7 @@ local function RoguemonTracker()
 			end
 		end
 
-		return os.time() -- To fit same size as the game randomizer seeds
+		return os.time()
 	end
 	
 	-- Get item ID corresponding to an item name, if there is one
