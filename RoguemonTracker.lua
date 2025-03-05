@@ -319,18 +319,20 @@ local function RoguemonTracker()
 		-- Auto-determine the log file name & path that includes "AutoRandomized"
 		local logpath = LogOverlay.getLogFileAutodetected() or nil
 		local file = io.open(logpath, "r")
-		if file ~= nil then
-			-- Read in the entire file as a single string
-			local fileContents = file:read("*a") or ""
-			file:close()
-			-- Check for first match of Random Seed, should be near the first few lines
-			local seed = string.match(fileContents, "Random Seed:%s*(%d+)")
-			if seed then
-				return seed
+		if logpath then
+			if file ~= nil then
+				-- Read in the entire file as a single string
+				local fileContents = file:read("*a") or ""
+				file:close()
+				-- Check for first match of Random Seed, should be near the first few lines
+				local seed = string.match(fileContents, "Random Seed:%s*(%d+)")
+				if seed then
+					return seed
+				end
 			end
 		end
 
-		return math.random(1, 999999999999999) -- To fit same size as the game randomizer seeds
+		return os.time() -- To fit same size as the game randomizer seeds
 	end
 	
 	-- Get item ID corresponding to an item name, if there is one
