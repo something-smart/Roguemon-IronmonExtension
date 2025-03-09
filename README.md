@@ -1,6 +1,6 @@
 ## Roguemon Extension for Ironmon Tracker
 
-This is an extension for the [Gen 3 Ironmon Tracker](https://github.com/besteon/Ironmon-Tracker), intended to add support for the [Roguemon](https://docs.google.com/document/d/1uU1KeFB_kjIULXArfwdLjZrNV_D_IXi0h2wD_nP6erQ/edit?pli=1&tab=t.0) ruleset by Crozwords.
+This is an extension for the [Gen 3 Ironmon Tracker](https://github.com/besteon/Ironmon-Tracker), intended to add support for the [Roguemon](https://github.com/Crozwords/Roguemon) ruleset by Crozwords.
 
 This extension only works with Pokemon FireRed, and is intended for use with the [National Dex patch](https://github.com/CyanSMP64/NatDexExtension/releases/tag/v1.1.3) although most of the features still work without it.
 
