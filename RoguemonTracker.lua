@@ -24,18 +24,18 @@ local function RoguemonTracker()
 	local specialRedeemInfo = {
 		["Luck Incense"] = {consumable = false, image = "luck.png", description = "Instead of trashing heals over cap, may have your pokemon hold them and take them back later."},
 		["Reroll Chip"] = {consumable = true, image = "rerollchip.png", description = "May be used to reroll any reward spin once."},
-		["Duplicator"] = {consumable = true, image = "duplicator.png", description = "Purchase a copy of one future HP/status heal found (immediate choice)."},
+		["Duplicator"] = {consumable = true, image = "duplicator.png", description = "Gain a copy of one future HP/status heal found (immediate choice)."},
 		["Temporary TM Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Teach one ground TM found before the next badge (immediate choice)."},
 		["Potion Investment"] = {consumable = true, image = "diamond.png", description = "Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase. Value:"},
 		["Temporary Held Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 2 gym badges."},
 		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Don't cleanse flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
-		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one found item before next gym (immediate decision)."},
+		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one non-revive found item before next gym (immediate decision)."},
 		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
-		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one found item found in the future (immediate decision)."},
+		["Held Item Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Permanently unlock one non-revive found item found in the future (immediate decision)."},
 		["Fight wilds in Rts 1/2/22"] = {consumable = "true", image = "exp-charm.png", description = "Fight the first encounter on each. You may PC heal anytime, but must stop there."},
-		["Fight up to 5 random wilds"] = {consumable = "true", image = "exp-charm.png", description = "May be anywhere, but can't heal in between. Can run but counts as 1 of the 5."},
+		["Fight up to 5 wilds in Viridian Forest"] = {consumable = "true", image = "exp-charm.png", description = "Can't heal in between. Can run but counts as 1 of the 5."},
 		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 Ground TM found in the future (immediate decision)."},
 		["Revive"] = {consumable = true, image = "revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."},
 		["Warding Charm"] = {consumable = true, image = "warding-charm.png", description = "Cancel the effect of any one Curse."}
@@ -127,7 +127,7 @@ local function RoguemonTracker()
 	}
 
 	local curseInfo = {
-		["Forgetfulness"] = {description = "Must pick up and teach one TM"},
+		["Forgetfulness"] = {description = "Must pick up and teach first TM in segment"},
 		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap"},
 		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently"},
 		["Tormented Soul"] = {description = "Cannot use the same move twice in a row"},
@@ -202,8 +202,10 @@ local function RoguemonTracker()
 		{text = "Display small prizes", default = false},
 		{text = "Show reminders", default = true},
 		{text = "Show reminders over cap", default = false},
-		{text = "Ascension 2+", default = false},
-		{text = "Alternate Curse theme", default = true}
+		{text = "5 Curses", default = false},
+		{text = "Combine rival segments", default = false},
+		{text = "Alternate Curse theme", default = true},
+		{text = "Egg reminders", default = false}
 	}
 
 	-- DYNAMIC, but does not need to be saved (because the player should not quit while these are relevant)
@@ -221,7 +223,7 @@ local function RoguemonTracker()
 	
 	local specialRedeemToDescribe = nil
 
-	local patchedMoonStones = false
+	local patchedChangedEvos = false
 	local committed = false
 	local caughtSomethingYet = false
 
@@ -229,8 +231,13 @@ local function RoguemonTracker()
 	local screenQueue = {}
 	local suppressedNotifications = {}
 	local givenMoonStoneNotification = false
+	local natureMintUp = nil
+	local hpHealsSetting = nil
+	local showedEggReminderAfterBrock = false
 
+	local priorItemsPocket = {}
 	local itemsPocket = {}
+	local priorBerryPocket = {}
 	local berryPocket = {}
 	local pokeInfo = nil
 	local itemFromPrize = nil
@@ -250,7 +257,6 @@ local function RoguemonTracker()
 	local flinchCheckFirstTurn = false
 	local weatherApplied = nil
 
-	local natureMintUp = nil
 
 	-- Dynamic, and must be saved/loaded:
 
@@ -270,6 +276,7 @@ local function RoguemonTracker()
 	local segmentStarted = false
 	local trainersDefeated = 0
 	local mandatoriesDefeated = 0
+	local rivalCombined = false
 
 	-- caps
 	local hpCap = 150
@@ -476,40 +483,54 @@ local function RoguemonTracker()
 		local empty = (next(itemsPocket) == nil and next(berryPocket) == nil)
 
 		local size = 0
+		local redFlags = 0
 		-- Check if items changed
+		local toProcess = {}
 		for i,q in pairs(newItemsPocket) do
 			size = size + 1
 			local oldq = itemsPocket[i] or 0
+			local olderq = priorItemsPocket[i] or 0
+			if olderq == q and oldq ~= q then
+				redFlags = redFlags + 1
+			end
 			if q > oldq and i ~= itemToIgnore and i ~= itemFromPrizeToIgnore then
 				currentHPVal = data.x.healvalue
 				currentStatusVal = self.countStatusHeals()
 				if not empty then
-					self.processItemAdded(TrackerAPI.getItemName(i, true))
+					toProcess[TrackerAPI.getItemName(i, true)] = true
 				end
 			end
-		end
-		if size > 0 then
-			itemsPocket = newItemsPocket
-		end
-		if not itemsPocket[24] and specialRedeems.consumable["Revive"] then
-			self.removeSpecialRedeem("Revive")
 		end
 
 		-- Check if berries changed
 		for i,q in pairs(newBerryPocket) do
 			size = size + 1
 			local oldq = berryPocket[i] or 0
+			local olderq = priorItemsPocket[i] or 0
+			if olderq == q and oldq ~= q then
+				redFlags = redFlags + 1
+			end
 			if q > oldq and i ~= itemToIgnore and i ~= itemFromPrizeToIgnore then
 				currentHPVal = data.x.healvalue
 				currentStatusVal = self.countStatusHeals()
 				if not empty then
-					self.processItemAdded(TrackerAPI.getItemName(i, true))
+					toProcess[TrackerAPI.getItemName(i, true)] = true
 				end
 			end
 		end
-		if size > 0 then
-			berryPocket = newBerryPocket
+
+		if redFlags <= 2  and size > 0 then
+			if not itemsPocket[24] and specialRedeems.consumable["Revive"] then
+				self.removeSpecialRedeem("Revive")
+			end
+			priorItemsPocket = itemsPocket
+			priorBerryPocket = berryPocket
+			for item,_ in pairs(toProcess) do
+				self.processItemAdded(item)
+			end
 		end
+		itemsPocket = newItemsPocket
+		berryPocket = newBerryPocket
 
 		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.level + 1 == newPokeInfo.level then
 			-- We leveled up. Check caps again
@@ -785,8 +806,39 @@ local function RoguemonTracker()
 		end
 	end
 
-	function self.patchStoneEvos()
-		patchedMoonStones = true
+	local changedEvoMethods = {
+		["Rhyhorn"] = "42",
+		["Sunkern"] = "18",
+		["Slugma"] = "18",
+		["Snover"] = "28",
+		["Happiny"] = "19",
+		["Tynamo"] = "21",
+		["Litwick"] = "20",
+		["Mienfoo"] = "32",
+		["Pawniard"] = "30",
+		["Rufflet"] = "40",
+		["Vullaby"] = "42",
+		["Deino"] = "35",
+		["Zweilous"] = "52",
+		["Larvesta"] = "40",
+		["Binacle"] = "32",
+		["Skrelp"] = "34",
+		["Amaura"] = "30",
+		["Noibat"] = "32",
+		["Cosmog"] = "18",
+		["Toxel"] = "19",
+		["Snom"] = "18",
+		["Dreepy"] = "30",
+		["Drakloak"] = "52",
+		["Varoom"] = "32",
+		["Gimmighoul"] = "34",
+		["Gimmighoul R"] = "34",
+		["Salandit"] = "33",
+		["Combee"] = "21"
+	}
+
+	function self.patchChangedEvos()
+		patchedChangedEvos = true
 		-- all these methods get changed to Rogue Stone
 		local itemEvoMethods = {
 			PokemonData.Evolutions.EEVEE_STONES_NATDEX, PokemonData.Evolutions.THUNDER, PokemonData.Evolutions.FIRE, PokemonData.Evolutions.WATER, 
@@ -851,6 +903,11 @@ local function RoguemonTracker()
 				end
 				if pk.evolution == PokemonData.Evolutions.NONE and pk.bst <= 450 then
 					pk.evolution = extraEvo
+				end
+				for name,method in pairs(changedEvoMethods) do
+					if pk.name == name then
+						pk.evolution = method
+					end
 				end
 			end
 		end
@@ -950,6 +1007,7 @@ local function RoguemonTracker()
 			end
 			if id then 
 				table.remove(specialRedeems.consumable, id) 
+				self.saveData()
 				return true
 			end
 		end
@@ -971,6 +1029,30 @@ local function RoguemonTracker()
 				downsized = true
 			end
 		end
+
+		rivalCombined = false
+		if segmentOrder[currentSegment + 1] and string.sub(segmentOrder[currentSegment + 1], 1, 5) == "Rival" and RoguemonOptions["Combine rival segments"] then
+			rivalCombined = true
+			for _,tid in pairs(segments[segmentOrder[currentSegment + 1]]["trainers"]) do
+				if defeatedTrainerIds[tid] then
+					rivalCombined = false
+				end
+			end
+			if rivalCombined then
+				for _,tid in pairs(segments[segmentOrder[currentSegment + 1]]["trainers"]) do
+					segments[segmentOrder[currentSegment + 2]]["trainers"][#segments[segmentOrder[currentSegment + 2]]["trainers"] + 1] = tid
+				end
+				for _,tid in pairs(segments[segmentOrder[currentSegment + 1]]["mandatory"]) do
+					segments[segmentOrder[currentSegment + 2]]["mandatory"][#segments[segmentOrder[currentSegment + 2]]["mandatory"] + 1] = tid
+				end
+				segments[segmentOrder[currentSegment + 2]]["rival"] = true
+				for _,rid in pairs(segments[segmentOrder[currentSegment + 1]]["routes"]) do
+					segments[segmentOrder[currentSegment + 2]]["routes"][#segments[segmentOrder[currentSegment + 2]]["routes"] + 1] = rid
+				end
+			end
+			currentSegment = currentSegment + 1
+		end
+
 		currentSegment = currentSegment + 1
 		segmentStarted = false
 		trainersDefeated = 0
@@ -1019,6 +1101,17 @@ local function RoguemonTracker()
 	function self.getSegmentMandatoryCount(segment)
 		local s = segments[segmentOrder[segment]]
 		return #s['mandatory'] - (s['rival'] and 2 or 0) - (s['choicePairs'] and #s['choicePairs'] or 0)
+	end
+
+	function self.isNextSegmentRivalDefeated()
+		if segmentOrder[currentSegment + 1] and string.sub(segmentOrder[currentSegment + 1], 1, 5) == "Rival" then
+			for _,tid in pairs(segments[segmentOrder[currentSegment + 1]]['trainers']) do
+				if defeatedTrainerIds[tid] then
+					return true
+				end
+			end
+		end
+		return false
 	end
 
 	-- Handle the buy phase.
@@ -1437,17 +1530,12 @@ local function RoguemonTracker()
 				name = "Ward",
 				onClick = function()
 					self.removeSpecialRedeem("Warding Charm")
-					cursedSegments[segmentOrder[currentSegment]] = nil
-					for i,seg in ipairs(cursedSegments) do
-						if seg == segmentOrder[currentSegment] then
-							table.remove(cursedSegments, i)
-							break
-						end
-					end
+					cursedSegments[segmentOrder[currentSegment]] = "Warded"
 					if RoguemonOptions["Alternate Curse theme"] then
 						Theme.importThemeFromText(previousTheme, true)
 					end
 					Program.changeScreenView(TrackerScreen)
+					self.saveData()
 				end,
 				isVisible = function()
 					return specialRedeems.consumable["Warding Charm"]
@@ -1760,7 +1848,7 @@ local function RoguemonTracker()
 					(part == "Fight Route X" and specialRedeems.internal["Route 15"]) then
 					add = false
 				end
-				if part == "Warding Charm" and not RoguemonOptions["Ascension 2+"] then
+				if part == "Warding Charm" and not RoguemonOptions["5 Curses"] then
 					add = false
 				end
 				if(part == "Ability Capsule") then
@@ -1829,7 +1917,11 @@ local function RoguemonTracker()
 			if string.sub(reward, 1, 11) == 'Fight Route' then
 				local route = string.sub(reward, 7)
 				specialRedeems.internal[route] = true
-				table.insert(segmentOrder, currentSegment, route)
+				if segmentStarted then
+					table.insert(segmentOrder, currentSegment + 1, route)
+				else
+					table.insert(segmentOrder, currentSegment, route)
+				end
 			else
 				-- Check cap increases first
 				if string.sub(reward, 1, 8) == 'HP Cap +' then
@@ -1920,6 +2012,8 @@ local function RoguemonTracker()
 		end
 
 		Program.redraw(true)
+
+		self.saveData()
 	end
 
 	local prefixHandlers = {
@@ -1995,13 +2089,14 @@ local function RoguemonTracker()
 				end
 			end
 		end
+		self.saveData()
 	end
 
 	-- CURSE RELATED FUNCTIONS -- 
 
 	function self.determineCurses()
 		local currentCurseCount = next(cursedSegments) == nil and 0 or #cursedSegments
-		local intendedCurseCount = RoguemonOptions["Ascension 2+"] and 5 or 1
+		local intendedCurseCount = RoguemonOptions["5 Curses"] and 5 or 1
 		if currentCurseCount ~= intendedCurseCount then
 			cursedSegments = {}
 			local availableCurses = {}
@@ -2029,7 +2124,7 @@ local function RoguemonTracker()
 	end
 
 	function self.getActiveCurse()
-		if segmentStarted then
+		if segmentStarted and not (cursedSegments[segmentOrder[currentSegment]] == "Warded") then
 			return cursedSegments[segmentOrder[currentSegment]]
 		end
 	end
@@ -2512,7 +2607,8 @@ local function RoguemonTracker()
 			['unlockedHeldItems'] = unlockedHeldItems,
 			['downsized'] = downsized,
 			['stepCounter'] = stepCounter,
-			['previousTheme'] = previousTheme
+			['previousTheme'] = previousTheme,
+			['rivalCombined'] = rivalCombined
 		}
 
 		if not DEBUG_MODE then
@@ -2548,6 +2644,13 @@ local function RoguemonTracker()
 			downsized = saveData['downsized'] or downsized
 			stepCounter = saveData['stepCounter'] or stepCounter
 			previousTheme = saveData['previousTheme'] or Theme.exportThemeToText()
+			rivalCombined = saveData['rivalCombined'] or rivalCombined
+		end
+		if rivalCombined then
+			for _,tid in pairs(segments[segmentOrder[currentSegment]]["trainers"]) do
+				segments[segmentOrder[currentSegment]]["trainers"][tid] = true
+				segments[segmentOrder[currentSegment]]["rival"] = true
+			end
 		end
 		if seedNumber == -1 then
 			seedNumber = self.generateSeed()
@@ -2656,11 +2759,14 @@ local function RoguemonTracker()
 					self.startSegment()
 				end
 				trainersDefeated = trainersDefeated + 1
-				if trainersDefeated >= self.getSegmentTrainerCount(currentSegment) then
+				if trainersDefeated >= self.getSegmentTrainerCount(currentSegment) and not 
+					(RoguemonOptions["Combine rival segments"] and segmentOrder[currentSegment + 1] and string.sub(segmentOrder[currentSegment + 1], 1, 5) == "Rival" and not self.isNextSegmentRivalDefeated()) then
 					self.nextSegment()
 				end
 			end
 		end
+
+		self.saveData()
 	end
 
 	
@@ -2686,16 +2792,23 @@ local function RoguemonTracker()
 				return true
 			end,
 			getContentList = function(this)
+				local segmentName = segmentOrder[currentSegment]
+				if segmentOrder[currentSegment + 1] and string.sub(segmentOrder[currentSegment + 1], 1, 5) == "Rival" and RoguemonOptions["Combine rival segments"] then
+					segmentName = segmentName .. " (+ Rival?)"
+				end
+				if rivalCombined then
+					segmentName = "Rival + " .. segmentName
+				end
 				if segmentStarted then
-					local text = segmentOrder[currentSegment] .. ": " .. mandatoriesDefeated .. "/" .. self.getSegmentMandatoryCount(currentSegment) .. " mandatory, " .. 
+					local text = segmentName .. ": " .. mandatoriesDefeated .. "/" .. self.getSegmentMandatoryCount(currentSegment) .. " mandatory, " .. 
 					trainersDefeated .. "/" .. self.getSegmentTrainerCount(currentSegment) .. " total"
 					if milestoneTrainers[segmentOrder[currentSegment]] then
-						text = text .. " (Full Clear = Prize)"
+						text = text .. " [FC Prize]"
 					end
 					return Main.IsOnBizhawk() and { text } or text
 				else
-					local text = 'Next Segment: ' .. segmentOrder[currentSegment]
-					if segmentOrder[currentSegment] == "Congratulations!" then
+					local text = 'Next Segment: ' .. segmentName
+					if segmentName == "Congratulations!" then
 						text = "Congratulations!"
 					end
 					return Main.IsOnBizhawk() and { text } or text
@@ -2759,7 +2872,7 @@ local function RoguemonTracker()
 			onClick = function()
 				local curseInfoText = "Cursed Segments: @ "
 				for _,seg in ipairs(cursedSegments) do
-					if not (self.reachedSegment(seg) and not (segmentOrder[currentSegment] == seg)) then
+					if not (self.reachedSegment(seg) and not (segmentOrder[currentSegment] == seg) and not cursedSegments[seg] == "Warded") then
 						curseInfoText = curseInfoText .. seg .. " @ "
 					end
 				end
@@ -2814,6 +2927,44 @@ local function RoguemonTracker()
 
 		-- Add a setting so Roguemon seeds default to being over when the entire party faints
 		QuickloadScreen.SettingsKeywordToGameOverMap["Ascension"] = "EntirePartyFaints"
+
+		-- Set tracker to use whole number heal value
+		hpHealsSetting = TrackerAPI.getOption("Show heals as whole number")
+		TrackerAPI.setOption("Show heals as whole number", true)
+
+		-- This is temporary, until Zac fixes the actual function
+		TrackerScreen.drawCarouselArea = function(data)
+			local shadowcolor = Utils.calcShadowColor(Theme.COLORS["Lower box background"])
+		
+			-- Draw the border box for the Stats area
+			gui.drawRectangle(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 136, Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN), 19, Theme.COLORS["Lower box border"], Theme.COLORS["Lower box background"])
+		
+			local carousel = TrackerScreen.getCurrentCarouselItem()
+			for _, content in pairs(carousel:getContentList(data.p.id)) do
+				if content.type == Constants.ButtonTypes.IMAGE or content.type == Constants.ButtonTypes.PIXELIMAGE or content.type == Constants.ButtonTypes.FULL_BORDER then
+					Drawing.drawButton(content, shadowcolor)
+				elseif type(content) == "string" then
+					local wrappedText = self.wrapPixelsInline(content, Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN) - 5)
+					if not string.find(wrappedText, "%\n") then
+						Drawing.drawText(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 140, wrappedText, Theme.COLORS["Lower box text"], shadowcolor)
+					else
+						Drawing.drawText(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 136, wrappedText, Theme.COLORS["Lower box text"], shadowcolor)
+						gui.drawLine(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 155, Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - Constants.SCREEN.MARGIN, 155, Theme.COLORS["Lower box border"])
+						gui.drawLine(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 156, Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - Constants.SCREEN.MARGIN, 156, Theme.COLORS["Main background"])
+					end
+				end
+			end
+		
+			--work around limitation of drawText not having width limit: paint over any spillover
+			local x = Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - Constants.SCREEN.MARGIN
+			local y = 137
+			gui.drawLine(x, y, x, y + 14, Theme.COLORS["Lower box border"])
+			gui.drawRectangle(x + 1, y, 12, 14, Theme.COLORS["Main background"], Theme.COLORS["Main background"])
+		end
+
+		-- Update RogueStone name
+		MiscData.Items[94] = "RogueStone"
+		MiscData.EvolutionStones[94].name = "RogueStone"
 	end
 
 	function self.unload()
@@ -2826,6 +2977,10 @@ local function RoguemonTracker()
 		Program.removeFrameCounter("Roguemon Saving")
 		Program.removeFrameCounter("Roguemon Notification Input Check")
 		QuickloadScreen.SettingsKeywordToGameOverMap["Roguemon"] = nil
+		-- Update RogueStone name back to normal
+		MiscData.Items[94] = "Moon Stone"
+		MiscData.EvolutionStones[94].name = "Moon Stone"
+		TrackerAPI.setOption("Show heals as whole number", hpHealsSetting)
 	end
 
 	function self.afterRedraw()
@@ -2844,10 +2999,11 @@ local function RoguemonTracker()
 			end
 		end
 		-- Check if we stepped onto the route for the segment we're supposed to do next
-		if not segmentStarted then
+		if not segmentStarted and committed then
 			for _,r in pairs(segments[segmentOrder[currentSegment]]["routes"]) do
 				if mapId == r then
 					self.startSegment()
+					self.saveData()
 				end
 			end
 		end
@@ -2855,20 +3011,30 @@ local function RoguemonTracker()
 		if not caughtSomethingYet and #Program.GameData.PlayerTeam > 1 then
 			caughtSomethingYet = true
 		end
+		local toCommit = false
 		-- Check if the player has previously caught something but deposited down to 1
 		if not committed and caughtSomethingYet and #Program.GameData.PlayerTeam == 1 and mapId ~= 8 then
-			committed = true
+			toCommit = true
 		end
 		-- Check if we have fought a trainer in Viridian Forest
 		if not committed and (defeatedTrainerIds[102] or defeatedTrainerIds[103] or defeatedTrainerIds[104] or 
 		defeatedTrainerIds[531] or defeatedTrainerIds[532]) then
+			toCommit = true
+		end
+		if toCommit then
 			committed = true
+			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
+				self.displayNotification("Use the egg, Luke!", "lucky-egg.png", function()
+					return Tracker.getPokemon(1, true).heldItem == 197
+				end)
+			end
 		end
 		-- Check if we are in a Pokemon Center/Pokemon League with full HP when all mandatory trainers in the current segment are defeated.
 		-- If so, the segment is assumed to be finished.
 		local pokemon = TrackerAPI.getPlayerPokemon()
 		if pokemon and pokemon.curHP == pokemon.stats.hp and (mapId == 8 or mapId == 212) and segmentStarted and mandatoriesDefeated >= self.getSegmentMandatoryCount(currentSegment) then
 			self.nextSegment()
+			self.saveData()
 		end
 		-- Check if we have entered Celadon for the first time with a pokemon that can evolve with a moon stone.
 		if offeredMoonStoneFirst == 0 and mapId == 84 and PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
@@ -2884,9 +3050,9 @@ local function RoguemonTracker()
 			self.displayNotification("A RogueStone has been added to your bag", "moon-stone.png", nil)
 		end
 
-		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to Rogue Stone
-		if not patchedMoonStones and PokemonData.Pokemon[412] ~= nil then
-			self.patchStoneEvos()
+		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to Rogue Stone and update some evo levels
+		if not patchedChangedEvos and PokemonData.Pokemon[412] ~= nil then
+			self.patchChangedEvos()
 		end
 
 		-- Check if we are in battle for curses
@@ -2927,6 +3093,7 @@ local function RoguemonTracker()
 						end
 						stepCounter.lastCounted = steps
 					end
+					self.saveData()
 				end
 			end
 		end
@@ -2946,6 +3113,7 @@ local function RoguemonTracker()
 				end
 				if hadV then
 					unlockedHeldItems[heldItem] = true
+					self.saveData()
 				end
 			end
 		end
@@ -2985,10 +3153,18 @@ local function RoguemonTracker()
 
 		self.handleBuyCleanseNotifs(mapId)
 
+		if defeatedTrainerIds[414] and not needToBuy and not needToCleanse and Program.currentScreen == TrackerScreen and not showedEggReminderAfterBrock and RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem == 197 then
+			showedEggReminderAfterBrock = true
+			self.displayNotification("Your free Egg trial has expired", "lucky-egg.png", function()
+				return (Tracker.getPokemon(1, true).heldItem ~= 197 and self.itemNotPresent(197))
+			end)
+		end
+
 		if previousMap ~= mapId then
 			if previousMap == 51 and mapId == 85 and segmentOrder[currentSegment] == "Safari Zone" then
 				-- Went from Safari Gate to Fuchsia City
 				self.nextSegment()
+				self.saveData()
 			end
 			previousMap = mapId
 		end
@@ -3001,36 +3177,6 @@ local function RoguemonTracker()
 		local compareFunc = function(a, b) return a ~= b and not Utils.isNewerVersion(a, b) end -- if current version is *older* than online version
 		local isUpdateAvailable = Utils.checkForVersionUpdate(versionCheckUrl, self.version, versionResponsePattern, compareFunc)
 		return isUpdateAvailable, downloadUrl
-	end
-
-	-- This is temporary, until Zac fixes the actual function
-	TrackerScreen.drawCarouselArea = function(data)
-		local shadowcolor = Utils.calcShadowColor(Theme.COLORS["Lower box background"])
-	
-		-- Draw the border box for the Stats area
-		gui.drawRectangle(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 136, Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN), 19, Theme.COLORS["Lower box border"], Theme.COLORS["Lower box background"])
-	
-		local carousel = TrackerScreen.getCurrentCarouselItem()
-		for _, content in pairs(carousel:getContentList(data.p.id)) do
-			if content.type == Constants.ButtonTypes.IMAGE or content.type == Constants.ButtonTypes.PIXELIMAGE or content.type == Constants.ButtonTypes.FULL_BORDER then
-				Drawing.drawButton(content, shadowcolor)
-			elseif type(content) == "string" then
-				local wrappedText = self.wrapPixelsInline(content, Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN) - 10)
-				if not string.find(wrappedText, "%\n") then
-					Drawing.drawText(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 140, wrappedText, Theme.COLORS["Lower box text"], shadowcolor)
-				else
-					Drawing.drawText(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 136, wrappedText, Theme.COLORS["Lower box text"], shadowcolor)
-					gui.drawLine(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 155, Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - Constants.SCREEN.MARGIN, 155, Theme.COLORS["Lower box border"])
-					gui.drawLine(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 156, Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - Constants.SCREEN.MARGIN, 156, Theme.COLORS["Main background"])
-				end
-			end
-		end
-	
-		--work around limitation of drawText not having width limit: paint over any spillover
-		local x = Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - Constants.SCREEN.MARGIN
-		local y = 137
-		gui.drawLine(x, y, x, y + 14, Theme.COLORS["Lower box border"])
-		gui.drawRectangle(x + 1, y, 12, 14, Theme.COLORS["Main background"], Theme.COLORS["Main background"])
 	end
 
 	return self
