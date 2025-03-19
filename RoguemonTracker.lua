@@ -682,6 +682,12 @@ local function RoguemonTracker()
 		end
 	end
 
+	function self.resetTheme()
+		if RoguemonOptions["Alternate Curse theme"] then
+			Theme.importThemeFromText(previousTheme, true)
+		end
+	end
+
 	-- DATA FUNCTIONS --
 
 	-- Read the config file. Executed once, on startup.
@@ -959,8 +965,8 @@ local function RoguemonTracker()
 	-- Move to the next segment.
 	function self.nextSegment()
 		local curse = self.getActiveCurse()
-		if curse and RoguemonOptions["Alternate Curse theme"] then
-			Theme.importThemeFromText(previousTheme, true)
+		if curse then
+			self.resetTheme()
 		end
 		if trainersDefeated < self.getSegmentTrainerCount(currentSegment) then
 			if curse == "Claustrophobia" then
@@ -1444,9 +1450,7 @@ local function RoguemonTracker()
 							break
 						end
 					end
-					if RoguemonOptions["Alternate Curse theme"] then
-						Theme.importThemeFromText(previousTheme, true)
-					end
+					self.resetTheme()
 					Program.changeScreenView(TrackerScreen)
 				end,
 				isVisible = function()
@@ -2817,8 +2821,8 @@ local function RoguemonTracker()
 	end
 
 	function self.unload()
-		if curse and RoguemonOptions["Alternate Curse theme"] then
-			Theme.importThemeFromText(previousTheme, true)
+		if curse then
+			self.resetTheme()
 		end
 		TrackerScreen.CarouselItems[self.SEGMENT_CAROUSEL_INDEX] = nil
 		TrackerScreen.Buttons.RogueMenuButton = nil
@@ -2831,6 +2835,9 @@ local function RoguemonTracker()
 	function self.afterRedraw()
 		self.redrawScreenImages()
 		self.drawCapsAndRoguemonMenu()
+		if LogOverlay.isGameOver and self.getActiveCurse() then
+			self.resetTheme()
+		end
 	end
 
 	function self.afterProgramDataUpdate()
