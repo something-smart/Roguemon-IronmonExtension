@@ -8,7 +8,7 @@ local function RoguemonTracker()
 	self.url = string.format("https://github.com/%s", self.github or "")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = false
+	local DEBUG_MODE = true
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
@@ -40,9 +40,11 @@ local function RoguemonTracker()
 		["Revive"] = {consumable = true, image = "revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."},
 		["Warding Charm"] = {consumable = true, image = "warding-charm.png", description = "Cancel the effect of any one Curse."},
 		["Cooler Bag"] = {consumable = false, image = "coolerbag.png", description = "Drinks don't count against HP cap, and Berry Juices may be saved."},
-		["Regenerator"] = {consumable = false, image = "Aguav Berry.png", description = "Regain 5% of max HP after every fight."},
-		["Remodeler"] = {consumable = false, image = "tm.png", description = "May immediately teach any found TM over a move of the same type."},
-		["Choose 2"] = {consumable = true, image = "choice-band.png", description = "Choose 2 prizes at the next milestone."},
+		["Regenerator"] = {consumable = false, image = "leftovers.png", description = "Regain 5% of max HP after every fight."},
+		["Remodeler"] = {consumable = false, image = "remodeler.png", description = "May immediately teach any found TM over a move of the same type."},
+		["Choose 2"] = {consumable = true, image = "choose-2.png", description = "Choose 2 prizes at the next milestone."},
+		["Secret Dex"] = {consumable = false, image = "secret-dex.png", description = "Get stat info on all 570+ BST pokemon."},
+		["Special Insight"] = {consumable = false, image = "special-insight.png", description = "Learn every enemy pokemon's ability."}
 	}
 
 	local gymLeaders = {[414] = true, [415] = true, [416] = true, [417] = true, [418] = true, [420] = true, [419] = true, [350] = true}
@@ -1124,7 +1126,32 @@ local function RoguemonTracker()
 				stepCounter.lastCounted = Utils.getGameStat(Constants.GAME_STATS.STEPS)
 				stepCounter.toxicFumesCycle = 0
 			end
+			if curse == "High Pressure" then
+				local pkmn = self.readLeadPokemonData()
+				local pp1 = Utils.getbits(pkmn.attack3, 0, 8)
+				local pp2 = Utils.getbits(pkmn.attack3, 8, 8)
+				local pp3 = Utils.getbits(pkmn.attack3, 16, 8)
+				local pp4 = Utils.getbits(pkmn.attack3, 24, 8)
+				ppValues = {pp1, pp2, pp3, pp4}
+				pkmn.attack3 = pp1/2 + Utils.bit_lshift(pp2/2, 8)  + Utils.bit_lshift(pp3/2, 16) + Utils.bit_lshift(pp4/2, 24)
+				self.writeLeadPokemonData(pkmn)
+			end
 		end
+	end
+
+	function self.wardCurse()
+		self.removeSpecialRedeem("Warding Charm")
+		if self.getActiveCurse() == "High Pressure" then
+			local pkmn = self.readLeadPokemonData()
+			pkmn.attack3 = ppValues[1] + Utils.bit_lshift(ppValues[2], 8)  + Utils.bit_lshift(ppValues[3], 16) + Utils.bit_lshift(ppValues[4], 24)
+			self.writeLeadPokemonData(pkmn)
+		end
+		cursedSegments[segmentOrder[currentSegment]] = "Warded"
+		if RoguemonOptions["Alternate Curse theme"] then
+			Theme.importThemeFromText(previousTheme, true)
+		end
+		self.returnToHomeScreen()
+		self.saveData()
 	end
 
 	-- Determine if a particular segment has been reached yet
@@ -1581,13 +1608,7 @@ local function RoguemonTracker()
 			["Curse:"] = {
 				name = "Ward",
 				onClick = function()
-					self.removeSpecialRedeem("Warding Charm")
-					cursedSegments[segmentOrder[currentSegment]] = "Warded"
-					if RoguemonOptions["Alternate Curse theme"] then
-						Theme.importThemeFromText(previousTheme, true)
-					end
-					self.returnToHomeScreen()
-					self.saveData()
+					self.wardCurse()
 				end,
 				isVisible = function()
 					return specialRedeems.consumable["Warding Charm"]
@@ -1926,7 +1947,9 @@ local function RoguemonTracker()
 						add = false
 					end
 				end
-				if add and choice then choices[#choices + 1] = choice end
+				if add and choice then 
+					choices[#choices + 1] = choice 
+				end
 			end
 
 			local option1Split = Utils.split(choices[1], ":", true)
@@ -2044,54 +2067,6 @@ local function RoguemonTracker()
 						end
 						additionalOptionsRemaining = 1
 						nextScreen = OptionSelectionScreen
-					end
-				end
-				if reward == "Secret Dex" then
-					if not readLog then
-						local logpath = LogOverlay.getLogFileAutodetected() or LogOverlay.getLogFileFromPrompt()
-						if not Utils.isNilOrEmpty(logpath) then
-							RandomizerLog.loadedLogPath = logpath
-							readLog = RandomizerLog.parseLog(logpath)
-						end
-					end
-					if readLog then
-						local STATS_ORDERED = { "hp", "atk", "def", "spa", "spd", "spe"}
-						for id, pokemon in pairs(PokemonData.Pokemon) do
-							local bst = tonumber(pokemon.bst)
-							if bst and bst >= 570 then
-								Tracker.getOrCreateTrackedPokemon(id, true)
-								local lowThreshold = bst * 3/24
-								local highThreshold = bst * 5/24
-								for _, statKey in ipairs(STATS_ORDERED) do
-									local stat = RandomizerLog.Data.Pokemon[id].BaseStats[statKey]
-									if stat < lowThreshold then
-										Tracker.TrackStatMarking(id, statKey, 2)
-									elseif stat > highThreshold then
-										Tracker.TrackStatMarking(id, statKey, 1)
-									else
-										Tracker.TrackStatMarking(id, statKey, 3)
-									end
-								end
-							end
-						end
-					end
-				end
-				if reward == "Special Insight" then
-					if not readLog then
-						local logpath = LogOverlay.getLogFileAutodetected() or LogOverlay.getLogFileFromPrompt()
-						if not Utils.isNilOrEmpty(logpath) then
-							RandomizerLog.loadedLogPath = logpath
-							readLog = RandomizerLog.parseLog(logpath)
-						end
-					end
-					if readLog then
-						for id, pokemon in pairs(PokemonData.Pokemon) do
-							Tracker.getOrCreateTrackedPokemon(id, true)
-							if RandomizerLog.Data.Pokemon[id] then
-								local ability = RandomizerLog.Data.Pokemon[id].Abilities[1]
-								Tracker.TrackAbility(id, ability)
-							end
-						end
 					end
 				end
 				if string.sub(reward, 1, 3) == 'Any' then
@@ -2318,7 +2293,8 @@ local function RoguemonTracker()
 
 	function self.getActiveCurse()
 		if segmentStarted and not (cursedSegments[segmentOrder[currentSegment]] == "Warded") then
-			return cursedSegments[segmentOrder[currentSegment]]
+			return "High Pressure"
+			-- return cursedSegments[segmentOrder[currentSegment]]
 		end
 	end
 
@@ -2609,16 +2585,6 @@ local function RoguemonTracker()
 				unrulySpiritFirstTurn = true
 			end
 		end
-		if curse == "High Pressure" and not curseAppliedThisSegment then
-			curseAppliedThisSegment = true
-			local pkmn = self.readLeadPokemonData()
-			local pp1 = Utils.getbits(pkmn.attack3, 0, 8) / 2
-			local pp2 = Utils.getbits(pkmn.attack3, 8, 8) / 2
-			local pp3 = Utils.getbits(pkmn.attack3, 16, 8) / 2
-			local pp4 = Utils.getbits(pkmn.attack3, 24, 8) / 2
-			pkmn.attack3 = pp1 + Utils.bit_lshift(pp2, 8)  + Utils.bit_lshift(pp3, 16) + Utils.bit_lshift(pp4, 24)
-			self.writeLeadPokemonData(pkmn)
-		end
 		if curse == "Relay Race" then
 			faintToProcess = false
 			relayRaceStats = {atk = 6, def = 6, spa = 6, spd = 6, spe = 7, acc = 6, eva = 6}
@@ -2795,6 +2761,37 @@ local function RoguemonTracker()
 
 	function self.everyTurn()
 		
+	end
+
+	function self.checkInBattleEffects()
+		local id = Tracker.getPokemon(Battle.Combatants.LeftOther, false).pokemonID
+		local pokemon = PokemonData.Pokemon[id]
+		if pokemon then
+			if specialRedeems.unlocks["Secret Dex"] and not (Tracker.getOrCreateTrackedPokemon(pokemonID) and 
+			Tracker.getOrCreateTrackedPokemon(pokemonID).sm and Tracker.getOrCreateTrackedPokemon(pokemonID).sm['hp']) then
+				local STATS_ORDERED = { "hp", "atk", "def", "spa", "spd", "spe"}
+				local bst = tonumber(pokemon.bst)
+				if bst and bst >= 570 then
+					local lowThreshold = bst * 4/30
+					local highThreshold = bst * 6/30
+					for _, statKey in ipairs(STATS_ORDERED) do
+						local stat = pokemon.baseStats[statKey]
+						if stat < lowThreshold then
+							Tracker.TrackStatMarking(id, statKey, 2)
+						elseif stat > highThreshold then
+							Tracker.TrackStatMarking(id, statKey, 1)
+						else
+							Tracker.TrackStatMarking(id, statKey, 3)
+						end
+					end
+				end
+			end
+			if specialRedeems.unlocks["Special Insight"] and not (Tracker.getOrCreateTrackedPokemon(pokemonID) 
+			and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities[1]) then
+				local ability = pokemon.abilities[1]
+				Tracker.TrackAbility(id, ability)
+			end
+		end
 	end
 
 	-- DISPLAY/NOTIFICATION FUNCTIONS -- 
@@ -3548,6 +3545,9 @@ local function RoguemonTracker()
 			else
 				inBattleTurnCount = -1
 			end
+		end
+		if Battle.inBattle then
+			self.checkInBattleEffects()
 		end
 
 		-- Check updates to bag items and pokemon info
