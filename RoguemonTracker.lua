@@ -24,7 +24,7 @@ local function RoguemonTracker()
 	local specialRedeemInfo = {
 		["Luck Incense"] = {consumable = false, image = "luck.png", description = "Instead of trashing heals over cap, may have your pokemon hold them and take them back later."},
 		["Reroll Chip"] = {consumable = true, image = "rerollchip.png", description = "May be used to reroll any reward spin once."},
-		["Duplicator"] = {consumable = true, image = "duplicator.png", description = "Gain a copy of one future healing item found (immediate choice)."},
+		["Duplicator"] = {consumable = true, image = "duplicator.png", description = "Gain a copy of one future HP/PP/status healing item found (immediate choice)."},
 		["Temporary TM Voucher"] = {consumable = true, image = "bluevoucher.png", description = "Teach one TM found before the next badge (immediate choice)."},
 		["Potion Investment"] = {consumable = true, image = "diamond.png", description = "Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase. Value:"},
 		["Temporary Held Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 2 gym badges."},
@@ -40,8 +40,8 @@ local function RoguemonTracker()
 		["Revive"] = {consumable = true, image = "revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."},
 		["Warding Charm"] = {consumable = true, image = "warding-charm.png", description = "Cancel the effect of any one Curse."},
 		["Cooler Bag"] = {consumable = false, image = "coolerbag.png", description = "Drinks don't count against HP cap, and Berry Juices may be saved."},
-		["Regenerator"] = {consumable = false, image = "leftovers.png", description = "Regain 5% of max HP after every fight."},
-		["Remodeler"] = {consumable = false, image = "remodeler.png", description = "May immediately teach any found TM over a move of the same type."},
+		["Regenerator"] = {consumable = false, image = "leftovers.png", description = "Regain 3% of max HP after every fight."},
+		["Remodeler"] = {consumable = false, image = "remodeler.png", description = "May immediately teach a found TM over a move of the same type. This is reusable."},
 		["Choose 2"] = {consumable = true, image = "choose-2.png", description = "Choose 2 prizes at the next milestone."},
 		["Secret Dex"] = {consumable = false, image = "secret-dex.png", description = "Get stat info on all 570+ BST pokemon."},
 		["Special Insight"] = {consumable = false, image = "special-insight.png", description = "Learn every enemy pokemon's ability."}
@@ -126,8 +126,8 @@ local function RoguemonTracker()
 		["Victory Road"] = {["routes"] = {125, 126, 127}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true, ["Downsizing"] = true}},
 		["Pokemon League"] = {["routes"] = {212, 213, 214, 215, 216, 217}, ["allMandatory"] = true, ["rival"] = true},
 		["Congratulations!"] = {["routes"] = {}},
-		["Route 12/13"] = {["routes"] = {100, 101}},
-		["Route 14/15"] = {["routes"] = {102, 103}},
+		["Route 12 + 13"] = {["routes"] = {100, 101}},
+		["Route 14 + 15"] = {["routes"] = {102, 103}},
 	}
 
 	local curseInfo = {
@@ -242,7 +242,6 @@ local function RoguemonTracker()
 	local specialRedeemToDescribe = nil
 
 	local patchedChangedEvos = false
-	local readLog = false
 	local committed = false
 	local caughtSomethingYet = false
 
@@ -259,7 +258,7 @@ local function RoguemonTracker()
 	local priorBerryPocket = {}
 	local berryPocket = {}
 	local pokeInfo = nil
-	local itemFromPrize = nil
+	local itemsFromPrize = nil
 	local previousMap = nil
 
 	local wildBattleCounter = 0
@@ -476,6 +475,7 @@ local function RoguemonTracker()
 				quantity = readQuantity - quantity
 				if quantity < 0 then
 					quantity = 0
+					Memory.writeword(address + bagPocketOffset + i * 4, 0)
 				end
 				if key ~= nil then quantity = Utils.bit_xor(quantity, key) end
 				Memory.writeword(address + bagPocketOffset + i * 4 + 2, quantity)
@@ -530,9 +530,9 @@ local function RoguemonTracker()
 			itemToIgnore = pokeInfo.heldItem
 		end
 		local itemFromPrizeToIgnore = nil
-		if itemFromPrize then
-			itemFromPrizeToIgnore = self.getItemId(itemFromPrize, true)
-		end
+		-- if itemFromPrize then
+		-- 	itemFromPrizeToIgnore = self.getItemId(itemFromPrize)
+		-- end
 
 		-- Check for info that changed
 		local newItemsPocket, newBerryPocket = self.readBagInfo()
@@ -551,7 +551,7 @@ local function RoguemonTracker()
 			end
 			if q > oldq and i ~= itemToIgnore and i ~= itemFromPrizeToIgnore then
 				currentStatusVal = self.countStatusHeals()
-				if not empty then
+				if not empty and TrackerAPI.getItemName(i, true) then
 					toProcess[TrackerAPI.getItemName(i, true)] = true
 				end
 			end
@@ -574,7 +574,7 @@ local function RoguemonTracker()
 		end
 
 		if redFlags <= 3  and size > 0 then
-			if priorItemsPocket[24] and (not itemsPocket[24]) and specialRedeems.consumable["Revive"] then
+			if priorItemsPocket[24] and (not itemsPocket[24]) and (not newItemsPocket[24]) and specialRedeems.consumable["Revive"] then
 				self.removeSpecialRedeem("Revive")
 			end
 			priorItemsPocket = itemsPocket
@@ -800,8 +800,8 @@ local function RoguemonTracker()
 					local prizeName = Utils.split(parts[1], ":", true)[1]
 					prize_images[prizeName] = parts[2]
 					if prizeName == "Fight Route X" then
-						prize_images["Fight Route 12/13"] = parts[2]
-						prize_images["Fight Route 14/15"] = parts[2]
+						prize_images["Fight Route 12 + 13"] = parts[2]
+						prize_images["Fight Route 14 + 15"] = parts[2]
 					end
 				end
 			end
@@ -1048,7 +1048,8 @@ local function RoguemonTracker()
 			end
 		end
 		if specialRedeems.consumable["Duplicator"] and TrackerAPI.getMapId() ~= 10 and TrackerAPI.getMapId() ~= 193 then
-			if MiscData.HealingItems[itemId] or MiscData.StatusItems[itemId] or MiscData.PPItems[itemId] then
+			if (MiscData.HealingItems[itemId] or MiscData.StatusItems[itemId] or MiscData.PPItems[itemId]) and not
+			(not specialRedeems.unlocks["Berry Pouch"] and string.sub(item, string.len(item)-4, string.len(item)) == "Berry" and MiscData.HealingItems[itemId]) then
 				self.offerBinaryOption("Duplicate " .. item, "Skip")
 			end
 		end
@@ -1938,7 +1939,7 @@ local function RoguemonTracker()
 					end
 				end
 				if choiceName == "Fight Route X" then
-					local routes = {"Route 12/13", "Route 14/15"}
+					local routes = {"Route 12 + 13", "Route 14 + 15"}
 					local rInd = 1
 					while specialRedeems.internal[routes[rInd]] and rInd <= 2 do
 						rInd = rInd + 1
@@ -2027,6 +2028,7 @@ local function RoguemonTracker()
 				if reward == "Berry Pouch" then itemId = 0 end -- this is an item in the game, but not what we want
 				if itemId ~= 0 then
 					-- This reward simply yields items, so provide them
+					itemFromPrize = reward
 					self.AddItemImproved(reward, itemCount)
 				end
 				if reward == "Nature Mint" then
@@ -2214,6 +2216,7 @@ local function RoguemonTracker()
 					unlockedHeldItems[option] = true
 				end
 			end
+			self.checkBagUpdates()
 		end
 		if additionalOptionsRemaining <= 0 then
 			if string.sub(option, 1, 1) == "+" then
@@ -2221,10 +2224,10 @@ local function RoguemonTracker()
 				additionalOptionsRemaining = 1
 				Program.redraw(true)
 			else
-				self.returnToHomeScreen()
 				if currentRoguemonScreen == OptionSelectionScreen then
 					currentRoguemonScreen = SpecialRedeemScreen
 				end
+				self.returnToHomeScreen()
 			end
 		end
 		self.saveData()
@@ -2238,6 +2241,7 @@ local function RoguemonTracker()
 		local intendedGymCurseCount = RoguemonOptions["Ascension 3"] and 2 or 0
 		if currentCurseCount ~= intendedSegmentCurseCount + intendedGymCurseCount then
 			cursedSegments = {}
+			local segmentCurses = {}
 
 			-- Segment curses
 			local availableCurses = {}
@@ -2260,6 +2264,7 @@ local function RoguemonTracker()
 						cursedSegments[seg] = "Warded"
 					else
 						cursedSegments[seg] = table.remove(availableCurses, curseIndex)
+						segmentCurses[cursedSegments[seg]] = true
 					end
 					added = added + 1
 				end
@@ -2268,7 +2273,7 @@ local function RoguemonTracker()
 			-- Gym curses
 			availableCurses = {}
 			for c,d in pairs(curseInfo) do
-				if d.gym then
+				if d.gym and not segmentCurses[c] then
 					availableCurses[#availableCurses + 1] = c
 				end
 			end
@@ -2450,12 +2455,22 @@ local function RoguemonTracker()
 
 	function self.randomlyReplaceMove(moveIndex)
 		local pkmn = self.readLeadPokemonData()
-		local moves = {[Utils.getbits(pkmn.attack1, 0, 16)] = true, 
+		local barredMoves = {[Utils.getbits(pkmn.attack1, 0, 16)] = true, 
 						[Utils.getbits(pkmn.attack1, 16, 16)] = true, 
 						[Utils.getbits(pkmn.attack2, 0, 16)] = true, 
-						[Utils.getbits(pkmn.attack2, 16, 16)] = true}
+						[Utils.getbits(pkmn.attack2, 16, 16)] = true,
+					[165] = true, -- Struggle
+					[15] = true, -- HMs
+					[19] = true,
+					[57] = true,
+					[70] = true,
+					[127] = true,
+					[148] = true,
+					[249] = true,
+					[291] = true
+				} 
 		local moveNo = math.random(360)
-		while moves[moveNo] do
+		while barredMoves[moveNo] do
 			moveNo = math.random(360)
 		end
 		self.setMove(moveIndex, moveNo)
@@ -2719,7 +2734,7 @@ local function RoguemonTracker()
 		end
 		if curse == "No Cover" then
 			self.applyStatus(0, 0x00000018, true)
-			self.setDisableStructWord(0, 0x15, 1)
+			self.setDisableStructByte(0, 0x15, 1)
 		end
 		if curse == "Relay Race" and faintToProcess then
 			faintToProcess = false
@@ -2769,11 +2784,12 @@ local function RoguemonTracker()
 		local id = Tracker.getPokemon(Battle.Combatants.LeftOther, false).pokemonID
 		local pokemon = PokemonData.Pokemon[id]
 		if pokemon then
-			if specialRedeems.unlocks["Secret Dex"] and not (Tracker.getOrCreateTrackedPokemon(pokemonID) and 
-			Tracker.getOrCreateTrackedPokemon(pokemonID).sm and Tracker.getOrCreateTrackedPokemon(pokemonID).sm['hp']) then
-				local STATS_ORDERED = { "hp", "atk", "def", "spa", "spd", "spe"}
+			if specialRedeems.unlocks["Secret Dex"] and not (Tracker.getOrCreateTrackedPokemon(id) and 
+			Tracker.getOrCreateTrackedPokemon(id).sm and Tracker.getOrCreateTrackedPokemon(id).sm['hp'] and 
+			Tracker.getOrCreateTrackedPokemon(id).sm['hp'] > 0 and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] > 0) then
 				local bst = tonumber(pokemon.bst)
 				if bst and bst >= 570 then
+					local STATS_ORDERED = { "hp", "atk", "def", "spa", "spd", "spe"}
 					local lowThreshold = bst * 4/30
 					local highThreshold = bst * 6/30
 					for _, statKey in ipairs(STATS_ORDERED) do
@@ -2828,7 +2844,7 @@ local function RoguemonTracker()
 					needToBuy = false
 					self.buyPhase()
 				end
-			elseif needToCleanse > 0 then
+			elseif needToCleanse > 0 and not needToBuy then
 				self.cleansingPhase(needToCleanse == 2)
 				needToCleanse = 0
 			end
@@ -2878,7 +2894,7 @@ local function RoguemonTracker()
 						screen.Buttons["RoguemonPrize" .. dx] = imageButton
 					end
 					if r == "Fight wilds in Rts 1/2/22" or r == "Fight up to 5 wilds in Forest" then
-						Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0x00000000)
+						Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
 					end
 					dx = dx + 1
 				end
@@ -2980,6 +2996,9 @@ local function RoguemonTracker()
 	function self.returnToHomeScreen()
 		if #screenQueue > 0 then
 			Program.changeScreenView(table.remove(screenQueue, 1))
+		elseif needToCleanse > 0 and not needToBuy then
+			self.cleansingPhase(needToCleanse == 2)
+			needToCleanse = 0
 		else
 			Program.changeScreenView(TrackerScreen)
 		end
@@ -3183,7 +3202,7 @@ local function RoguemonTracker()
 			local maxHP = Utils.getbits(Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsMaxHpAtk), 0, 16)
 			local lvCurHp = Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp)
 			local currentHP = Utils.getbits(lvCurHp, 16, 16)
-			currentHP = currentHP + math.floor(maxHP / 20 + 0.5)
+			currentHP = currentHP + math.floor(maxHP * 3 / 100 + 0.5)
 			if currentHP > maxHP then
 				currentHP = maxHP
 			end
@@ -3611,10 +3630,12 @@ local function RoguemonTracker()
 		self.determineCurses()
 
 		-- Display any queued screens
-		if Program.currentScreen == TrackerScreen and #screenQueue > 0 then
-			Program.changeScreenView(table.remove(screenQueue, 1))
-		else
-			self.handleBuyCleanseNotifs(mapId)
+		if Program.currentScreen == TrackerScreen then
+			if #screenQueue > 0 then
+				Program.changeScreenView(table.remove(screenQueue, 1))
+			else
+				self.handleBuyCleanseNotifs(mapId)
+			end
 		end
 
 		if defeatedTrainerIds[414] and not needToBuy and not (needToCleanse > 0) and Program.currentScreen == TrackerScreen and not showedEggReminderAfterBrock and RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem == 197 then
