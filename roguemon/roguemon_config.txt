@@ -46,7 +46,7 @@ PP Up & Potion|ppuppotion.png
 Any Vitamin x2 & Potion|2vitpot.png
 Any Vitamin & Potion x2|2potvit.png
 PP Up & Ether|ppupether.png
-Choose 2: Choose 2 prizes at the next milestone.|choose-2.png
+Choose 2: Choose 2 prizes at the next gym milestone.|choose-2.png
 Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 
