@@ -67,7 +67,7 @@ HP Cap +100|healing-pocket.png
 Status Cap +1 & Any Status Heal & Potion|trifecta.png
 Super Potion & Any Status Heal & Ether|superstatusether.png
 Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
-Temporary Item Voucher: Permanently unlock one non-revive found item before next gym (immediate decision).|tempvoucher.png
+Temporary Item Voucher: Permanently unlock one non-revive item found before next gym (immediate decision).|tempvoucher.png
 Teach 1 currently held TM|tm.png
 Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
 Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
@@ -96,7 +96,7 @@ Super Potion & Any Status Heal & Ether|superchoiceether.png
 Status Cap +1 & Any Status Heal & Potion|trifecta.png
 Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
 Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
-Temporary Item Voucher: Permanently unlock one non-revive found item before next gym (immediate decision).|tempvoucher.png
+Temporary Item Voucher: Permanently unlock one non-revive item found before next gym (immediate decision).|tempvoucher.png
 Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
 Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 X Speed & Super Potion|xspesuper.png
@@ -123,12 +123,13 @@ HP Cap +100|healing-pocket.png
 HP Cap +50 & X Accuracy|hp50xacc.png
 HP Cap +50 & Elixir|healing-pocketandelixir.png
 Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
-Temporary Item Voucher: Permanently unlock one non-revive found item before next gym (immediate decision).|tempvoucher.png
+Temporary Item Voucher: Permanently unlock one non-revive item found before next gym (immediate decision).|tempvoucher.png
 TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
 Rare Candy x2|2candy.png
 Regenerator: Regain 3% of max HP after every fight.|leftovers.png
 Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
 Special Insight: Learn every pokemon's ability.|special-insight.png
+Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 
 *Koga Prize
 Teach 1 currently held TM|tm.png
@@ -142,12 +143,13 @@ Found Item & Super Potion: Permanently unlock any non-revive item currently in t
 Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Held Item Voucher: Permanently unlock one non-revive found item found in the future (immediate decision).|voucher.png
+Held Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in Fuchsia City. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
+Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 
 *Silph Co FC Prize
 Teach 1 currently held TM|tm.png
@@ -162,11 +164,12 @@ Found Item & Full Heal: Permanently unlock any non-revive item currently in the 
 Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Held Item Voucher: Permanently unlock one non-revive found item found in the future (immediate decision).|voucher.png
+Held Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
+Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 
 *Sabrina Prize
 Teach 1 currently held TM|tm.png
@@ -180,11 +183,12 @@ Found Item & Super Potion: Permanently unlock any non-revive item currently in t
 Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Held Item Voucher: Permanently unlock one non-revive found item found in the future (immediate decision).|voucher.png
+Held Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor & Poke Doll: May use the Copycat move tutor. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
+Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 
 *Blaine Prize
 Teach 1 currently held TM|tm.png
@@ -198,7 +202,7 @@ Found Item & Super Potion: Permanently unlock any non-revive item currently in t
 Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Held Item Voucher: Permanently unlock one non-revive found item found in the future (immediate decision).|voucher.png
+Held Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in the Cinnabar Lab. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
@@ -217,7 +221,7 @@ Found Item & Full Heal: Permanently unlock any non-revive item currently in the 
 Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Held Item Voucher: Permanently unlock one non-revive found item found in the future (immediate decision).|voucher.png
+Held Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in Viridian City. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
