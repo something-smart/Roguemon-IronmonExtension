@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.1.1"
+	self.version = "1.1.2"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -2536,7 +2536,6 @@ local function RoguemonTracker()
 	end
 
 	function self.startOfBattleCurse(curse)
-		print("SOB")
 		thisFightFaintCount = 0
 		lastUsedMove = nil
 		if curse == "Tormented Soul" then
@@ -2690,7 +2689,6 @@ local function RoguemonTracker()
 		local accurateTurnCount = Memory.readbyte(GameSettings.gBattleResults + Program.Addresses.offsetBattleResultsCurrentTurn)
 		local address = (GameSettings.gBattleMons + BattleDetailsScreen.Addresses.offsetBattleMonsStatus2)
 		local statusData = Memory.readdword(address)
-		print("T: " .. Battle.turnCount .. " F: " .. Utils.bit_and(statusData, 0x00000008))
 		if curse == "Sharp Rocks" then
 			self.applyStatusToTeam(false, 0x00100000)
 		end
@@ -2715,7 +2713,6 @@ local function RoguemonTracker()
 		end
 		if curse == "Unruly Spirit" or curse == "Unstable Ground" then
 			if accurateTurnCount == 1 and not flinchCheckFirstTurn then
-				print("RESET")
 				flinchCheckFirstTurn = true
 				self.removeStatus(0, 0xFFFFFFF7)
 			end
