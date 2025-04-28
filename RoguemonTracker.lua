@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.1.1"
+	self.version = "1.1.2"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -22,7 +22,7 @@ local function RoguemonTracker()
 	local prize_images = {} -- will get updated when config file is read
 
 	local specialRedeemInfo = {
-		["Luck Incense"] = {consumable = false, image = "luck.png", description = "Instead of trashing heals over cap, may have your pokemon hold them and take them back later."},
+		["Luck Incense"] = {consumable = false, image = "luck.png", description = "Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later."},
 		["Reroll Chip"] = {consumable = true, image = "rerollchip.png", description = "May be used to reroll any reward spin once."},
 		["Duplicator"] = {consumable = true, image = "duplicator.png", description = "Gain a copy of one future HP/PP/status healing item found (immediate choice)."},
 		["Temporary TM Voucher"] = {consumable = true, image = "bluevoucher.png", description = "Teach one TM found before the next badge (immediate choice)."},
@@ -132,33 +132,43 @@ local function RoguemonTracker()
 	}
 
 	local curseInfo = {
-		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight", segment = true, gym = false},
-		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap", segment = true, gym = false},
-		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently", segment = true, gym = false},
+		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight", segment = true, gym = false,
+							longDescription = "After the first fight this segment, your bottom-most move is changed to a random move."},
+		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap", segment = true, gym = false,
+							longDescription = "If this segment is not full cleared, lose 50 HP Cap."},
+		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently", segment = true, gym = false,
+							longDescription = "If this segment is not full cleared, all future prize spins will have only 2 options."},
 		["Tormented Soul"] = {description = "Cannot use the same move twice in a row", segment = true, gym = true},
 		["Kaizo Curse"] = {description = "Cannot use healing items outside of battle", segment = true, gym = true},
 		["Headwind"] = {description = "Start fights at -2 Speed", segment = true, gym = true},
 		["Sharp Rocks"] = {description = "All enemies have +2 crit rate", segment = true, gym = true},
 		["High Pressure"] = {description = "Start missing 50% PP on all moves", segment = true, gym = true},
 		["Heavy Fog"] = {description = "All combatants have -1 Accuracy", segment = true, gym = true},
-		["Unstable Ground"] = {description = "Flinch on the first turn of each fight", segment = true, gym = true},
+		["Unstable Ground"] = {description = "75% to flinch on first turn of a fight", segment = true, gym = true},
 		["1000 Cuts"] = {description = "Permanent -5 HP Cap when hit by an attack", segment = true, gym = false},
 		["Acid Rain"] = {description = "Each fight has a random weather", segment = true, gym = false},
-		["Toxic Fumes"] = {description = "Take 1 damage every 8 steps (can't faint)", segment = true, gym = false},
+		["Toxic Fumes"] = {description = "Take 1 damage every 8 steps (can't faint)", segment = true, gym = false,
+							longDescription = "Take 1 damage for every 8 steps walked. This can't bring you below 1 HP."},
 		["Narcolepsy"] = {description = "30% to fall asleep after each fight", segment = true, gym = false},
 		["Clean Air"] = {description = "Enemies have Mist, Safeguard, and Ingrain", segment = true, gym = false},
 		["Clouded Instincts"] = {description = "First move in battle must be 1st slot", segment = true, gym = false},
 		["Unruly Spirit"] = {description = "10% to flinch on every turn", segment = true, gym = true},
-		["Chameleon"] = {description = "Typing is randomized each battle", segment = true, gym = true},
+		["Chameleon"] = {description = "Typing is randomized each battle", segment = true, gym = true,
+							longDescription = "Your typing is randomized for each battle. This cannot give you STAB on your attacks."},
 		["No Cover"] = {description = "Enemies cannot miss you", segment = true, gym = true},
-		["Relay Race"] = {description = "Enemy stat stages carry over, with +1 Speed", segment = true, gym = true},
-		["Resourceful"] = {description = "When a move reaches 0 PP, it changes randomly", segment = true, gym = false},
-		["Safety Zone"] = {description = "If you start a fight <75% HP, 30% to lose an HP heal", segment = true, gym = false},
-		["Live Audience"] = {description = "When hit by a move, Encored for 2-3 turns", segment = true, gym = false},
+		["Relay Race"] = {description = "Enemy stat stages carry over, with +1 Speed", segment = true, gym = true,
+							longDescription = "All enemy pokemon start with +1 Speed, plus any stat changes that the previous pokemon in the fight had."},
+		["Resourceful"] = {description = "When a move reaches 0 PP, it changes randomly", segment = true, gym = false,
+							longDescription = "When one of your moves reaches 0 PP, it is changed to a random move."},
+		["Safety Zone"] = {description = "If you start a fight <75% HP, 30% to lose an HP heal", segment = true, gym = false,
+							longDescription = "If you start a fight with less than 75% of your max HP, 30% chance to lose a random HP heal from your bag."},
+		["Live Audience"] = {description = "When hit by a move, Encored for 2-3 turns", segment = true, gym = false,
+							longDescription = "When you are hit by a damaging move, you are forced to repeat the same move you used for 2-3 turns."},
 		["Moody"] = {description = "+1 and -1 to random stats each turn", segment = true, gym = true},
 		["Curse of Decay"] = {description = "When you use a move, -1 EV in its attacking stat", segment = true, gym = true},
-		["Poltergeist"] = {description = "No FC = cursed item effects on pickup", segment = true, gym = false},
-		["Muscular Dystrophy"] = {description = "Attacking IVs temporarily set to 0", segment = true, gym = false},
+		["Poltergeist"] = {description = "No FC = cursed item effects on pickup", segment = true, gym = false,
+							longDescription = "If this segment isn't full cleared, all type-boosting items will apply a unique negative effect on pickup."},
+		["Debilitation"] = {description = "Attacking IVs temporarily set to 0", segment = true, gym = false},
 		["Time Warp"] = {description = "Lose 5 levels for this segment", segment = true, gym = true},
 		["Memory Game"] = {description = "Moves hidden, one per fight is Metronome", segment = true, gym = false},
 	}
@@ -233,6 +243,8 @@ local function RoguemonTracker()
 
 	-- DYNAMIC, but does not need to be saved (because the player should not quit while these are relevant)
 
+	local updateCounters = {}
+
 	local option1 = ""
 	local option1Desc = ""
 	local option2 = ""
@@ -278,7 +290,7 @@ local function RoguemonTracker()
 	local curseAppliedThisSegment = false
 	local inBattleTurnCount = 0
 	local lastAttackDamage = 0
-	local unrulySpiritFirstTurn = false
+	local shouldFlinchFirstTurn = false
 	local flinchCheckFirstTurn = false
 	local weatherApplied = nil
 	local thisFightFaintCount = 0
@@ -287,6 +299,7 @@ local function RoguemonTracker()
 	local lastUsedMove = nil
 	local ppValues = {0, 0, 0, 0}
 	local curseCooldown = 0
+	local drewBlackBarsForMemoryGame = false
 
 	-- Dynamic, and must be saved/loaded:
 
@@ -342,7 +355,7 @@ local function RoguemonTracker()
 	-- step count information for Toxic Fumes curse
 	local stepCounter = {lastCounted = 0, toxicFumesCycle = 0}
 
-	-- atk/spatk IVs if Muscular Dystrophy is active
+	-- atk/spatk IVs if Debilitation is active
 	local savedIVs = {}
 
 	-- exp temporarily lost to Time Warp
@@ -561,6 +574,7 @@ local function RoguemonTracker()
 		Program.updateBagItems()
 		local data = DataHelper.buildTrackerScreenDisplay()
 
+		Program.updatePokemonTeams()
 		local newPokeInfo = Tracker.getPokemon(1, true)
 
 		local itemToIgnore = nil
@@ -797,9 +811,20 @@ local function RoguemonTracker()
 	end
 
 	function self.resetTheme()
-		if RoguemonOptions["Alternate Curse theme"] then
+		if RoguemonOptions["Alternate Curse theme"] and previousTheme then
 			Theme.importThemeFromText(previousTheme, true)
 		end
+	end
+
+	function self.addUpdateCounter(name, updates, fct, count)
+		if not count then
+			count = -1
+		end
+		updateCounters[name] = {updateCount = updates, currentUpdateCount = updates, functionToUse = fct, executionCount = count}
+	end
+
+	function self.removeUpdateCounter(name)
+		updateCounters[name] = null
 	end
 
 	-- DATA FUNCTIONS --
@@ -1299,7 +1324,7 @@ local function RoguemonTracker()
 	end
 
 	function self.undoCurse(curse)
-		if curse == "Muscular Dystrophy" then
+		if curse == "Debilitation" then
 			local pkmn = self.readLeadPokemonData()
 			local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
 			ivs['atk'] = savedIVs['atk']
@@ -1333,10 +1358,23 @@ local function RoguemonTracker()
 			pkmn.growth2 = targetExp
 
 			self.writeLeadPokemonData(pkmn)
-			Program.addFrameCounter("Recalculate Time Warp Stats", 50, self.recalculateStats, 1) 
+			self.addUpdateCounter("Recalculate Time Warp Stats", 2, self.recalculateStats, 1) 
+
+			local maxHP = Utils.getbits(Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsMaxHpAtk), 0, 16)
+			local lvCurHp = Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp)
+			local currentHP = Utils.getbits(lvCurHp, 16, 16)
+			self.hpMissing = maxHP - currentHP
+			self.addUpdateCounter("Readjust Time Warp HP", 4, function()
+				local maxHP = Utils.getbits(Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsMaxHpAtk), 0, 16)
+				local lvCurHp = Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp)
+				local currentHP = Utils.getbits(lvCurHp, 16, 16)
+				currentHP = maxHP - self.hpMissing
+				Memory.writedword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.getbits(lvCurHp, 0, 16) + Utils.bit_lshift(currentHP, 16))
+			end, 1)
 		end
 		if curse == "Memory Game" then
 			self.memoryGameOff()
+			Program.removeFrameCounter("Memory Game Move Obscuring")
 		end
 	end
 
@@ -1395,13 +1433,17 @@ local function RoguemonTracker()
 		if curse then
 			runSummary[#runSummary + 1] = {
 				type = "Curse",
-				curse = curse
+				curse = curse,
+				title = segmentOrder[currentSegment]
 			}
 			if RoguemonOptions["Alternate Curse theme"] then
-				previousTheme = Theme.exportThemeToText()
+				local t = Theme.exportThemeToText()
+				if t ~= CURSE_THEME then
+					previousTheme = t
+				end
 				Theme.importThemeFromText(CURSE_THEME, true)
 			end
-			self.displayNotification("Curse: " .. curse .. " @ " .. curseInfo[curse].description, "Curse.png", nil)
+			self.displayNotification("Curse: " .. curse .. " @ " .. self.getCurseDescription(curse), "Curse.png", nil)
 			if curse == "Toxic Fumes" then
 				stepCounter.lastCounted = Utils.getGameStat(Constants.GAME_STATS.STEPS)
 				stepCounter.toxicFumesCycle = 0
@@ -1416,7 +1458,7 @@ local function RoguemonTracker()
 				pkmn.attack3 = pp1/2 + Utils.bit_lshift(pp2/2, 8)  + Utils.bit_lshift(pp3/2, 16) + Utils.bit_lshift(pp4/2, 24)
 				self.writeLeadPokemonData(pkmn)
 			end
-			if curse == "Muscular Dystrophy" then
+			if curse == "Debilitation" then
 				local pkmn = self.readLeadPokemonData()
 				local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
 				savedIVs['atk'] = ivs['atk']
@@ -1445,8 +1487,8 @@ local function RoguemonTracker()
 				pkmn.growth2 = pkInfo.experience - timeWarpedExp
 
 				self.writeLeadPokemonData(pkmn)
-				Program.addFrameCounter("Recalculate Time Warp Stats", 50, self.recalculateStats, 1) 
-				Program.addFrameCounter("Adjust Time Warp HP", 100, function()
+				self.addUpdateCounter("Recalculate Time Warp Stats", 2, self.recalculateStats, 1) 
+				self.addUpdateCounter("Adjust Time Warp HP", 4, function()
 					local maxHP = Utils.getbits(Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsMaxHpAtk), 0, 16)
 					local lvCurHp = Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp)
 					local currentHP = Utils.getbits(lvCurHp, 16, 16)
@@ -1458,12 +1500,21 @@ local function RoguemonTracker()
 			end
 			if curse == "Memory Game" then
 				self.memoryGameOn()
+				Program.addFrameCounter("Memory Game Move Obscuring", 1, function()
+					if not drewBlackBarsForMemoryGame and Battle.inBattle and Memory.readbyte(GameSettings.sBattleBuffersTransferData) == 20 then
+						Program.redraw(true)
+					end
+				end)
 			end
 		end
 	end
 
 	function self.wardCurse()
 		self.removeSpecialRedeem("Warding Charm")
+		local summaryItem = runSummary[#runSummary]
+		if summaryItem.type == "Curse" then
+			summaryItem.title = summaryItem.title .. " (Warded)"
+		end
 		if self.getActiveCurse() == "High Pressure" then
 			local pkmn = self.readLeadPokemonData()
 			pkmn.attack3 = ppValues[1] + Utils.bit_lshift(ppValues[2], 8)  + Utils.bit_lshift(ppValues[3], 16) + Utils.bit_lshift(ppValues[4], 24)
@@ -1475,7 +1526,7 @@ local function RoguemonTracker()
 			local lvCurHp = Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp)
 			local currentHP = Utils.getbits(lvCurHp, 16, 16)
 			self.hpMissing = maxHP - currentHP
-			Program.addFrameCounter("Readjust Time Warp HP", 100, function()
+			self.addUpdateCounter("Readjust Time Warp HP", 4, function()
 				local maxHP = Utils.getbits(Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsMaxHpAtk), 0, 16)
 				local lvCurHp = Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp)
 				local currentHP = Utils.getbits(lvCurHp, 16, 16)
@@ -1560,40 +1611,6 @@ local function RoguemonTracker()
 			end
 		end
 		return false
-	end
-
-	-- Handle the buy phase.
-	function self.buyPhase()
-		self.displayNotification("Buy Phase @ May trade heals for equal value @ May trade status heals 1:1, or 3:1 for Full Heals or vice versa", "Poke_Mart.png", nil)
-		if specialRedeems.consumable["Potion Investment"] then
-			local buyable = "Potion"
-			if specialRedeems.consumable["Potion Investment"] >= 50 then
-				buyable = "Super Potion"
-			end
-			if specialRedeems.consumable["Potion Investment"] >= 200 then
-				buyable = "Hyper Potion"
-			end
-			if self.reachedSegment("Victory Road") then
-				buyable = "Max Potion"
-			end
-			self.offerBinaryOption("Cash Out - " .. buyable, "Wait")
-		end
-	end
-
-	-- Handle the cleansing phase.
-	function self.cleansingPhase(remindNoCleansing)
-		-- TODO: Implement automatic cleansing. Coming in a future update hopefully.
-		if remindNoCleansing then
-			self.displayNotification("Reminder: NO Cleansing Phase!", "supernerd.png", function()
-				local mapId = TrackerAPI.getMapId()
-				return previousMap == 10 and mapId ~= 10
-			end)
-		else
-			self.displayNotification("Cleansing Phase @ Must sell all non-healing items (including TMs) unless they have been unlocked", "trash.png", function()
-				local mapId = TrackerAPI.getMapId()
-				return previousMap == 10 and mapId ~= 10
-			end)
-		end
 	end
 
 	-- TRACKER SCREENS --
@@ -2087,18 +2104,6 @@ local function RoguemonTracker()
 		Input.checkButtonsClicked(xmouse, ymouse, NotificationScreen.Buttons or {})
 	end
 
-	function self.displayNotification(message, image, dismissFunction)
-		NotificationScreen.message = message
-		NotificationScreen.image = IMAGES_DIRECTORY .. image
-		if Program.currentScreen == PrettyStatScreen or Program.currentScreen == OptionSelectionScreen then
-			self.readyScreen(NotificationScreen)
-		else
-			Program.changeScreenView(NotificationScreen)
-		end
-		Program.redraw(true)
-		shouldDismissNotification = dismissFunction
-	end
-
 	-- Options screen
 	local RoguemonOptionsScreen = {
 		
@@ -2291,6 +2296,7 @@ local function RoguemonTracker()
 			table.remove(runSummary, 1)
 		end
 		local summaryItem = runSummary[RunSummaryScreen.index]
+		local title = summaryItem.title
 		if summaryItem.type == "Prize" then
 			RunSummaryScreen.Buttons.Option1.boxColors = {summaryItem.chosen[summaryItem.options[1]] and "Positive text" or "Default text"}
 			RunSummaryScreen.option1 = summaryItem.options[1]
@@ -2315,10 +2321,14 @@ local function RoguemonTracker()
 			end
 		elseif summaryItem.type == "Curse" then
 			-- Image
-			Drawing.drawImage(IMAGES_DIRECTORY .. "Curse.png", canvas.x + 40, 15, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
+			local imgName = "Curse.png"
+			if summaryItem.title and #summaryItem.title > 8 and string.sub(summaryItem.title, #summaryItem.title - 8, #summaryItem.title) == "(Warded)" then
+				imgName = "warding-charm.png"
+			end
+			Drawing.drawImage(IMAGES_DIRECTORY .. imgName, canvas.x + 40, 20, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
 
 			-- Text
-			Drawing.drawText(canvas.x + 10, 64, self.wrapPixelsInline("Curse: " .. summaryItem.curse .. " @ " .. curseInfo[summaryItem.curse].description, canvas.w - 20))
+			Drawing.drawText(canvas.x + 10, 69, self.wrapPixelsInline("Curse: " .. summaryItem.curse .. " @ " .. self.getCurseDescription(summaryItem.curse), canvas.w - 20))
 		elseif summaryItem.type == "Evolution" then
 			self.drawPrettyStats(canvas, summaryItem.prev, summaryItem.new, summaryItem.level)
 		end
@@ -2329,6 +2339,9 @@ local function RoguemonTracker()
 		Drawing.drawButton(RunSummaryScreen.Buttons.LastButton)
 		Drawing.drawButton(RunSummaryScreen.Buttons.FirstButton)
 		Drawing.drawButton(RunSummaryScreen.Buttons.PrizeInfoButton)
+		if title then
+			Drawing.drawText(canvas.x + 43, 5, title)
+		end
 	end
 
 	RunSummaryScreen.Buttons = {
@@ -2432,7 +2445,328 @@ local function RoguemonTracker()
 		Input.checkButtonsClicked(xmouse, ymouse, RunSummaryScreen.Buttons or {})
 	end
 
+	local SHOP_BUTTON_X = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 3
+	local SHOP_BUTTON_Y = 9
+	local SHOP_BUTTON_HOR_COUNT = 6
+	local SHOP_BUTTON_WIDTH = 16
+	local SHOP_BUTTON_HEIGHT = 16
+
+	local ShopScreen = {
+		hp = 0,
+		status = 0,
+		updates = {}
+	}
+
+	local shopItemImages = {
+		["Oran Berry"] = "oran-berry.png",
+		["Potion"] = "potion.png",
+		["Berry Juice"] = "berry-juice-small.png",
+		["Sitrus Berry"] = "Sitrus Berry.png",
+		["Super Potion"] = "super-potion-small.png",
+		["Fresh Water"] = "fresh-water.png",
+		["EnergyPowder"] = "energy-powder.png",
+		["Soda Pop"] = "soda-pop.png",
+		["Lemonade"] = "lemonade.png",
+		["Moomoo Milk"] = "moomoo-milk.png",
+		["Hyper Potion"] = "hyper-potion.png",
+		["Antidote"] = "antidote2.png",
+		["Parlyz Heal"] = "paralyze-heal2.png",
+		["Burn Heal"] = "burn-heal2.png",
+		["Ice Heal"] = "ice-heal2.png",
+		["Awakening"] = "awakening2.png",
+		["Pecha Berry"] = "pecha-berry.png",
+		["Cheri Berry"] = "cheri-berry.png",
+		["Chesto Berry"] = "chesto-berry.png",
+		["Aspear Berry"] = "aspear-berry.png",
+		["Rawst Berry"] = "rawst-berry.png",
+		["Persim Berry"] = "persim-berry.png",
+		["Lum Berry"] = "lum-berry.png",
+		["Full Heal"] = "full-heal.png",
+		["Lava Cookie"] = "lava-cookie.png",
+		["Heal Powder"] = "heal-powder.png",
+	}
+
+	function self.getShopButtonLocation(index)
+		return SHOP_BUTTON_X + ((index-1) % SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_WIDTH, SHOP_BUTTON_Y + math.floor((index-1) / SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_HEIGHT
+	end
+
+	function ShopScreen.addButton(item)
+		local index = #ShopScreen.Buttons + 1
+		local x,y = self.getShopButtonLocation(index)
+		local b = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			box = {x, y, SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT},
+			onClick = function(this)
+				if not ShopScreen.updates[this.item] then
+					ShopScreen.updates[this.item] = 0
+				end
+				ShopScreen.updates[this.item] = ShopScreen.updates[this.item] - 1
+				local itemId = self.getItemId(this.item)
+				local itemInfo = MiscData.HealingItems[itemId]
+				if itemInfo then
+					ShopScreen.hp = ShopScreen.hp + itemInfo.amount
+				else
+					itemInfo = MiscData.StatusItems[itemId]
+					ShopScreen.status = ShopScreen.status + (itemInfo.type == MiscData.StatusType.All and 3 or 1)
+				end
+				for i = this.index,#ShopScreen.Buttons - 1 do
+					ShopScreen.Buttons[i] = ShopScreen.Buttons[i + 1]
+					ShopScreen.Buttons[i].index = i
+					local x1,y1 = self.getShopButtonLocation(i)
+					ShopScreen.Buttons[i].box = {x1, y1, SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT}
+				end
+				ShopScreen.Buttons[#ShopScreen.Buttons] = nil
+				Program.redraw(true)
+			end,
+			boxColors = {"Default text"},
+			draw = function(this, shadowcolor)
+				local x, y, w, h = this.box[1], this.box[2], this.box[3], this.box[4]
+				Drawing.drawImage(this.image, x + 1, y + 1, w - 2, h - 2)
+			end,
+			image = IMAGES_DIRECTORY .. shopItemImages[item],
+			item = item,
+			index = index
+		}
+		ShopScreen.Buttons[index] = b
+	end
+
+	function self.beginShop()
+		ShopScreen.hp = 0
+		ShopScreen.status = 0
+		ShopScreen.updates = {}
+		for i,b in ipairs(ShopScreen.Buttons) do
+			ShopScreen.Buttons[i] = nil
+		end
+		for id,ct in pairs(Program.GameData.Items.StatusHeals) do
+			if(ct <= 999) then
+				local name = TrackerAPI.getItemName(id)
+				if shopItemImages[name] then
+					for i = 1, ct do
+						ShopScreen.addButton(name)
+					end
+				end
+			end
+		end
+		for id,ct in pairs(Program.GameData.Items.HPHeals) do
+			if(ct <= 999) then
+				local name = TrackerAPI.getItemName(id)
+				if shopItemImages[name] then
+					for i = 1, ct do
+						ShopScreen.addButton(name)
+					end
+				end
+			end
+		end
+	end
+
+	function self.endShop()
+		for item,ct in pairs(ShopScreen.updates) do
+			if ct > 0 then
+				self.AddItemImproved(item, ct)
+			elseif ct < 0 then
+				self.removeItem(item, ct*-1)
+			end
+		end
+		local newItemsPocket, newBerryPocket = self.readBagInfo()
+		priorItemsPocket = newItemsPocket
+		itemsPocket = newItemsPocket
+		priorBerryPocket = newBerryPocket
+		berryPocket = newBerryPocket
+		needToCleanse = phases[lastMilestone].cleansing and 1 or 2
+	end
+
+	function ShopScreen.drawScreen()
+		local canvas = {
+			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
+			y = Constants.SCREEN.MARGIN,
+			w = Constants.SCREEN.RIGHT_GAP - (Constants.SCREEN.MARGIN * 2),
+			h = Constants.SCREEN.HEIGHT - (Constants.SCREEN.MARGIN * 2),
+			text = Theme.COLORS["Default text"],
+			border = Theme.COLORS["Upper box border"],
+			fill = Theme.COLORS["Upper box background"],
+			shadow = Utils.calcShadowColor(Theme.COLORS["Upper box border"]),
+		}
+
+		Drawing.drawBackgroundAndMargins()
+		gui.defaultTextBackground(canvas.fill)
+
+		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
+
+		local hpTextColor
+		local hpText
+		if ShopScreen.hp > 0 then
+			hpTextColor = Theme.COLORS["Positive text"]
+			hpText = "HP: +" .. ShopScreen.hp
+		elseif ShopScreen.hp < 0 then
+			hpTextColor = Theme.COLORS["Negative text"]
+			hpText = "HP: " .. ShopScreen.hp
+		else
+			hpTextColor = Theme.COLORS["Default text"]
+			hpText = "HP: " .. ShopScreen.hp
+		end
+		Drawing.drawText(canvas.x + 59, 120, hpText, hpTextColor)
+
+		local statusTextColor
+		local statusText
+		if ShopScreen.status > 0 then
+			statusTextColor = Theme.COLORS["Positive text"]
+			statusText = "Status: +" .. ShopScreen.status
+		elseif ShopScreen.status < 0 then
+			statusTextColor = Theme.COLORS["Negative text"]
+			statusText = "Status: " .. ShopScreen.status
+		else
+			statusTextColor = Theme.COLORS["Default text"]
+			statusText = "Status: " .. ShopScreen.status
+		end
+		Drawing.drawText(canvas.x + 98, 120, statusText, statusTextColor)
+
+		for _, button in pairs(ShopScreen.Buttons or {}) do
+			Drawing.drawButton(button)
+		end
+	end
+
+	ShopScreen.Buttons = {
+		BackButton = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			getText = function() return "Back" end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 110, 8, 22, 10},
+			onClick = function()
+				self.returnToHomeScreen()
+			end,
+			boxColors = {"Default text"}
+		},
+		ResetButton = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			getText = function() return "Reset" end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 110, 25, 27, 10},
+			onClick = function()
+				self.beginShop()
+				Program.redraw(true)
+			end,
+			boxColors = {"Default text"}
+		},
+		DoneButton = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			getText = function() return "Done" end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 110, 136, 24, 10},
+			textColor = Theme.COLORS["Default text"],
+			onClick = function(this)
+				if ShopScreen.hp >= 0 and ShopScreen.status >= 0 then
+					self.endShop()
+					currentRoguemonScreen = RunSummaryScreen
+					self.returnToHomeScreen()
+				else
+					this.textColor = Theme.COLORS["Negative text"]
+					self.addUpdateCounter("Done Button Flash Red", 2, function()
+						this.textColor = Theme.COLORS["Default text"]
+					end, 1)
+				end
+			end,
+			boxColors = {"Default text"}
+		}
+	}
+
+	local shopAddButtonItems = {
+		["Potion"] = {x = 0, y = 0},
+		["Super Potion"] = {x = 1, y = 0},
+		["Hyper Potion"] = {x = 2, y = 0},
+		["Antidote"] = {x = 0, y = 1},
+		["Parlyz Heal"] = {x = 1, y = 1},
+		["Burn Heal"] = {x = 2, y = 1},
+		["Awakening"] = {x = 3, y = 1},
+		["Ice Heal"] = {x = 4, y = 1},
+		["Full Heal"] = {x = 5, y = 1}
+	}
+
+	for item, info in pairs(shopAddButtonItems) do
+		ShopScreen.Buttons[item .. " Button"] = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			box = {SHOP_BUTTON_X + info.x * SHOP_BUTTON_WIDTH, SHOP_BUTTON_Y + 110 + info.y * SHOP_BUTTON_HEIGHT,
+				SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT},
+			onClick = function(this)
+				if not ShopScreen.updates[this.item] then
+					ShopScreen.updates[this.item] = 0
+				end
+				ShopScreen.updates[this.item] = ShopScreen.updates[this.item] + 1
+				local itemId = self.getItemId(this.item)
+				local itemInfo = MiscData.HealingItems[itemId]
+				if itemInfo then
+					ShopScreen.hp = ShopScreen.hp - itemInfo.amount
+				else
+					itemInfo = MiscData.StatusItems[itemId]
+					ShopScreen.status = ShopScreen.status - (itemInfo.type == MiscData.StatusType.All and 3 or 1)
+				end
+				ShopScreen.addButton(item)
+				Program.redraw(true)
+			end,
+			boxColors = {"Positive text"},
+			draw = function(this, shadowcolor)
+				local x, y, w, h = this.box[1], this.box[2], this.box[3], this.box[4]
+				Drawing.drawImage(this.image, x + 1, y + 1, w - 2, h - 2)
+			end,
+			isVisible = function()
+				return (not info.segment or self.reachedSegment(info.segment))
+			end,
+			image = IMAGES_DIRECTORY .. shopItemImages[item],
+			item = item
+		}
+	end
+
+	function ShopScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, ShopScreen.Buttons or {})
+	end
+
 	-- REWARD SPIN FUNCTIONS --
+
+	function self.displayNotification(message, image, dismissFunction)
+		NotificationScreen.message = message
+		NotificationScreen.image = IMAGES_DIRECTORY .. image
+		if Program.currentScreen == PrettyStatScreen or Program.currentScreen == OptionSelectionScreen then
+			self.readyScreen(NotificationScreen)
+		else
+			Program.changeScreenView(NotificationScreen)
+		end
+		Program.redraw(true)
+		shouldDismissNotification = dismissFunction
+	end
+
+	-- Handle the buy phase.
+	function self.buyPhase()
+		if specialRedeems.consumable["Potion Investment"] then
+			local buyable = "Potion"
+			if specialRedeems.consumable["Potion Investment"] >= 50 then
+				buyable = "Super Potion"
+			end
+			if specialRedeems.consumable["Potion Investment"] >= 200 then
+				buyable = "Hyper Potion"
+			end
+			if self.reachedSegment("Victory Road") then
+				buyable = "Max Potion"
+			end
+			self.offerBinaryOption("Cash Out - " .. buyable, "Wait")
+		end
+		currentRoguemonScreen = ShopScreen
+		self.beginShop()
+		self.readyScreen(ShopScreen)
+	end
+
+	-- Handle the cleansing phase.
+	function self.cleansingPhase(remindNoCleansing)
+		-- TODO: Implement automatic cleansing. Coming in a future update hopefully.
+		if remindNoCleansing then
+			self.displayNotification("Reminder: NO Cleansing Phase!", "supernerd.png", function()
+				local mapId = TrackerAPI.getMapId()
+				return (previousMap == 10 and mapId ~= 10) or (previousMap == 192 and mapId ~= 192)
+			end)
+		else
+			self.displayNotification("Cleansing Phase @ Must sell all non-healing items (including TMs) unless they have been unlocked", "trash.png", function()
+				local mapId = TrackerAPI.getMapId()
+				return (previousMap == 10 and mapId ~= 10) or (previousMap == 192 and mapId ~= 192)
+			end)
+		end
+	end
+
+	
 	
 	-- Update caps to match the current milestone
 	function self.updateCaps(fromMilestone)
@@ -2504,10 +2838,14 @@ local function RoguemonTracker()
 				if add and choiceName == "Fight Route X" then
 					local routes = {"Route 12 + 13", "Route 14 + 15"}
 					local rInd = 1
-					while specialRedeems.internal[routes[rInd]] and rInd <= 2 do
+					while rInd <= 2 and specialRedeems.internal[routes[rInd]] do
 						rInd = rInd + 1
 					end
-					choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Keep items found."
+					if rInd == 3 then
+						add = false
+					else
+						choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Keep items found."
+					end
 				end
 				for _, v in pairs(choices) do
 					if v == choice then
@@ -2549,7 +2887,6 @@ local function RoguemonTracker()
 			if phases[milestoneName].buy then
 				needToBuy = true
 			end
-			needToCleanse = phases[milestoneName].cleansing and 1 or 2
 		end
 
 	end
@@ -2559,7 +2896,8 @@ local function RoguemonTracker()
 		runSummary[#runSummary + 1] = {
 			type = "Prize",
 			options = {option1, option2, option3},
-			chosen = {[option] = true}
+			chosen = {[option] = true},
+			title = lastMilestone .. " Prize"
 		}
 
 		local nextScreen = TrackerScreen -- by default we return to the main screen, unless the reward needs us to make another choice
@@ -2873,6 +3211,10 @@ local function RoguemonTracker()
 				end
 			end
 		end
+	end
+
+	function self.getCurseDescription(curse)
+		return curseInfo[curse].longDescription or curseInfo[curse].description
 	end
 
 	function self.getActiveCurse()
@@ -3212,7 +3554,12 @@ local function RoguemonTracker()
 		end
 		if curse == "Unruly Spirit" then
 			if math.random(10) <= 1 and self.getAbility() ~= "Inner Focus" then
-				unrulySpiritFirstTurn = true
+				shouldFlinchFirstTurn = true
+			end
+		end
+		if curse == "Unstable Ground" then
+			if math.random(4) <= 3 and self.getAbility() ~= "Inner Focus" then
+				shouldFlinchFirstTurn = true
 			end
 		end
 		if curse == "Relay Race" then
@@ -3281,7 +3628,7 @@ local function RoguemonTracker()
 			end
 		end
 		if curse == "Unruly Spirit" then
-			unrulySpiritFirstTurn = false
+			shouldFlinchFirstTurn = false
 		end
 		if curse == "Unruly Spirit" or curse == "Unstable Ground" then
 			flinchCheckFirstTurn = false
@@ -3316,11 +3663,11 @@ local function RoguemonTracker()
 			end
 		end
 		if curse == "Unruly Spirit" then
-			if accurateTurnCount == 0 and unrulySpiritFirstTurn then
+			if accurateTurnCount == 0 and shouldFlinchFirstTurn then
 				self.applyStatusToTeam(true, 0x00000008)
 			end
 		end
-		if curse == "Unstable Ground" then
+		if curse == "Unstable Ground" and shouldFlinchFirstTurn then
 			if accurateTurnCount == 0 and self.getAbility() ~= "Inner Focus" then
 				self.applyStatusToTeam(true, 0x00000008)
 			end
@@ -3427,8 +3774,7 @@ local function RoguemonTracker()
 	end
 
 	function self.checkInBattleEffects()
-		--if Battle.Combatants.LeftOther and not Battle.isWildEncounter then
-		if Battle.Combatants.LeftOther then
+		if Battle.Combatants.LeftOther and not Battle.isWildEncounter and Tracker.getPokemon(Battle.Combatants.LeftOther, false) then
 			local id = Tracker.getPokemon(Battle.Combatants.LeftOther, false).pokemonID
 			local pokemon = PokemonData.Pokemon[id]
 			if pokemon then
@@ -3849,6 +4195,12 @@ local function RoguemonTracker()
 			end
 		end
 
+		-- Show the pretty stat screen immediately if it needs to be shown
+		if #screenQueue > 0 and screenQueue[1] == PrettyStatScreen then
+			local s = table.remove(screenQueue, 1)
+			Program.changeScreenView(s)
+		end
+
 		-- Check if trainer was part of a milestone
 		if milestoneTrainers[trainerId] then
 			local milestoneName = milestoneTrainers[trainerId]['name']
@@ -4144,7 +4496,7 @@ local function RoguemonTracker()
 		end
 
 		-- Set up a frame counter to save the roguemon data every 30 seconds
-		Program.addFrameCounter("Roguemon Saving", 1800, self.saveData, nil, true)
+		self.addUpdateCounter("Roguemon Saving", 30, self.saveData)
 
 		-- Add a setting so Roguemon seeds default to being over when the entire party faints
 		QuickloadScreen.SettingsKeywordToGameOverMap["Ascension"] = "EntirePartyFaints"
@@ -4166,7 +4518,7 @@ local function RoguemonTracker()
 		TrackerScreen.CarouselItems[self.CURSE_CAROUSEL_INDEX] = nil
 		TrackerScreen.Buttons.RogueMenuButton = nil
 		TrackerScreen.Buttons.CurseMenuButton = nil
-		Program.removeFrameCounter("Roguemon Saving")
+		self.removeUpdateCounter("Roguemon Saving")
 		QuickloadScreen.SettingsKeywordToGameOverMap["Roguemon"] = nil
 		-- Update RogueStone name back to normal
 		MiscData.Items[94] = "Moon Stone"
@@ -4175,7 +4527,7 @@ local function RoguemonTracker()
 	end
 
 	function self.inputCheckBizhawk()
-		if Program.currentScreen == NotificationScreen then
+		if Program.currentScreen == NotificationScreen or Program.currentScreen == PrettyStatScreen then
 			local joypad = Input.getJoypadInputFormatted()
 			CustomCode.inputCheckMGBA()
 			local nextBtn = Options.CONTROLS["Next page"] or ""
@@ -4202,19 +4554,40 @@ local function RoguemonTracker()
 		self.drawCapsAndRoguemonMenu()
 		if LogOverlay.isGameOver and self.getActiveCurse() then
 			self.resetTheme()
+			self.undoCurse()
 		end
 		if self.getActiveCurse() == "Memory Game" then
 			if Program.currentScreen == TrackerScreen and not (Battle.inBattle and not Battle.isViewingOwn) then
 				gui.drawRectangle(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 95, 136, 39, 0xFF000000, 0xFF000000)
 			end
-			if Battle.inBattle then
-				gui.drawRectangle(15, 120, 60, 30, 0xFF000000, 0xFF000000)
-				gui.drawRectangle(103, 120, 60, 30, 0xFF000000, 0xFF000000)
+			if Battle.inBattle and Memory.readbyte(GameSettings.sBattleBuffersTransferData) == 20 and not drewBlackBarsForMemoryGame then
+				gui.drawRectangle(15, 120, 70, 30, 0xFF000000, 0xFF000000)
+				gui.drawRectangle(103, 120, 70, 30, 0xFF000000, 0xFF000000)
+				gui.drawRectangle(199, 120, 33, 30, 0xFF000000, 0xFF000000)
+				drewBlackBarsForMemoryGame = true
+			else
+				if drewBlackBarsForMemoryGame then
+					gui.drawRectangle(15, 120, 70, 30, 0xFF000000, 0xFF000000)
+					gui.drawRectangle(103, 120, 70, 30, 0xFF000000, 0xFF000000)
+					gui.drawRectangle(199, 120, 33, 30, 0xFF000000, 0xFF000000)
+				end
+				drewBlackBarsForMemoryGame = false
 			end
 		end
 	end
 
 	function self.afterProgramDataUpdate()
+		for name,counter in pairs(updateCounters) do
+			counter.currentUpdateCount = counter.currentUpdateCount - 1
+			if counter.currentUpdateCount == 0 then
+				counter.functionToUse()
+				counter.currentUpdateCount = counter.updateCount
+				counter.executionCount = counter.executionCount - 1
+				if counter.executionCount == 0 then
+					updateCounters[name] = nil
+				end
+			end
+		end
 		-- Check what map we're on
 		local mapId = TrackerAPI.getMapId()
 		-- Check if there's a milestone for just being on this map
@@ -4348,20 +4721,23 @@ local function RoguemonTracker()
 		if pokemon then
 			local heldItem = TrackerAPI.getItemName(pokemon.heldItem, true)
 			if not Battle.inBattle and heldItem and not allowedHeldItems[heldItem] and not unlockedHeldItems[heldItem] then
-
-				local hadV = false
-				if foundItemPrizeActive then
-					hadV = true
-					foundItemPrizeActive = false
+				if heldItem == "Leftovers" then
+					self.displayNotification("Reminder that Leftovers is banned in all ascensions.", "supernerd.png", nil)
 				else
-					hadV = self.removeSpecialRedeem("Temporary Item Voucher")
-				end
-				if not hadV then
-					hadV = self.removeSpecialRedeem("Held Item Voucher")
-				end
-				if hadV then
-					unlockedHeldItems[heldItem] = true
-					self.saveData()
+					local hadV = false
+					if foundItemPrizeActive then
+						hadV = true
+						foundItemPrizeActive = false
+					else
+						hadV = self.removeSpecialRedeem("Temporary Item Voucher")
+					end
+					if not hadV then
+						hadV = self.removeSpecialRedeem("Held Item Voucher")
+					end
+					if hadV then
+						unlockedHeldItems[heldItem] = true
+						self.saveData()
+					end
 				end
 			end
 		end
