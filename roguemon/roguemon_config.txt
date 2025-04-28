@@ -20,7 +20,7 @@ HP Cap +50|healing-pocket.png
 Status Cap +1 & Potion & Any Status Heal|trifecta.png
 Fight up to 5 wilds in Forest: Can't heal in between. Can run but counts as 1 of the 5.|exp-forest.png
 Potion & Fight wilds in Rts 1/2/22: Fight the first encounter on each. You may PC heal anytime, but must stop there.|potionandexp.png
-Luck Incense: Instead of trashing heals over cap, may have your pokemon hold them and take them back later.|luck.png
+Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 Berry Juice|berry-juice.png
 Clairvoyance: Learn all future curses.|clairvoyance.png
@@ -35,7 +35,7 @@ Potion & Any Status Heal x2|potiontwochoice.png
 HP Cap +100|healing-pocket.png
 Status Cap +1 & Any Status Heal & Potion|trifecta.png
 Duplicator: Gain a copy of one future HP/PP/status healing item found (immediate choice).|duplicator.png
-Luck Incense: Instead of trashing heals over cap, may have your pokemon hold them and take them back later.|luck.png
+Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Temporary TM Voucher: Teach one TM found before the next badge (immediate choice).|bluevoucher.png
 Potion x3|threepotion.png
 Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
@@ -75,7 +75,7 @@ Nature Mint: Change your nature to one of your choice.|mint.png
 HP Cap +50 & Ability Capsule|hp50capsule.png
 Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 Duplicator: Gain a copy of one future healing HP/PP/status item found (immediate choice).|duplicator.png
-Luck Incense: Instead of trashing heals over cap, may have your pokemon hold them and take them back later.|luck.png
+Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 PP Up & Max Ether|ppupmaxether.png
 Any Vitamin x2 & Super Potion|2vitsuper.png
