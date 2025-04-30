@@ -159,8 +159,8 @@ Hyper Potion & Elixir|hyperandelixir.png
 Any Battle Item x2 & Super Potion|twoXsuper.png
 Super Potion x2 & Any Battle Item|twosupersandx.png
 Super Potion & Full Heal & Elixir|superfullelixir.png
-Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
-Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag.|grounditemandsuper.png
+Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag.|grounditem-fullheal.png
 Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
@@ -198,8 +198,8 @@ Hyper Potion & Elixir|hyperandelixir.png
 Any Battle Item x2 & Super Potion|twoXsuper.png
 Super Potion x2 & Any Battle Item|twosupersandx.png
 Super Potion & Full Heal & Elixir|superfullelixir.png
-Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
-Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag.|grounditemandsuper.png
+Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag.|grounditem-fullheal.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
 Held Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png

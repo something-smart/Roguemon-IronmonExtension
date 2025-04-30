@@ -38,6 +38,7 @@ local function RoguemonTracker()
 		["Fight up to 5 wilds in Forest"] = {consumable = "true", image = "exp-forest.png", description = "Can't heal in between. Can run but counts as 1 of the 5."},
 		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 TM found in the future (immediate decision)."},
 		["Revive"] = {consumable = true, image = "revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."},
+		["Max Revive"] = {consumable = true, image = "max-revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."},
 		["Warding Charm"] = {consumable = true, image = "warding-charm.png", description = "Cancel the effect of any one Curse."},
 		["Cooler Bag"] = {consumable = false, image = "coolerbag.png", description = "Drinks don't count against HP cap, and Berry Juices may be saved."},
 		["Regenerator"] = {consumable = false, image = "leftovers.png", description = "Regain 3% of max HP after every fight."},
@@ -624,6 +625,9 @@ local function RoguemonTracker()
 		if redFlags <= 3  and size > 0 then
 			if priorItemsPocket[24] and (not itemsPocket[24]) and (not newItemsPocket[24]) and specialRedeems.consumable["Revive"] then
 				self.removeSpecialRedeem("Revive")
+			end
+			if priorItemsPocket[25] and (not itemsPocket[25]) and (not newItemsPocket[25]) and specialRedeems.consumable["Max Revive"] then
+				self.removeSpecialRedeem("Max Revive")
 			end
 			priorItemsPocket = itemsPocket
 			priorBerryPocket = berryPocket
@@ -2469,6 +2473,7 @@ local function RoguemonTracker()
 		["Lemonade"] = "lemonade.png",
 		["Moomoo Milk"] = "moomoo-milk.png",
 		["Hyper Potion"] = "hyper-potion.png",
+		["Energy Root"] = "energy-root.png",
 		["Antidote"] = "antidote2.png",
 		["Parlyz Heal"] = "paralyze-heal2.png",
 		["Burn Heal"] = "burn-heal2.png",
@@ -2815,7 +2820,7 @@ local function RoguemonTracker()
 			while #choices < choiceCount do
 				local choice = rewardOptions[math.random(#rewardOptions)]
 				if string.sub(choice, 1, 6) == "Revive" and specialRedeems.consumable["Revive"] then
-					choice = "Max Revive: Upgrade your Revive to a Max Revive.|max-revive.png"
+					choice = "Max Revive: Upgrade your Revive to a Max Revive."
 				end
 				local choiceName = Utils.split(choice, ":", true)[1]
 				local choiceParts = Utils.split(choiceName, '&', true)
@@ -2939,8 +2944,6 @@ local function RoguemonTracker()
 					self.AddItemImproved(reward, itemCount)
 					if reward == "Max Revive" then
 						self.removeSpecialRedeem("Revive")
-						specialRedeems.consumable["Max Revive"] = true
-						specialRedeems.consumable[#specialRedeems.consumable + 1] = "Max Revive"
 						self.removeItem("Revive", 1)
 					end
 				end
