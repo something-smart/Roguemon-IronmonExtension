@@ -1,11 +1,13 @@
 150,3
 Rival 1,150,3,It's Dangerous To Go Alone
 Brock,200,5,Brock Prize
+Brock 2,200,5,Brock Prize 2
 Mt Moon FC,200,5,Mt Moon FC Prize
 Misty,300,5,Misty Prize
 Surge,350,6,Surge Prize
 Erika,450,6,Erika Prize
 Koga,500,7,Koga Prize
+Koga 2,500,7,Koga Prize 2
 Silph Co,500,7,Silph Co FC Prize
 Sabrina,550,8,Sabrina Prize
 Blaine,600,8,Blaine Prize
@@ -13,42 +15,41 @@ Giovanni,700,8,Giovanni Prize
 Victory Road,700,8,Victory Road FC Prize
 -
 *It's Dangerous To Go Alone
-Potion & Parlyz Heal & Antidote|potionparaantidote.png
-Potion x2 & Parlyz Heal|potiontwopara.png
-Potion x2 & Antidote|potiontwoantidote.png
+Potion x2 & Any Status Heal|twopotionandchoice.png
 HP Cap +50|healing-pocket.png
-Status Cap +1 & Potion & Any Status Heal|trifecta.png
+Status Cap +1 & Any Status Heal x2|trifecta.png
 Fight up to 5 wilds in Forest: Can't heal in between. Can run but counts as 1 of the 5.|exp-forest.png
 Potion & Fight wilds in Rts 1/2/22: Fight the first encounter on each. You may PC heal anytime, but must stop there.|potionandexp.png
-Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
-Berry Juice|berry-juice.png
-Clairvoyance: Learn all future curses.|clairvoyance.png
 
 *Brock Prize
+Duplicator: Gain a copy of one future HP/PP/status healing item found (immediate choice).|duplicator.png
+Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
+Temporary TM Voucher: Teach one future TM found before the next badge (immediate choice).|bluevoucher.png
+Temporary Item Pass: All legal items are unlocked for the next two gyms.|tempvoucher.png
+Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
+Nature Mint: Change your nature to one of your choice.|mint.png
+Ability Capsule|ability-capsule.png
+Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
+Clairvoyance: Learn all future curses.|clairvoyance.png
+Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
+Flutist: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flute.png
+Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
+
+*Brock Prize 2
 Potion x2 & Ether|twopotionether.png
 Full Heal & Any Status Heal|allfourstatus.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 Potion & Ether & Any Status Heal|potionstatusether.png
-Potion x2 & Any Status Heal|twopotionandchoice.png
-Potion & Any Status Heal x2|potiontwochoice.png
+Potion x2 & Any Status Heal x2|twopotionandchoice.png
 HP Cap +100|healing-pocket.png
-Status Cap +1 & Any Status Heal & Potion|trifecta.png
-Duplicator: Gain a copy of one future HP/PP/status healing item found (immediate choice).|duplicator.png
-Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
-Temporary TM Voucher: Teach one future TM found before the next badge (immediate choice).|bluevoucher.png
+Status Cap +1 & Any Status Heal & Potion x2|trifecta.png
 Potion x3|threepotion.png
-Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
-Nature Mint: Change your nature to one of your choice.|mint.png
-HP Cap +50 & Ability Capsule|hp50capsule.png
-Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 PP Up & Potion|ppuppotion.png
 Any Vitamin x2 & Potion|2vitpot.png
 Any Vitamin & Potion x2|2potvit.png
 PP Up & Ether|ppupether.png
 Choose 2: Choose 2 prizes at the next gym milestone.|choose-2.png
-Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
-Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 
 *Mt Moon FC Prize
 Super Potion|super-potion.png
@@ -62,52 +63,31 @@ Super Potion x2|twosupers.png
 Full Heal & Any Status Heal|allfourstatus.png
 Potion x3 & Any Status Heal|threepotionandchoice.png
 Super Potion & Any Status Heal x2|superandchoice.png
-Temporary Found Item: Temporarily unlock an item in your bag for 2 gym badges.|grounditem.png
 HP Cap +100|healing-pocket.png
-Status Cap +1 & Any Status Heal & Potion|trifecta.png
+Status Cap +1 & Any Status Heal & Super Potion|trifecta.png
 Super Potion & Any Status Heal & Ether|superstatusether.png
-Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
-Temporary Item Voucher: Permanently unlock one future non-revive item found before next gym (immediate decision).|tempvoucher.png
-Teach 1 currently held TM|tm.png
-Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
-Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
-Nature Mint: Change your nature to one of your choice.|mint.png
-HP Cap +50 & Ability Capsule|hp50capsule.png
-Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
-Duplicator: Gain a copy of one future healing HP/PP/status item found (immediate choice).|duplicator.png
-Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 PP Up & Max Ether|ppupmaxether.png
 Any Vitamin x2 & Super Potion|2vitsuper.png
 Any Vitamin x3|3vit.png
-Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
-Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
-Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
-Special Insight: Learn every enemy pokemon's ability.|special-insight.png
+Teach 1 currently held TM|tm.png
 
 *Surge Prize
-TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
-Super Potion x3|threesuper.png
-Super Potion x2 & Any Status Heal|twosuperandchoice.png
-HP Cap +100|healing-pocket.png
-HP Cap +50 & Any Status Heal|capandchoice.png
-HP Cap +50 & Super Potion|capandsuper.png
-Super Potion & Any Status Heal & Ether|superchoiceether.png
-Status Cap +1 & Any Status Heal & Potion|trifecta.png
-Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
-Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
-Temporary Item Voucher: Permanently unlock one future non-revive item found before next gym (immediate decision).|tempvoucher.png
+Flutist: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flute.png
 Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
+Nature Mint: Change your nature to one of your choice.|mint.png
+Ability Capsule|ability-capsule.png
 Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
-X Speed & Super Potion|xspesuper.png
-X Defend & Super Potion x2|xdef2super.png
-Guard Spec. & Dire Hit & Ether|direguardether.png
-HP Cap +50 & Rare Candy|hp50candy.png
-Any Vitamin x3|3vit.png
-Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
+Duplicator: Gain a copy of one future HP/PP/status healing item found (immediate choice).|duplicator.png
+Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
-Regenerator: Regain 3% of max HP after every fight.|leftovers.png
+Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 Special Insight: Learn every pokemon's ability.|special-insight.png
+TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
+Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
+Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
+Regenerator: Regain 3% of max HP after every fight.|leftovers.png
+Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and teach one (or none).|tm.png
@@ -118,114 +98,105 @@ Super Potion x2 & Full Heal|twosuperandfull.png
 Any Battle Item x2|twoxitems.png
 Move Tutor 3F & PP Max: May teach the Move Tutor's move on the 3rd floor of Dept Store. Cannot pre-scout.|ppmaxtutor.png
 Super Potion & Any Battle Item|superandx.png
-Found Item: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem.png
 HP Cap +100|healing-pocket.png
 HP Cap +50 & X Accuracy|hp50xacc.png
 HP Cap +50 & Elixir|healing-pocketandelixir.png
-Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
-Temporary Item Voucher: Permanently unlock one future non-revive item found before next gym (immediate decision).|tempvoucher.png
-TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
 Rare Candy x2|2candy.png
-Regenerator: Regain 3% of max HP after every fight.|leftovers.png
-Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
-Special Insight: Learn every pokemon's ability.|special-insight.png
-Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Found Item: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem.png
 
 *Koga Prize
-Teach 1 currently held TM|tm.png
+Flutist: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flute.png
+Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
+Regenerator: Regain 3% of max HP after every fight.|leftovers.png
+Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
+Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
+Special Insight: Learn every pokemon's ability.|special-insight.png
+Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
+X Factor: You may keep and use Battle Items freely.|XFACTOR.png
+Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
+TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
+
+*Koga Prize 2
 Hyper Potion & Super Potion|hyperandsuper.png
 Hyper Potion & Full Heal|hyperandfull.png
 Hyper Potion & Elixir|hyperandelixir.png
 Any Battle Item x2 & Super Potion|twoXsuper.png
 Super Potion x2 & Any Battle Item|twosupersandx.png
 Super Potion & Full Heal & Elixir|superfullelixir.png
-Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
-Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+HP Cap +150|healing-pocket.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in Fuchsia City. Cannot pre-scout.|hp50tutor.png
-HP Cap +150|healing-pocket.png
-Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
-X Factor: You may keep and use Battle Items freely.|XFACTOR.png
-Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
+Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+Teach 1 currently held TM|tm.png
 
 *Silph Co FC Prize
-Teach 1 currently held TM|tm.png
 Hyper Potion & Super Potion|hyperandsuper.png
 Hyper Potion & Full Heal|hyperandfull.png
 Hyper Potion & Elixir|hyperandelixir.png
 Any Battle Item x2 & Super Potion|twoXsuper.png
 Super Potion x2 & Any Battle Item|twosupersandx.png
 Super Potion & Full Heal & Elixir|superfullelixir.png
-Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag.|grounditemandsuper.png
-Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag.|grounditem-fullheal.png
-Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
+HP Cap +150|healing-pocket.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
-HP Cap +150|healing-pocket.png
-Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
-X Factor: You may keep and use Battle Items freely.|XFACTOR.png
-Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
+Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
+Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+Teach 1 currently held TM|tm.png
 
 *Sabrina Prize
-Teach 1 currently held TM|tm.png
 Hyper Potion & Super Potion|hyperandsuper.png
 Hyper Potion & Full Heal|hyperandfull.png
 Hyper Potion & Elixir|hyperandelixir.png
 Any Battle Item x2 & Super Potion|twoXsuper.png
 Super Potion x2 & Any Battle Item|twosupersandx.png
 Super Potion & Full Heal & Elixir|superfullelixir.png
-Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
-Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+HP Cap +150|healing-pocket.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor & Poke Doll: May use the Copycat move tutor. Cannot pre-scout.|hp50tutor.png
-HP Cap +150|healing-pocket.png
-Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
-Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
-
-*Blaine Prize
-Teach 1 currently held TM|tm.png
-Hyper Potion & Super Potion|hyperandsuper.png
-Hyper Potion & Full Heal|hyperandfull.png
-Hyper Potion & Elixir|hyperandelixir.png
-Any Battle Item x2 & Super Potion|twoXsuper.png
-Super Potion x2 & Any Battle Item|twosupersandx.png
-Super Potion & Full Heal & Elixir|superfullelixir.png
-Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag.|grounditemandsuper.png
-Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag.|grounditem-fullheal.png
-HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
-HP Cap +50 & Super Potion|healing-pocket-super.png
-Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
-Fight Route X: Treat the routes together as a segment.|exp-charm.png
-HP Cap +50 & Move Tutor: May use the move tutor in the Cinnabar Lab. Cannot pre-scout.|hp50tutor.png
-HP Cap +150|healing-pocket.png
-Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
-
-*Giovanni Prize
-Teach 1 currently held TM|tm.png
-Hyper Potion & Super Potion|hyperandsuper.png
-Hyper Potion & Full Heal|hyperandfull.png
-Hyper Potion & Elixir|hyperandelixir.png
-Any Battle Item x2 & Super Potion|twoXsuper.png
-Super Potion x2 & Any Battle Item|twosupersandx.png
-Super Potion & Full Heal & Elixir|superfullelixir.png
 Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
 Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
-Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
+Teach 1 currently held TM|tm.png
+
+*Blaine Prize
+Hyper Potion & Super Potion|hyperandsuper.png
+Hyper Potion & Full Heal|hyperandfull.png
+Hyper Potion & Elixir|hyperandelixir.png
+Any Battle Item x2 & Super Potion|twoXsuper.png
+Super Potion x2 & Any Battle Item|twosupersandx.png
+Super Potion & Full Heal & Elixir|superfullelixir.png
+HP Cap +150|healing-pocket.png
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
-Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
-HP Cap +50 & Move Tutor: May use the move tutor in Viridian City. Cannot pre-scout.|hp50tutor.png
+HP Cap +50 & Move Tutor: May use the move tutor in the Cinnabar Lab. Cannot pre-scout.|hp50tutor.png
+Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
+Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+Teach 1 currently held TM|tm.png
+
+*Giovanni Prize
+Hyper Potion & Super Potion|hyperandsuper.png
+Hyper Potion & Full Heal|hyperandfull.png
+Hyper Potion & Elixir|hyperandelixir.png
+Any Battle Item x2 & Super Potion|twoXsuper.png
+Super Potion x2 & Any Battle Item|twosupersandx.png
+Super Potion & Full Heal & Elixir|superfullelixir.png
 HP Cap +150|healing-pocket.png
-Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
+HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
+HP Cap +50 & Super Potion|healing-pocket-super.png
+Fight Route X: Treat the routes together as a segment.|exp-charm.png
+HP Cap +50 & Move Tutor: May use the move tutor in Viridian by water. Cannot pre-scout.|hp50tutor.png
+Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
+Found Item & Super Potion: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditemandsuper.png
+Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
+Teach 1 currently held TM|tm.png
 
 *Victory Road FC Prize
 Full Restore|full-restore.png
