@@ -1,16 +1,16 @@
 150,3
 Rival 1,150,3,It's Dangerous To Go Alone
 Brock,200,5,Brock Prize
-Mt Moon FC,200,5,Mt Moon FC Prize
+Mt. Moon,200,5,Mt. Moon Prize
 Misty,300,5,Misty Prize
 Surge,350,6,Surge Prize
 Erika,450,6,Erika Prize
 Koga,500,7,Koga Prize
-Silph Co,500,7,Silph Co FC Prize
+Silph Co,500,7,Silph Co Prize
 Sabrina,550,8,Sabrina Prize
 Blaine,600,8,Blaine Prize
 Giovanni,700,8,Giovanni Prize
-Victory Road,700,8,Victory Road FC Prize
+Victory Road,700,8,Victory Road Prize
 -
 *It's Dangerous To Go Alone
 Potion & Parlyz Heal & Antidote|potionparaantidote.png
@@ -50,7 +50,7 @@ Choose 2: Choose 2 prizes at the next gym milestone.|choose-2.png
 Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 
-*Mt Moon FC Prize
+*Mt. Moon Prize
 Super Potion|super-potion.png
 Elixir|elixir.png
 One of Move Tutor Bros: You may use a Tutor outside Mt. Moon. Cannot pre-scout; see both and teach one (or none).|tmtwo.png
@@ -151,7 +151,7 @@ Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 
-*Silph Co FC Prize
+*Silph Co Prize
 Teach 1 currently held TM|tm.png
 Hyper Potion & Super Potion|hyperandsuper.png
 Hyper Potion & Full Heal|hyperandfull.png
@@ -227,7 +227,7 @@ HP Cap +50 & Move Tutor: May use the move tutor in Viridian City. Cannot pre-sco
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 
-*Victory Road FC Prize
+*Victory Road Prize
 Full Restore|full-restore.png
 Max Potion & Full Heal|maxandfull.png
 Big Mushroom & Found TM OR Move Reminder: May use Move Reminder in Celadon; may also use kept mushrooms.|tmrelearnmush.png

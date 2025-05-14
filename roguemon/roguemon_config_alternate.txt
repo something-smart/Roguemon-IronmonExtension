@@ -2,17 +2,17 @@
 Rival 1,150,3,It's Dangerous To Go Alone
 Brock,200,5,Brock Prize
 Brock 2,200,5,Brock Prize 2
-Mt Moon FC,200,5,Mt Moon FC Prize
+Mt. Moon,200,5,Mt. Moon Prize
 Misty,300,5,Misty Prize
 Surge,350,6,Surge Prize
 Erika,450,6,Erika Prize
 Koga,500,7,Koga Prize
 Koga 2,500,7,Koga Prize 2
-Silph Co,500,7,Silph Co FC Prize
+Silph Co,500,7,Silph Co Prize
 Sabrina,550,8,Sabrina Prize
 Blaine,600,8,Blaine Prize
 Giovanni,700,8,Giovanni Prize
-Victory Road,700,8,Victory Road FC Prize
+Victory Road,700,8,Victory Road Prize
 -
 *It's Dangerous To Go Alone
 Potion x2 & Any Status Heal|twopotionandchoice.png
@@ -51,7 +51,7 @@ Any Vitamin & Potion x2|2potvit.png
 PP Up & Ether|ppupether.png
 Choose 2: Choose 2 prizes at the next gym milestone.|choose-2.png
 
-*Mt Moon FC Prize
+*Mt. Moon Prize
 Super Potion|super-potion.png
 Elixir|elixir.png
 One of Move Tutor Bros: You may use a Tutor outside Mt. Moon. Cannot pre-scout; see both and teach one (or none).|tmtwo.png
@@ -133,7 +133,7 @@ Found Item & Super Potion: Permanently unlock any non-revive item currently in t
 Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
 Teach 1 currently held TM|tm.png
 
-*Silph Co FC Prize
+*Silph Co Prize
 Hyper Potion & Super Potion|hyperandsuper.png
 Hyper Potion & Full Heal|hyperandfull.png
 Hyper Potion & Elixir|hyperandelixir.png
@@ -198,7 +198,7 @@ Found Item & Super Potion: Permanently unlock any non-revive item currently in t
 Found Item & Full Heal: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem-fullheal.png
 Teach 1 currently held TM|tm.png
 
-*Victory Road FC Prize
+*Victory Road Prize
 Full Restore|full-restore.png
 Max Potion & Full Heal|maxandfull.png
 Big Mushroom & Found TM OR Move Reminder: May use Move Reminder in Celadon; may also use kept mushrooms.|tmrelearnmush.png

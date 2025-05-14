@@ -55,9 +55,9 @@ local function RoguemonTracker()
 
 	-- Trainer IDs for milestones. "count" indicates how many trainers must be defeated for the milestone to count.
 	local milestoneTrainers = {
-		[326] = {["name"] = "Rival 1", ["count"] = 1},
-		[327] = {["name"] = "Rival 1", ["count"] = 1},
-		[328] = {["name"] = "Rival 1", ["count"] = 1},
+		-- [326] = {["name"] = "Rival 1", ["count"] = 1},
+		-- [327] = {["name"] = "Rival 1", ["count"] = 1},
+		-- [328] = {["name"] = "Rival 1", ["count"] = 1},
 		[414] = {["name"] = "Brock", ["count"] = 1},
 		[415] = {["name"] = "Misty", ["count"] = 1},
 		[416] = {["name"] = "Surge", ["count"] = 1},
@@ -67,7 +67,7 @@ local function RoguemonTracker()
 		[420] = {["name"] = "Sabrina", ["count"] = 1},
 		[419] = {["name"] = "Blaine", ["count"] = 1},
 		[350] = {["name"] = "Giovanni", ["count"] = 1},
-		["Mt. Moon"] = "Mt Moon FC",
+		["Mt. Moon"] = "Mt. Moon",
 		["Silph Co"] = "Silph Co",
 		["Victory Road"] = "Victory Road"
 	}
@@ -370,8 +370,8 @@ local function RoguemonTracker()
 	-- previous theme, to be stored while the curse theme is active
 	local previousTheme = nil
 
-	-- tracks if we have given the moon stone yet. 0 = not at all, 1 = initial trade was offered (-100 HP Cap), 2 = given for free
-	local offeredMoonStoneFirst = 0
+	-- tracks how many times the roguestone has been offered
+	local offeredMoonStoneFirst = 1
 
 	-- Options
 	local RoguemonOptions = {
@@ -406,6 +406,7 @@ local function RoguemonTracker()
 	
 	-- Get item ID corresponding to an item name, if there is one
 	function self.getItemId(itemName)
+		if itemName == "Poke Doll" then return 80 end
 		if itemName == Constants.BLANKLINE then return 0 end
 		for id, item in pairs(MiscData.Items) do
 			if item == itemName then
@@ -809,7 +810,7 @@ local function RoguemonTracker()
 
 	-- Helper function to change to or queue a screen
 	function self.readyScreen(screen)
-		if Program.currentScreen == TrackerScreen then
+		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
 			Program.changeScreenView(screen)
 		else
 			screenQueue[#screenQueue + 1] = screen
@@ -958,7 +959,6 @@ local function RoguemonTracker()
 		["Noibat"] = "32",
 		["Cosmog"] = "18",
 		["Toxel"] = "19",
-		["Snom"] = "18",
 		["Dreepy"] = "30",
 		["Drakloak"] = "52",
 		["Varoom"] = "32",
@@ -1514,7 +1514,7 @@ local function RoguemonTracker()
 				local currentLevel = pkInfo.level
 				local targetLevel = currentLevel
 
-				local timeWarpedExp = math.floor(pkInfo.experience * 0.25)
+				timeWarpedExp = math.floor(pkInfo.experience * 0.25)
 
 				local targetExp = pkInfo.experience - timeWarpedExp
 				local growthRateIndex = Memory.readbyte(GameSettings.gBaseStats + (pkInfo.pokemonID * Program.Addresses.sizeofBaseStatsPokemon) + Program.Addresses.offsetGrowthRateIndex)
@@ -1912,7 +1912,7 @@ local function RoguemonTracker()
 				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OSS_LEFT_TOP_LEFT_X + (i*(OSS_BUTTON_WIDTH + OSS_BUTTON_HORIZONTAL_GAP)), 
 				OSS_TOP_BUTTON_Y + (j*(OSS_BUTTON_HEIGHT + OSS_BUTTON_VERTICAL_GAP)), OSS_BUTTON_WIDTH, OSS_BUTTON_HEIGHT },
 				onClick = function()
-					self.selectAdditionalOption(self.splitOn(additionalOptions[index], "(")[1]) -- if a button has (), it's clarification text; we display it but don't read it
+					self.selectAdditionalOption(additionalOptions[index])
 				end,
 				isVisible = function()
 					return additionalOptions[index] and additionalOptions[index] ~= "" -- Visible as long as it has text
@@ -1933,7 +1933,6 @@ local function RoguemonTracker()
 			additionalOptions[i] = ""
 		end
 		additionalOptionsRemaining = 1
-		self.setCurrentRoguemonScreen(OptionSelectionScreen)
 		self.readyScreen(OptionSelectionScreen)
 	end
 
@@ -2846,7 +2845,6 @@ local function RoguemonTracker()
 			end
 			self.offerBinaryOption("Cash Out - " .. buyable, "Wait")
 		end
-		currentRoguemonScreen = ShopScreen
 		self.beginShop()
 		self.readyScreen(ShopScreen)
 	end
@@ -2988,7 +2986,6 @@ local function RoguemonTracker()
 			else
 				self.readyScreen(RewardScreen)
 			end
-			self.setCurrentRoguemonScreen(RewardScreen)
 			Program.redraw(true)
 		end
 
@@ -3141,7 +3138,7 @@ local function RoguemonTracker()
 
 		self.updateCaps(false)
 
-		if option ~= "Choose 2" and specialRedeems.consumable["Choose 2"]  and not milestoneTrainers[self.baseMilestone(lastMilestone)] then
+		if option ~= "Choose 2" and specialRedeems.consumable["Choose 2"] and not milestoneTrainers[self.baseMilestone(lastMilestone)] then
 			self.removeSpecialRedeem("Choose 2")
 			self.readyScreen(RewardScreen)
 			if option1 == option then
@@ -3188,7 +3185,8 @@ local function RoguemonTracker()
 	}
 
 	-- Select an option on the additional option screen. Usually this just yields an item.
-	function self.selectAdditionalOption(option)
+	function self.selectAdditionalOption(rawOption)
+		local option = self.splitOn(rawOption, "(")[1]  -- if a button has (), it's clarification text; we display it but don't read it
 		local special = false
 		-- Special button options provided by certain redeems.
 		for prefix,func in pairs(prefixHandlers) do
@@ -3225,9 +3223,15 @@ local function RoguemonTracker()
 			additionalOptionsRemaining = additionalOptionsRemaining - 1
 		end
 		if option == "RogueStone" then
-			-- Moon stone trade reduces HP cap by 100
-			hpCapModifier = hpCapModifier - 100
-			hpCap = hpCap - 100
+			-- Moon stone trade reduces HP cap
+			local capReduced = 0
+			if rawOption == "RogueStone (-50 HP Cap)" then
+				capReduced = 50
+			elseif rawOption == "RogueStone (-100 HP Cap)" then
+				capReduced = 100
+			end
+			hpCapModifier = hpCapModifier - capReduced
+			hpCap = hpCap - capReduced
 			self.AddItemImproved("RogueStone", 1)
 			additionalOptionsRemaining = additionalOptionsRemaining - 1
 			special = true
@@ -3956,7 +3960,7 @@ local function RoguemonTracker()
 
 	-- Buy phase notification followed by cleansing phase notification, once the player leaves the gym and takes their prize
 	function self.handleBuyCleanseNotifs(mapId)
-		if Program.currentScreen == TrackerScreen and not (currentRoguemonScreen == RewardScreen) then
+		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
 			if needToBuy then
 				if not gymMapIds[mapId] then
 					needToBuy = false
@@ -4126,13 +4130,13 @@ local function RoguemonTracker()
 	end
 
 	function self.returnToHomeScreen()
-		if #screenQueue > 0 then
+		if #screenQueue > 0  and currentRoguemonScreen == RunSummaryScreen then
 			local s = table.remove(screenQueue, 1)
 			Program.changeScreenView(s)
 			if s == OptionSelectionScreen or s == RewardScreen then
 				self.setCurrentRoguemonScreen(s)
 			end
-		elseif needToCleanse > 0 and not needToBuy then
+		elseif needToCleanse > 0 and not needToBuy and currentRoguemonScreen == RunSummaryScreen then
 			if Program.currentScreen == OptionSelectionScreen then
 				Program.changeScreenView(TrackerScreen)
 			end
@@ -4247,6 +4251,36 @@ local function RoguemonTracker()
 		if readOptions then
 			for k,v in pairs(readOptions) do
 				RoguemonOptions[k] = v
+			end
+		end
+	end
+
+	local rogueStoneThresholds = {
+		{bst = 290, locations = {{map = 80, trainer = 414, amt = 50}, {map = 81, trainer = nil, amt = 0}}},
+		{bst = 320, locations = {{map = 80, trainer = 414, amt = 100}, {map = 81, trainer = nil, amt = 50}, {map = 81, trainer = 415, amt = 0}}},
+		{bst = 370, locations = {{map = 81, trainer = 415, amt = 100}, {map = 83, trainer = 416, amt = 50}, {map = 82, trainer = nil, amt = 0}}},
+		{bst = 601, locations = {{map = 83, trainer = 416, amt = 100}, {map = 82, trainer = nil, amt = 50}, {map = 84, trainer = 417, amt = 0}}}
+	}
+
+	function self.checkRogueStoneOffers(mapId, pokemon)
+		if pokemon and PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
+			local bst = PokemonData.Pokemon[pokemon.pokemonID].bst
+			for _,info in pairs(rogueStoneThresholds) do
+				if bst <= info.bst then
+					local loc = info.locations[offeredMoonStoneFirst]
+					if loc then
+						if mapId == loc.map and (not loc.trainer or defeatedTrainerIds[loc.trainer]) then
+							offeredMoonStoneFirst = offeredMoonStoneFirst + 1
+							if loc.amt > 0 then
+								self.offerBinaryOption("RogueStone (-" .. loc.amt .. " HP Cap)", "Skip")
+							else
+								self.AddItemImproved("RogueStone", 1)
+								self.displayNotification("A RogueStone has been added to your bag", "moon-stone.png", nil)
+							end
+						end
+					end
+					break
+				end
 			end
 		end
 	end
@@ -4366,7 +4400,6 @@ local function RoguemonTracker()
 
 		self.saveData()
 	end
-
 	
 	self.configureOptions = function()
 		Program.changeScreenView(RoguemonOptionsScreen)
@@ -4667,7 +4700,7 @@ local function RoguemonTracker()
 		self.drawCapsAndRoguemonMenu()
 		if LogOverlay.isGameOver and self.getActiveCurse() then
 			self.resetTheme()
-			self.undoCurse()
+			self.undoCurse(self.getActiveCurse())
 		end
 		if self.getActiveCurse() == "Memory Game" then
 			if Program.currentScreen == TrackerScreen and not (Battle.inBattle and not Battle.isViewingOwn) then
@@ -4748,19 +4781,9 @@ local function RoguemonTracker()
 			self.nextSegment()
 			self.saveData()
 		end
-		-- Check if we have entered Celadon for the first time with a pokemon that can evolve with a moon stone.
-		if offeredMoonStoneFirst == 0 and mapId == 84 and PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
-			offeredMoonStoneFirst = 1
-			-- Set up the options to offer the trade
-			self.offerBinaryOption("RogueStone (-100 HP Cap)", "Skip")
-		end
-		-- Check if we are in Celadon City with Hideout completed with a pokemon that can evolve with a moon stone.
-		if offeredMoonStoneFirst < 2 and mapId == 84 and defeatedTrainerIds[348] and PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed and self.contains(PokemonData.Pokemon[pokemon.pokemonID].evolution.detailed, "RogueStone") then
-			offeredMoonStoneFirst = 2
-			-- Give it for free
-			self.AddItemImproved("RogueStone", 1)
-			self.displayNotification("A RogueStone has been added to your bag", "moon-stone.png", nil)
-		end
+
+		-- RogueStone offer checks
+		self.checkRogueStoneOffers(mapId, pokemon)
 
 		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to RogueStone and update some evo levels
 		if not patchedChangedEvos and PokemonData.Pokemon[412] ~= nil then
@@ -4875,20 +4898,24 @@ local function RoguemonTracker()
 		end
 
 		-- Display suppressed notifications from before the player has committed
-		if committed and Program.currentScreen == TrackerScreen and #suppressedNotifications > 0 then
-			local n = table.remove(suppressedNotifications, 1)
-			self.displayNotification(n.message, n.image, n.dismissFunction)
+		if committed and lastMilestone == nil and Program.currentScreen == TrackerScreen then
+			if #suppressedNotifications > 0 then
+				local n = table.remove(suppressedNotifications, 1)
+				self.displayNotification(n.message, n.image, n.dismissFunction)
+			else
+				self.spinReward("Rival 1", false)
+			end
 		end
 
 		-- if we haven't yet chosen the curses for this seed, choose them now
 		self.determineCurses()
 
 		-- Display any queued screens
-		if Program.currentScreen == TrackerScreen then
+		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
 			if #screenQueue > 0 then
 				local s = table.remove(screenQueue, 1)
 				Program.changeScreenView(s)
-				if s == OptionSelectionScreen or s == RewardScreen then
+				if s == OptionSelectionScreen or s == RewardScreen or s == ShopScreen then
 					self.setCurrentRoguemonScreen(s)
 				end
 			else
