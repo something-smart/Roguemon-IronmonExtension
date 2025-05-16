@@ -4599,6 +4599,22 @@ local function RoguemonTracker()
 		}
 	end
 
+	function self.updateGameSettings()
+		local GS = GameSettings
+
+		-- FireRed
+		if GS.game == 3 then
+			GS.FriendshipRequiredToEvo = 0x08042fa8 + 0x13e -- GetEvolutionTargetSpecies + 0x13e
+		end
+	end
+
+	function self.updateFriendshipValues()
+		local friendshipRequired = Memory.readbyte(GameSettings.FriendshipRequiredToEvo) + 1
+		if friendshipRequired > 1 and friendshipRequired ~= Program.GameData.FriendshipRequiredToEvo then
+			Program.GameData.friendshipRequired = friendshipRequired
+		end
+	end
+
 	function self.startup()
 		-- Read & populate configuration info
 		self.readConfig()
@@ -4649,6 +4665,9 @@ local function RoguemonTracker()
 		-- Update RogueStone name
 		MiscData.Items[94] = "RogueStone"
 		MiscData.EvolutionStones[94].name = "RogueStone"
+
+		self.updateGameSettings()
+		self.updateFriendshipValues()
 	end
 
 	function self.unload()
