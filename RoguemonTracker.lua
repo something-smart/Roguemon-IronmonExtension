@@ -811,6 +811,9 @@ local function RoguemonTracker()
 	-- Helper function to change to or queue a screen
 	function self.readyScreen(screen)
 		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
+			if screen == OptionSelectionScreen or screen == RewardScreen or screen == ShopScreen then
+				self.setCurrentRoguemonScreen(screen)
+			end
 			Program.changeScreenView(screen)
 		else
 			screenQueue[#screenQueue + 1] = screen
@@ -1041,6 +1044,22 @@ local function RoguemonTracker()
 					end
 				end
 			end
+		end
+	end
+
+	function self.updateGameSettings()
+		local GS = GameSettings
+
+		-- FireRed
+		if GS.game == 3 then
+			GS.FriendshipRequiredToEvo = 0x08042fa8 + 0x13e -- GetEvolutionTargetSpecies + 0x13e
+		end
+	end
+
+	function self.updateFriendshipValues()
+		local friendshipRequired = Memory.readbyte(GameSettings.FriendshipRequiredToEvo) + 1
+		if friendshipRequired > 1 and friendshipRequired ~= Program.GameData.FriendshipRequiredToEvo then
+			Program.GameData.friendshipRequired = friendshipRequired
 		end
 	end
 
@@ -1352,9 +1371,10 @@ local function RoguemonTracker()
 			if profile then
 			    local settingsName = FileManager.extractFileNameFromPath(profile.Paths.Settings or "")
 			    if Utils.containsText(settingsName, "Ascension", true) then
-					return tonumber(settingsName:match("(%d+)") or "") or 0
+					return tonumber(settingsName:match("(%d+)") or "") or 1
 			    end
 			end
+			return 1
 		else
 			return tonumber(RoguemonOptions["Ascension"])
 		end
@@ -2666,7 +2686,6 @@ local function RoguemonTracker()
 		itemsPocket = newItemsPocket
 		priorBerryPocket = newBerryPocket
 		berryPocket = newBerryPocket
-		needToCleanse = phases[self.baseMilestone(lastMilestone)].cleansing and 1 or 2
 	end
 
 	function ShopScreen.drawScreen()
@@ -2989,10 +3008,11 @@ local function RoguemonTracker()
 			Program.redraw(true)
 		end
 
-		if phases[milestoneName] then
-			if phases[milestoneName].buy then
+		if phases[self.baseMilestone(lastMilestone)] then
+			if phases[self.baseMilestone(lastMilestone)].buy then
 				needToBuy = true
 			end
+			needToCleanse = phases[self.baseMilestone(lastMilestone)].cleansing and 1 or 2
 		end
 
 	end
@@ -3964,9 +3984,9 @@ local function RoguemonTracker()
 			if needToBuy then
 				if not gymMapIds[mapId] then
 					needToBuy = false
-					self.buyPhase()
+					self.addUpdateCounter("Buy Phase", 2, function() self.buyPhase() end, 1)
 				end
-			elseif needToCleanse > 0 and not needToBuy then
+			elseif needToCleanse > 0 and not needToBuy and not updateCounters["Buy Phase"] then
 				self.cleansingPhase(needToCleanse == 2)
 				needToCleanse = 0
 			end
@@ -4756,17 +4776,17 @@ local function RoguemonTracker()
 		if not caughtSomethingYet and #Program.GameData.PlayerTeam > 1 then
 			caughtSomethingYet = true
 		end
-		local toCommit = false
-		-- Check if the player has previously caught something but deposited down to 1
-		if not committed and caughtSomethingYet and #Program.GameData.PlayerTeam == 1 and mapId ~= 8 then
-			toCommit = true
-		end
-		-- Check if we have fought a trainer in Viridian Forest
-		if not committed and (defeatedTrainerIds[102] or defeatedTrainerIds[103] or defeatedTrainerIds[104] or 
-		defeatedTrainerIds[531] or defeatedTrainerIds[532]) then
-			toCommit = true
-		end
-		if toCommit then
+		-- local toCommit = false
+		-- -- Check if the player has previously caught something but deposited down to 1
+		-- if not committed and caughtSomethingYet and #Program.GameData.PlayerTeam == 1 and mapId ~= 8 then
+		-- 	toCommit = true
+		-- end
+		-- -- Check if we have fought a trainer in Viridian Forest
+		-- if not committed and (defeatedTrainerIds[102] or defeatedTrainerIds[103] or defeatedTrainerIds[104] or 
+		-- defeatedTrainerIds[531] or defeatedTrainerIds[532]) then
+		-- 	toCommit = true
+		-- end
+		if not committed and Memory.readbyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + 0x82) == 2 then
 			committed = true
 			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
 				self.displayNotification("Use the Egg, Luke!", "lucky-egg.png", function()
@@ -4785,9 +4805,11 @@ local function RoguemonTracker()
 		-- RogueStone offer checks
 		self.checkRogueStoneOffers(mapId, pokemon)
 
-		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to RogueStone and update some evo levels
+		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to RogueStone and update some evo levels & friendship values
 		if not patchedChangedEvos and PokemonData.Pokemon[412] ~= nil then
 			self.patchChangedEvos()
+			self.updateGameSettings()
+			self.updateFriendshipValues()
 		end
 
 		-- Check if we are in battle for curses
@@ -4923,11 +4945,21 @@ local function RoguemonTracker()
 			end
 		end
 
-		if defeatedTrainerIds[414] and not needToBuy and not (needToCleanse > 0) and Program.currentScreen == TrackerScreen and not showedEggReminderAfterBrock and RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem == 197 then
+		-- if defeatedTrainerIds[414] and not needToBuy and not (needToCleanse > 0) and Program.currentScreen == TrackerScreen and not showedEggReminderAfterBrock 
+		-- and RoguemonOptions["Egg reminders"] and (previousMap == 10) and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem == 197 then
+		-- 	showedEggReminderAfterBrock = true
+		-- 	self.displayNotification("Your free Egg trial has expired", "lucky-egg.png", function()
+		-- 		return (Tracker.getPokemon(1, true).heldItem ~= 197 and self.itemNotPresent(197))
+		-- 	end)
+		-- end
+
+		if defeatedTrainerIds[414] and not showedEggReminderAfterBrock and RoguemonOptions["Egg reminders"] and 
+		Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem == 197 then
 			showedEggReminderAfterBrock = true
-			self.displayNotification("Your free Egg trial has expired", "lucky-egg.png", function()
-				return (Tracker.getPokemon(1, true).heldItem ~= 197 and self.itemNotPresent(197))
-			end)
+			local pkmn = self.readLeadPokemonData()
+			-- delete lucky egg
+			pkmn.growth1 = Utils.getbits(pkmn.growth1, 0, 16) + Utils.bit_lshift(0x0, 16)
+			self.writeLeadPokemonData(pkmn)
 		end
 
 		if previousMap ~= mapId then
