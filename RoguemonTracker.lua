@@ -173,8 +173,12 @@ local function RoguemonTracker()
 							longDescription = "If this segment isn't full cleared, all type-boosting items will apply a unique negative effect on pickup."},
 		["Debilitation"] = {description = "Attacking IVs temporarily set to 0", segment = true, gym = false},
 		["Time Warp"] = {description = "Lose 25% of your EXP until the segment ends", segment = true, gym = true},
-		["Memory Game"] = {description = "Moves hidden, one per fight is Metronome", segment = true, gym = false},
+		["TikTok"] = {description = "One move per fight is secretly Metronome.", segment = true, gym = false},
 	}
+
+	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
+	local ROM_CURSE_NONE   = 0
+	local ROM_CURSE_TIKTOK = 1 << 0
 
 	local notifyOnPickup = {
 		consumables = {
@@ -302,7 +306,6 @@ local function RoguemonTracker()
 	local lastUsedMove = nil
 	local ppValues = {0, 0, 0, 0}
 	local curseCooldown = 0
-	local drewBlackBarsForMemoryGame = false
 
 	-- Dynamic, and must be saved/loaded:
 
@@ -363,9 +366,6 @@ local function RoguemonTracker()
 
 	-- exp temporarily lost to Time Warp
 	local timeWarpedExp = 0
-
-	-- move replaced by Memory Game
-	local memoryGameMove = nil
 
 	-- previous theme, to be stored while the curse theme is active
 	local previousTheme = nil
@@ -1061,6 +1061,8 @@ local function RoguemonTracker()
 		-- FireRed
 		if GS.game == 3 then
 			GS.FriendshipRequiredToEvo = 0x08042fa8 + 0x13e -- GetEvolutionTargetSpecies + 0x13e
+			GS.HandleTurnActionSelectionState = 0x08014c5c + 0x1 -- HandleTurnActionSelectionState + 0x1
+			GS.ReturnFromBattleToOverworld = 0x08016774 + 0x1 -- ReturnFromBattleToOverworld + 0x1
 		end
 	end
 
@@ -1437,9 +1439,8 @@ local function RoguemonTracker()
 				Memory.writedword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.getbits(lvCurHp, 0, 16) + Utils.bit_lshift(currentHP, 16))
 			end, 1)
 		end
-		if curse == "Memory Game" then
-			self.memoryGameOff()
-			Program.removeFrameCounter("Memory Game Move Obscuring")
+		if curse == "TikTok" then
+			self.romCurseOff(ROM_CURSE_TIKTOK)
 		end
 	end
 
@@ -1571,13 +1572,8 @@ local function RoguemonTracker()
 					end
 				end, 1)
 			end
-			if curse == "Memory Game" then
-				self.memoryGameOn()
-				Program.addFrameCounter("Memory Game Move Obscuring", 1, function()
-					if not drewBlackBarsForMemoryGame and Battle.inBattle and Memory.readbyte(GameSettings.sBattleBuffersTransferData) == 20 then
-						Program.redraw(true)
-					end
-				end)
+			if curse == "TikTok" then
+				self.romCurseOn(ROM_CURSE_TIKTOK)
 			end
 		end
 	end
@@ -1613,45 +1609,18 @@ local function RoguemonTracker()
 		self.saveData()
 	end
 
-	function self.memoryGameOn()
-		local pkmn = self.readLeadPokemonData()
-		local moves = {
-			{ id = Utils.getbits(pkmn.attack1, 0, 16), pp = Utils.getbits(pkmn.attack3, 0, 8) },
-			{ id = Utils.getbits(pkmn.attack1, 16, 16), pp = Utils.getbits(pkmn.attack3, 8, 8) },
-			{ id = Utils.getbits(pkmn.attack2, 0, 16), pp = Utils.getbits(pkmn.attack3, 16, 8) },
-			{ id = Utils.getbits(pkmn.attack2, 16, 16), pp = Utils.getbits(pkmn.attack3, 24, 8) }
-		}
-		local mInd = math.random(4)
-		memoryGameMove = moves[mInd]
-		moves[mInd] = {id = 118, pp = 10}
-
-		pkmn.attack1 = moves[1].id + Utils.bit_lshift(moves[2].id, 16)
-		pkmn.attack2 = moves[3].id + Utils.bit_lshift(moves[4].id, 16)
-		pkmn.attack3 = moves[1].pp + Utils.bit_lshift(moves[2].pp, 8) + Utils.bit_lshift(moves[3].pp, 16) + Utils.bit_lshift(moves[4].pp, 24)
-		self.writeLeadPokemonData(pkmn)
+	function self.getCurseVarAddr()
+		return Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + 0x7E
 	end
 
-	function self.memoryGameOff()
-		if memoryGameMove then
-			local pkmn = self.readLeadPokemonData()
-			local moves = {
-				{ id = Utils.getbits(pkmn.attack1, 0, 16), pp = Utils.getbits(pkmn.attack3, 0, 8) },
-				{ id = Utils.getbits(pkmn.attack1, 16, 16), pp = Utils.getbits(pkmn.attack3, 8, 8) },
-				{ id = Utils.getbits(pkmn.attack2, 0, 16), pp = Utils.getbits(pkmn.attack3, 16, 8) },
-				{ id = Utils.getbits(pkmn.attack2, 16, 16), pp = Utils.getbits(pkmn.attack3, 24, 8) }
-			}
-			for i,m in ipairs(moves) do
-				if m.id == 118 then
-					moves[i] = memoryGameMove
-					memoryGameMove = nil
-				end
-			end
+	function self.romCurseOn(curse)
+		newVal = Memory.readbyte(self.getCurseVarAddr()) | curse
+		Memory.writebyte(self.getCurseVarAddr(), newVal)
+	end
 
-			pkmn.attack1 = moves[1].id + Utils.bit_lshift(moves[2].id, 16)
-			pkmn.attack2 = moves[3].id + Utils.bit_lshift(moves[4].id, 16)
-			pkmn.attack3 = moves[1].pp + Utils.bit_lshift(moves[2].pp, 8) + Utils.bit_lshift(moves[3].pp, 16) + Utils.bit_lshift(moves[4].pp, 24)
-			self.writeLeadPokemonData(pkmn)
-		end
+	function self.romCurseOff(curse)
+		newVal = Memory.readbyte(self.getCurseVarAddr()) & ~curse
+		Memory.writebyte(self.getCurseVarAddr(), newVal)
 	end
 
 	-- Determine if a particular segment has been reached yet
@@ -3786,10 +3755,6 @@ local function RoguemonTracker()
 			curseAppliedThisSegment = true
 			self.randomlyReplaceMove(4)
 		end
-		if curse == "Memory Game" then
-			self.memoryGameOff()
-			self.memoryGameOn()
-		end
 	end
 
 	function self.ongoingCurse(curse)
@@ -4214,7 +4179,6 @@ local function RoguemonTracker()
 			['savedIVs'] = savedIVs,
 			['timeWarpedExp'] = timeWarpedExp,
 			['runSummary'] = runSummary,
-			['memoryGameMove'] = memoryGameMove,
 		}
 
 		if not DEBUG_MODE then
@@ -4255,7 +4219,6 @@ local function RoguemonTracker()
 			savedIVs = saveData['savedIVs'] or savedIVs
 			timeWarpedExp = saveData['timeWarpedExp'] or timeWarpedExp
 			runSummary = saveData['runSummary'] or runSummary
-			memoryGameMove = saveData['memoryGameMove'] or memoryGameMove
 		end
 		if rivalCombined then
 			for _,tid in pairs(segments[segmentOrder[currentSegment-1]]["trainers"]) do
@@ -4737,24 +4700,6 @@ local function RoguemonTracker()
 		if LogOverlay.isGameOver and self.getActiveCurse() then
 			self.resetTheme()
 			self.undoCurse(self.getActiveCurse())
-		end
-		if self.getActiveCurse() == "Memory Game" then
-			if Program.currentScreen == TrackerScreen and not (Battle.inBattle and not Battle.isViewingOwn) then
-				gui.drawRectangle(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 95, 136, 39, 0xFF000000, 0xFF000000)
-			end
-			if Battle.inBattle and Memory.readbyte(GameSettings.sBattleBuffersTransferData) == 20 and not drewBlackBarsForMemoryGame then
-				gui.drawRectangle(15, 120, 70, 30, 0xFF000000, 0xFF000000)
-				gui.drawRectangle(103, 120, 70, 30, 0xFF000000, 0xFF000000)
-				gui.drawRectangle(199, 120, 33, 30, 0xFF000000, 0xFF000000)
-				drewBlackBarsForMemoryGame = true
-			else
-				if drewBlackBarsForMemoryGame then
-					gui.drawRectangle(15, 120, 70, 30, 0xFF000000, 0xFF000000)
-					gui.drawRectangle(103, 120, 70, 30, 0xFF000000, 0xFF000000)
-					gui.drawRectangle(199, 120, 33, 30, 0xFF000000, 0xFF000000)
-				end
-				drewBlackBarsForMemoryGame = false
-			end
 		end
 	end
 
