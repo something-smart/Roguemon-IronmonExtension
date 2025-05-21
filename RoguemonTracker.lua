@@ -816,7 +816,15 @@ local function RoguemonTracker()
 			end
 			Program.changeScreenView(screen)
 		else
-			screenQueue[#screenQueue + 1] = screen
+			local found = false
+			for _,s in ipairs(screenQueue) do
+				if s == screen then
+					found = true
+				end
+			end
+			if not found then
+				screenQueue[#screenQueue + 1] = screen
+			end
 		end
 	end
 
@@ -3961,6 +3969,10 @@ local function RoguemonTracker()
 				self.applyStatus(0, math.random(4) + 1, false)
 			end
 		end
+
+		if currentRoguemonScreen ~= RunSummaryScreen then
+			currentRoguemonScreen = RunSummaryScreen
+		end
 	end
 
 	-- DISPLAY/NOTIFICATION FUNCTIONS -- 
@@ -4287,17 +4299,21 @@ local function RoguemonTracker()
 			local bst = PokemonData.Pokemon[pokemon.pokemonID].bst
 			for _,info in pairs(rogueStoneThresholds) do
 				if bst <= info.bst then
-					local loc = info.locations[offeredMoonStoneFirst]
-					if loc then
+					local index = offeredMoonStoneFirst
+					local loc = info.locations[index]
+					while loc do
 						if mapId == loc.map and (not loc.trainer or defeatedTrainerIds[loc.trainer]) then
-							offeredMoonStoneFirst = offeredMoonStoneFirst + 1
+							offeredMoonStoneFirst = index + 1
 							if loc.amt > 0 then
 								self.offerBinaryOption("RogueStone (-" .. loc.amt .. " HP Cap)", "Skip")
 							else
 								self.AddItemImproved("RogueStone", 1)
 								self.displayNotification("A RogueStone has been added to your bag", "moon-stone.png", nil)
 							end
+							break
 						end
+						index = index + 1
+						loc = info.locations[index]
 					end
 					break
 				end
@@ -4776,16 +4792,7 @@ local function RoguemonTracker()
 		if not caughtSomethingYet and #Program.GameData.PlayerTeam > 1 then
 			caughtSomethingYet = true
 		end
-		-- local toCommit = false
-		-- -- Check if the player has previously caught something but deposited down to 1
-		-- if not committed and caughtSomethingYet and #Program.GameData.PlayerTeam == 1 and mapId ~= 8 then
-		-- 	toCommit = true
-		-- end
-		-- -- Check if we have fought a trainer in Viridian Forest
-		-- if not committed and (defeatedTrainerIds[102] or defeatedTrainerIds[103] or defeatedTrainerIds[104] or 
-		-- defeatedTrainerIds[531] or defeatedTrainerIds[532]) then
-		-- 	toCommit = true
-		-- end
+
 		if not committed and Memory.readbyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + 0x82) == 2 then
 			committed = true
 			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
