@@ -179,6 +179,7 @@ local function RoguemonTracker()
 	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
 	local ROM_CURSE_NONE   = 0
 	local ROM_CURSE_TIKTOK = 1 << 0
+	local ROM_CURSE_TOXIC_FUMES = 1 << 1
 
 	local notifyOnPickup = {
 		consumables = {
@@ -357,9 +358,6 @@ local function RoguemonTracker()
 
 	-- exists if the Poltergeist curse has been triggered, and holds any carried-over effects
 	local haunted = nil
-
-	-- step count information for Toxic Fumes curse
-	local stepCounter = {lastCounted = 0, toxicFumesCycle = 0}
 
 	-- atk/spatk IVs if Debilitation is active
 	local savedIVs = {}
@@ -1442,6 +1440,9 @@ local function RoguemonTracker()
 		if curse == "TikTok" then
 			self.romCurseOff(ROM_CURSE_TIKTOK)
 		end
+		if curse == "Toxic Fumes" then
+			self.romCurseOff(ROM_CURSE_TOXIC_FUMES)
+		end
 	end
 
 	-- Move to the next segment.
@@ -1510,10 +1511,6 @@ local function RoguemonTracker()
 				Theme.importThemeFromText(CURSE_THEME, true)
 			end
 			self.displayNotification("Curse: " .. curse .. " @ " .. self.getCurseDescription(curse), "Curse.png", nil)
-			if curse == "Toxic Fumes" then
-				stepCounter.lastCounted = Utils.getGameStat(Constants.GAME_STATS.STEPS)
-				stepCounter.toxicFumesCycle = 0
-			end
 			if curse == "High Pressure" then
 				local pkmn = self.readLeadPokemonData()
 				local pp1 = Utils.getbits(pkmn.attack3, 0, 8)
@@ -1574,6 +1571,9 @@ local function RoguemonTracker()
 			end
 			if curse == "TikTok" then
 				self.romCurseOn(ROM_CURSE_TIKTOK)
+			end
+			if curse == "Toxic Fumes" then
+				self.romCurseOn(ROM_CURSE_TOXIC_FUMES)
 			end
 		end
 	end
@@ -4173,7 +4173,6 @@ local function RoguemonTracker()
 			['unlockedHeldItems'] = unlockedHeldItems,
 			['downsized'] = downsized,
 			['haunted'] = haunted,
-			['stepCounter'] = stepCounter,
 			['previousTheme'] = previousTheme,
 			['rivalCombined'] = rivalCombined,
 			['savedIVs'] = savedIVs,
@@ -4213,7 +4212,6 @@ local function RoguemonTracker()
 			unlockedHeldItems = saveData['unlockedHeldItems'] or unlockedHeldItems
 			downsized = saveData['downsized'] or downsized
 			haunted = saveData['haunted'] or haunted
-			stepCounter = saveData['stepCounter'] or stepCounter
 			previousTheme = saveData['previousTheme'] or Theme.exportThemeToText()
 			rivalCombined = saveData['rivalCombined'] or rivalCombined
 			savedIVs = saveData['savedIVs'] or savedIVs
@@ -4783,30 +4781,6 @@ local function RoguemonTracker()
 				curseAppliedThisFight = false
 				inBattleTurnCount = -1
 				curseCooldown = 0
-				if curse == "Toxic Fumes" then
-					local steps = Utils.getGameStat(Constants.GAME_STATS.STEPS)
-					local stepDiff = (steps - stepCounter.lastCounted) % (2^32)
-					local newCycle = stepCounter.toxicFumesCycle + stepDiff
-					local hpToDeduct = math.floor(newCycle / 8)
-					if hpToDeduct >= 0 and hpToDeduct <= 16 then
-						-- Guard against garbage/erroneous reads
-						if hpToDeduct > 0 then
-							newCycle = newCycle - 8*hpToDeduct
-							local startAddress = GameSettings.pstats
-							local level_and_currenthp = Memory.readdword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp)
-							local levelPlusUnusedByte = Utils.getbits(level_and_currenthp, 0, 16)
-							local currentHP = Utils.getbits(level_and_currenthp, 16, 16)
-							currentHP = currentHP - hpToDeduct
-							if currentHP < 1 then
-								currentHP = 1
-							end
-							Memory.writedword(startAddress + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.bit_lshift(currentHP, 16) + levelPlusUnusedByte)
-						end
-						stepCounter.toxicFumesCycle = newCycle
-						stepCounter.lastCounted = steps
-					end
-					self.saveData()
-				end
 			end
 		else
 			if Battle.inBattle then
