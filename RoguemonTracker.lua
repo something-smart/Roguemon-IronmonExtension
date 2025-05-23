@@ -177,9 +177,10 @@ local function RoguemonTracker()
 	}
 
 	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
-	local ROM_CURSE_NONE   = 0
-	local ROM_CURSE_TIKTOK = 1 << 0
+	local ROM_CURSE_NONE        = 0
+	local ROM_CURSE_TIKTOK      = 1 << 0
 	local ROM_CURSE_TOXIC_FUMES = 1 << 1
+	local ROM_CURSE_MOODY       = 1 << 2
 
 	local notifyOnPickup = {
 		consumables = {
@@ -1443,6 +1444,9 @@ local function RoguemonTracker()
 		if curse == "Toxic Fumes" then
 			self.romCurseOff(ROM_CURSE_TOXIC_FUMES)
 		end
+		if curse == "Moody" then
+			self.romCurseOff(ROM_CURSE_MOODY)
+		end
 	end
 
 	-- Move to the next segment.
@@ -1575,6 +1579,9 @@ local function RoguemonTracker()
 			if curse == "Toxic Fumes" then
 				self.romCurseOn(ROM_CURSE_TOXIC_FUMES)
 			end
+                        if curse == "Moody" then
+                                self.romCurseOn(ROM_CURSE_MOODY)
+                        end
 		end
 	end
 
@@ -3818,15 +3825,6 @@ local function RoguemonTracker()
 			faintToProcess = false
 			relayRaceStats.spe = relayRaceStats.spe + 1
 			self.setStatStages(1, relayRaceStats)
-		end
-		if curse == "Moody" and inBattleTurnCount > 0 then
-			local stats = {"atk", "def", "spa", "spd", "spe", "acc", "eva"}
-			local statUp = table.remove(stats, math.random(#stats))
-			local statDown = table.remove(stats, math.random(#stats))
-			local stages = self.getStatStages(0)
-			stages[statUp] = stages[statUp] + 1
-			stages[statDown] = stages[statDown] - 1
-			self.setStatStages(0, stages)
 		end
 		local newPPValues = self.getPPValues()
 		if inBattleTurnCount > 0 then
