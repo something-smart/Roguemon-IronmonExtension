@@ -178,9 +178,9 @@ local function RoguemonTracker()
 
 	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
 	local ROM_CURSE_NONE        = 0
-	local ROM_CURSE_TIKTOK      = 1 << 0
-	local ROM_CURSE_TOXIC_FUMES = 1 << 1
-	local ROM_CURSE_MOODY       = 1 << 2
+	local ROM_CURSE_TIKTOK      = 1
+	local ROM_CURSE_TOXIC_FUMES = 2
+	local ROM_CURSE_MOODY       = 4
 
 	local notifyOnPickup = {
 		consumables = {
@@ -1620,13 +1620,23 @@ local function RoguemonTracker()
 		return Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + 0x7E
 	end
 
+	local function bit_not(n)
+		local p,c=1,0
+		while n>0 do
+			local r=n%2
+			if r<1 then c=c+p end
+			n,p=(n-r)/2,p*2
+		end
+		return c
+	end
+
 	function self.romCurseOn(curse)
-		newVal = Memory.readbyte(self.getCurseVarAddr()) | curse
+		local newVal = Utils.bit_or(Memory.readbyte(self.getCurseVarAddr()), curse)
 		Memory.writebyte(self.getCurseVarAddr(), newVal)
 	end
 
 	function self.romCurseOff(curse)
-		newVal = Memory.readbyte(self.getCurseVarAddr()) & ~curse
+		local newVal = Utils.bit_and(Memory.readbyte(self.getCurseVarAddr()), bit_not(curse))
 		Memory.writebyte(self.getCurseVarAddr(), newVal)
 	end
 
