@@ -293,6 +293,7 @@ local function RoguemonTracker()
 	local needToCleanse = 0
 	local shouldDismissNotification = nil
 	local foundItemPrizeActive = false
+	local lastFoughtTrainerId = 0
 
 	-- curse related values
 	local curseAppliedThisFight = false
@@ -4298,7 +4299,12 @@ local function RoguemonTracker()
 			return
 		end
 		-- Determine if we have just defeated a trainer
-		local trainerId = Memory.readword(GameSettings.gTrainerBattleOpponent_A)
+		local trainerId = lastFoughtTrainerId
+		if trainerId == 0 then
+			Utils.printDebug("Roguemon Error: Battle ended but we don't know the trainerId. Please report to #bug-reporting on Roguemon discord.")
+			return
+		end
+		lastFoughtTrainerId = 0
 		if defeatedTrainerIds[trainerId] then
 			-- Fought a wild
 			if TrackerAPI.getBattleOutcome() == 1 or (wildBattlesStarted and TrackerAPI.getBattleOutcome() == 4) then
@@ -4315,6 +4321,17 @@ local function RoguemonTracker()
 			return
 		else
 			defeatedTrainerIds[trainerId] = true
+		end
+
+		-- Attempt to true-up any defeated trainers which we somehow missed.
+		local segInfo = segments[segmentOrder[currentSegment]]
+		for _,t in pairs(segInfo["trainers"]) do
+			if TrackerAPI.hasDefeatedTrainer(t) and not defeatedTrainerIds[t] then
+				local warningMsg = "Roguemon Warning: Missed that we defeated trainer %d. Fixing. " ..
+				                   "Please report to #bug-reporting on Roguemon Discord."
+				Utils.printDebug(warningMsg, t)
+				defeatedTrainerIds[t] = true
+			end
 		end
 
 		-- Check bag updates before doing anything else
@@ -4371,7 +4388,6 @@ local function RoguemonTracker()
 		end
 
 		-- Check if trainer was part of the current segment
-		local segInfo = segments[segmentOrder[currentSegment]]
 		for _,t in pairs(segInfo["mandatory"]) do
 			if t == trainerId then
 				if not (segInfo["pairs"] and defeatedTrainerIds[segInfo["pairs"][trainerId]]) then
@@ -4802,6 +4818,7 @@ local function RoguemonTracker()
 		end
 		if Battle.inBattle then
 			self.checkInBattleEffects()
+			lastFoughtTrainerId = TrackerAPI.getOpponentTrainerId()
 		end
 
 		-- Check updates to bag items and pokemon info
