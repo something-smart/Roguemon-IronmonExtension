@@ -182,6 +182,15 @@ local function RoguemonTracker()
 	local ROM_CURSE_TOXIC_FUMES = 2
 	local ROM_CURSE_MOODY       = 4
 
+	local addressOffsets = {
+		-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
+		-- Note that GameSettings.gameVarsOffset may be modified by the NatDex
+		-- extension _after_ we initialize.
+		varAscension              = 0x5e,
+		varCurse                  = 0x7e,
+		varRoguemonSegment        = 0x82,
+	}
+
 	local notifyOnPickup = {
 		consumables = {
 			["Oran Berry"] = 2,
@@ -1066,6 +1075,10 @@ local function RoguemonTracker()
 		end
 	end
 
+	function self.setROMAscension()
+		Memory.writebyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varAscension, self.ascensionLevel())
+	end
+
 	function self.updateFriendshipValues()
 		local friendshipRequired = Memory.readbyte(GameSettings.FriendshipRequiredToEvo) + 1
 		if friendshipRequired > 1 and friendshipRequired ~= Program.GameData.FriendshipRequiredToEvo then
@@ -1618,7 +1631,7 @@ local function RoguemonTracker()
 	end
 
 	function self.getCurseVarAddr()
-		return Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + 0x7E
+		return Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varCurse
 	end
 
 	local function bit_not(n)
@@ -4660,6 +4673,9 @@ local function RoguemonTracker()
 		-- Set up a frame counter to save the roguemon data every 30 seconds
 		self.addUpdateCounter("Roguemon Saving", 30, self.saveData)
 
+		-- Write ascension data to the ROM regularly, as loaded saves may overwrite it
+		self.addUpdateCounter("Set ROM Ascension", 30, self.setROMAscension)
+
 		-- Add a setting so Roguemon seeds default to being over when the entire party faints
 		QuickloadScreen.SettingsKeywordToGameOverMap["Ascension"] = "EntirePartyFaints"
 
@@ -4759,8 +4775,7 @@ local function RoguemonTracker()
 		if not caughtSomethingYet and #Program.GameData.PlayerTeam > 1 then
 			caughtSomethingYet = true
 		end
-
-		if not committed and Memory.readbyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + 0x82) == 2 then
+		if not committed and Memory.readbyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varRoguemonSegment) == 2 then
 			committed = true
 			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
 				self.displayNotification("Use the Egg, Luke!", "lucky-egg.png", function()
