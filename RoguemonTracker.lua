@@ -1477,6 +1477,33 @@ local function RoguemonTracker()
 		end
 	end
 
+	-- Marks all of the trainers for the given segment as defeated in the ROM, such that
+	-- players don't accidentally fight trainers from past segments when backtracking.
+	function self.nullifyTrainers(segment)
+		local segInfo = segments[segmentOrder[segment]]
+		local flagBytes = {}
+
+		local saveBlock1Addr = Utils.getSaveBlock1Addr()
+
+		for _,trainerId in pairs(segInfo["trainers"]) do
+			-- largely copied from Program.hasDefeatedTrainer
+
+			local idAddrOffset = math.floor((Program.Addresses.offsetTrainerFlagStart + trainerId) / 8)
+			local idBit = (Program.Addresses.offsetTrainerFlagStart + trainerId) % 8
+			local trainerFlagAddr = saveBlock1Addr + GameSettings.gameFlagsOffset + idAddrOffset
+
+			if not flagBytes[trainerFlagAddr] then
+				flagBytes[trainerFlagAddr] = Memory.readbyte(trainerFlagAddr)
+			end
+
+			flagBytes[trainerFlagAddr] = Utils.bit_or(flagBytes[trainerFlagAddr], Utils.bit_lshift(1, idBit))
+		end
+
+		for addr, flags in pairs(flagBytes) do
+			Memory.writebyte(addr, flags)
+		end
+	end
+
 	-- Move to the next segment.
 	function self.nextSegment()
 		local curse = self.getActiveCurse()
@@ -1496,6 +1523,10 @@ local function RoguemonTracker()
 			end
 		end
 		self.undoCurse(curse)
+
+		if enforceRules then
+			self.nullifyTrainers(currentSegment)
+		end
 
 		rivalCombined = false
 		if segmentOrder[currentSegment + 1] and string.sub(segmentOrder[currentSegment + 1], 1, 5) == "Rival" and (self.ascensionLevel() > 2) then
