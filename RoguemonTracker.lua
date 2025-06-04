@@ -189,7 +189,13 @@ local function RoguemonTracker()
 		varAscension              = 0x5e,
 		varCurse                  = 0x7e,
 		varRoguemonSegment        = 0x82,
+
+		-- these are offset from SaveBlock2Addr
+		optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
 	}
+
+	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
+	local enforceRules = false
 
 	local notifyOnPickup = {
 		consumables = {
@@ -1077,6 +1083,14 @@ local function RoguemonTracker()
 
 	function self.setROMAscension()
 		Memory.writebyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varAscension, self.ascensionLevel())
+	end
+
+	-- Read rules enforcement state from the ROM. Set in game options menu.
+	function self.getRulesEnforcement()
+		local saveBlock2Addr = Utils.getSaveBlock2Addr()
+
+		local options = Memory.readbyte(saveBlock2Addr + addressOffsets.optionsRoguemonRules)
+		enforceRules = Utils.getbits(options, 5, 1) ~= 0
 	end
 
 	function self.updateFriendshipValues()
@@ -4675,6 +4689,9 @@ local function RoguemonTracker()
 
 		-- Write ascension data to the ROM regularly, as loaded saves may overwrite it
 		self.addUpdateCounter("Set ROM Ascension", 30, self.setROMAscension)
+
+		-- User may toggle this in the options menu of the game
+		self.addUpdateCounter("Get Rules Enforcement", 6, self.getRulesEnforcement)
 
 		-- Add a setting so Roguemon seeds default to being over when the entire party faints
 		QuickloadScreen.SettingsKeywordToGameOverMap["Ascension"] = "EntirePartyFaints"
