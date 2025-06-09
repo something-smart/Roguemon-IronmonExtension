@@ -182,6 +182,11 @@ local function RoguemonTracker()
 	local ROM_CURSE_TOXIC_FUMES = 2
 	local ROM_CURSE_MOODY       = 4
 
+	-- This is incremented whenever we make a change in the ROM that
+	-- requires a change in the tracker, or vice versa. We check it against
+	-- what is the ROM, and throw an error if it doesn't match.
+	local trackerCompatVersion = 0x01
+
 	local addressOffsets = {
 		-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
 		-- Note that GameSettings.gameVarsOffset may be modified by the NatDex
@@ -244,6 +249,7 @@ local function RoguemonTracker()
 	
 	local seedNumber = -1
 	local loadedData = false
+	local loadedExtension = false
 	local milestones = {} -- Milestones stored in order
 	local milestonesByName = {} -- Milestones keyed by name for easy access
 	local wheels = {}
@@ -1079,6 +1085,10 @@ local function RoguemonTracker()
 			GS.HandleTurnActionSelectionState = 0x08014c5c + 0x1 -- HandleTurnActionSelectionState + 0x1
 			GS.ReturnFromBattleToOverworld = 0x08016774 + 0x1 -- ReturnFromBattleToOverworld + 0x1
 		end
+	end
+
+	function self.getROMCompatVersion()
+		return Memory.readbyte(0x08000200)
 	end
 
 	function self.setROMAscension()
@@ -4352,6 +4362,9 @@ local function RoguemonTracker()
 	-- EXTENSION FUNCTIONS --
 
 	function self.afterBattleEnds()
+		if not loadedExtension then
+			return
+		end
 		if TrackerAPI.getBattleOutcome() == 2 then
 			-- We lost :(
 			return
@@ -4679,6 +4692,15 @@ local function RoguemonTracker()
 	end
 
 	function self.startup()
+		local romCompatVersion = self.getROMCompatVersion()
+		if romCompatVersion ~= trackerCompatVersion then
+			Utils.printDebug("!! Roguemon Error: This tracker does not support this ROM. " ..
+			                 "Either the ROM or the tracker needs an update.\n" ..
+					 "romCompatVersion: %d, trackerCompatVersion: %d",
+					 romCompatVersion, trackerCompatVersion)
+			return
+		end
+
 		-- Read & populate configuration info
 		self.readConfig()
 		self.populateSegmentData()
@@ -4734,6 +4756,8 @@ local function RoguemonTracker()
 		-- Update RogueStone name
 		MiscData.Items[94] = "RogueStone"
 		MiscData.EvolutionStones[94].name = "RogueStone"
+
+		loadedExtension = true
 	end
 
 	function self.unload()
@@ -4781,6 +4805,9 @@ local function RoguemonTracker()
 	end
 
 	function self.afterRedraw()
+		if not loadedExtension then
+			return
+		end
 		self.redrawScreenImages()
 		self.drawCapsAndRoguemonMenu()
 		if LogOverlay.isGameOver and self.getActiveCurse() then
@@ -4790,6 +4817,9 @@ local function RoguemonTracker()
 	end
 
 	function self.afterProgramDataUpdate()
+		if not loadedExtension then
+			return
+		end
 		for name,counter in pairs(updateCounters) do
 			counter.currentUpdateCount = counter.currentUpdateCount - 1
 			if counter.currentUpdateCount == 0 then
