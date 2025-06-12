@@ -7,6 +7,8 @@ local function RoguemonTracker()
 	self.github = "something-smart/Roguemon-IronmonExtension"
 	self.url = string.format("https://github.com/%s", self.github or "")
 
+	local RoguemonUtils = dofile(FileManager.getExtensionsFolderPath() .. "roguemon" .. FileManager.slash .. "utils.lua")
+
 	-- turn this on to have the reward screen accessible at any time
 	local DEBUG_MODE = false
 
@@ -5020,11 +5022,12 @@ local function RoguemonTracker()
 		end
 	end
 
+
 	function self.checkForUpdates()
-		local versionResponsePattern = '"tag_name":%s+"%w+(%d+%.%d+%.*%d*)"' -- matches "1.0" in "tag_name": "v1.0"
+		local versionResponsePattern = '"tag_name":%s+"%w+(%d+%.%d+%.%d[%d%w%-%+]*)"' -- matches "1.0.1-label+build" in "tag_name": "v1.0.1-label+build"
 		local versionCheckUrl = string.format("https://api.github.com/repos/%s/releases/latest", self.github or "")
 		local downloadUrl = string.format("%s/releases/latest", self.url or "")
-		local compareFunc = function(a, b) return a ~= b and not Utils.isNewerVersion(a, b) end -- if current version is *older* than online version
+		local compareFunc = function(a, b) return a ~= b and RoguemonUtils.compare_semver(a, b) == -1 end -- if current version is *older* than online version
 		local isUpdateAvailable = Utils.checkForVersionUpdate(versionCheckUrl, self.version, versionResponsePattern, compareFunc)
 		return isUpdateAvailable, downloadUrl
 	end
