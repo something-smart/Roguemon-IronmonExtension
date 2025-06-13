@@ -688,6 +688,7 @@ local function RoguemonTracker()
 				new = {stats = newPokeInfo.stats, pokemonID = newPokeInfo.pokemonID},
 				level = newPokeInfo.level
 			}
+			offeredMoonStoneFirst = 0
 		end
 		pokeInfo = newPokeInfo
 	end
@@ -1229,9 +1230,11 @@ local function RoguemonTracker()
 					smallestHeal = itemID
 				end
 			end
-			local itemLost = TrackerAPI.getItemName(smallestHeal)
-			self.removeItem(itemLost, 1)
-			return "The Poltergeist has stolen a " .. itemLost
+			if smallestHeal then
+				local itemLost = TrackerAPI.getItemName(smallestHeal)
+				self.removeItem(itemLost, 1)
+				return "The Poltergeist has stolen a " .. itemLost
+			end
 		end,
 		["FairyFeather"] = function()
 			haunted["2 Prize Options"] = true
@@ -1382,7 +1385,7 @@ local function RoguemonTracker()
 					msg = false
 				end
 			end
-			if msg and (MiscData.HealingItems[itemId] or MiscData.StatusItems[itemId] or MiscData.PPItems[itemId]) and not
+			if msg and (MiscData.HealingItems[itemId] or MiscData.StatusItems[itemId] or MiscData.PPItems[itemId] or item == "PP Up" or item == "PP Max") and not
 			((not specialRedeems.unlocks["Berry Pouch"]) and (string.sub(item, string.len(item)-4, string.len(item)) == "Berry") and MiscData.HealingItems[itemId]) then
 				self.offerBinaryOption("Duplicate " .. item, "Skip")
 			end
@@ -2985,6 +2988,12 @@ local function RoguemonTracker()
 
 	-- Spin the reward for a given milestone.
 	function self.spinReward(milestoneName, rerolled)
+		local rerollBans = nil
+		if rerolled then
+			rerollBans = {[option1] = true,
+						[option2] = true,
+						[option3] = true}
+		end
 		lastMilestone = milestoneName
 		if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
 			GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
@@ -2996,7 +3005,7 @@ local function RoguemonTracker()
 		end
 		if milestonesByName[milestoneName] then
 			local pkmn = self.readLeadPokemonData()
-			local isShiny = Utils.bit_xor(Utils.bit_xor(Utils.bit_xor(Utils.getbits(pkmn.otid, 0, 16), Utils.getbits(pkmn.otid, 19, 16)), math.floor(pkmn.personality / 65536)), pkmn.personality % 65536) < Program.Values.ShinyOdds
+			local isShiny = Utils.bit_xor(Utils.bit_xor(Utils.bit_xor(Utils.getbits(pkmn.otid, 0, 16), Utils.getbits(pkmn.otid, 16, 16)), math.floor(pkmn.personality / 65536)), pkmn.personality % 65536) < Program.Values.ShinyOdds
 
 			self.updateCaps(true)
 			local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
@@ -3028,6 +3037,9 @@ local function RoguemonTracker()
 					if(part == "Ability Capsule") then
 						choice = choice .. ": Change ability to " .. AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name .. "."
 					end
+				end
+				if rerollBans and rerollBans[choiceName] then
+					add = false
 				end
 				if add and choiceName == "Fight Route X" then
 					local routes = {"Route 12 + 13", "Route 14 + 15"}
@@ -5033,6 +5045,11 @@ local function RoguemonTracker()
 		local compareFunc = function(a, b) return a ~= b and RoguemonUtils.compare_semver(a, b) == -1 end -- if current version is *older* than online version
 		local isUpdateAvailable = Utils.checkForVersionUpdate(versionCheckUrl, self.version, versionResponsePattern, compareFunc)
 		return isUpdateAvailable, downloadUrl
+	end
+
+	-- Helper function for accessing roguemon data from the console
+	function RoguemonObj()
+		return self
 	end
 
 	return self
