@@ -1084,8 +1084,11 @@ local function RoguemonTracker()
 		-- FireRed
 		if GS.game == 3 then
 			GS.FriendshipRequiredToEvo = 0x08042fa8 + 0x13e -- GetEvolutionTargetSpecies + 0x13e
-			GS.HandleTurnActionSelectionState = 0x08014c5c + 0x1 -- HandleTurnActionSelectionState + 0x1
-			GS.ReturnFromBattleToOverworld = 0x08016774 + 0x1 -- ReturnFromBattleToOverworld + 0x1
+			GS.BattleIntroDrawPartySummaryScreens = 0x08013f00 + 0x1 -- BattleIntroDrawPartySummaryScreens + 0x1
+			GS.ReturnFromBattleToOverworld = 0x08016768 + 0x1 -- ReturnFromBattleToOverworld + 0x1
+			GS.BattleIntroOpponentSendsOutMonAnimation = 0x080141fc + 0x1 -- BattleIntroRecordMonsToDex + 0x1
+			GS.HandleTurnActionSelectionState = 0x08014c68 + 0x1 -- HandleTurnActionSelectionState + 0x1
+			GS.ReturnFromBattleToOverworld = 0x08016768 + 0x1 -- ReturnFromBattleToOverworld + 0x1
 		end
 	end
 
