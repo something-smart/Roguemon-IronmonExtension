@@ -10,7 +10,7 @@ local function RoguemonTracker()
 	local RoguemonUtils = dofile(FileManager.getExtensionsFolderPath() .. "roguemon" .. FileManager.slash .. "utils.lua")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = true
+	local DEBUG_MODE = false
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
@@ -92,7 +92,7 @@ local function RoguemonTracker()
 		["Pokemon League"] = {buy = true, cleansing = true}
 	}
 
-	-- Options for prizes that have multiple options. If a selected prize contains any of these, it will open the OptionSelectionScreen.
+	-- Options for prizes that have multiple options. If a selected prize contains any of these, it will open the self.OptionSelectionScreen.
 	-- Currently there is no support for a single prize having multiple DIFFERENT selections (e.g. 2x Any Vitamin is fine, Any Vitamin & Any Status Heal is not)
 	local prizeAdditionalOptions = {
 		["Any Status Heal"] = {"Antidote", "Parlyz Heal", "Awakening", "Burn Heal", "Ice Heal"},
@@ -768,7 +768,7 @@ local function RoguemonTracker()
 		end
 		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.pokemonID ~= newPokeInfo.pokemonID then
 			-- We evolved :D
-			self.showPrettyStatScreen(pokeInfo, newPokeInfo)
+			self.showself.PrettyStatScreen(pokeInfo, newPokeInfo)
 			runSummary[#runSummary + 1] = {
 				type = "Evolution",
 				prev = {stats = pokeInfo.stats, pokemonID = pokeInfo.pokemonID},
@@ -1398,16 +1398,16 @@ local function RoguemonTracker()
 			local itemId = self.getItemId(item)
 			if notifyOnPickup.consumables[item] and not (specialRedeems.unlocks["Berry Pouch"] and string.sub(item, string.len(item)-4, string.len(item)) == "Berry")
 			and not (specialRedeems.unlocks["Cooler Bag"] and item == "Berry Juice") then
-				NotificationScreen.queuedAuxiliary = NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
-				NotificationScreen.itemInQuestion = item
+				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
+				self.NotificationScreen.itemInQuestion = item
 				if notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse == "Kaizo Curse") then
 					return (item .. " must be used, equipped, or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
 					return (item .. " must be equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				end
 			elseif notifyOnPickup.vitamins[item] then
-				NotificationScreen.queuedAuxiliary = NotificationScreen.auxiliaryButtonInfo["TrashPickup"]
-				NotificationScreen.itemInQuestion = item
+				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["TrashPickup"]
+				self.NotificationScreen.itemInQuestion = item
 				return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 			elseif notifyOnPickup.candies[item] and not specialRedeems.unlocks["Candy Jar"] then
 				if item == "PP Max" and gymMapIds[TrackerAPI.getMapId()] then
@@ -1870,11 +1870,11 @@ local function RoguemonTracker()
 	-- TRACKER SCREENS --
 
 	-- Main screen for spinning and selecting rewards.
-    local RewardScreen = {
+    self.RewardScreen = {
 
 	}
 
-    RewardScreen.Colors = {
+    self.RewardScreen.Colors = {
 		text = "Default text",
 		highlight = "Intermediate text",
 		border = "Upper box border",
@@ -1894,23 +1894,23 @@ local function RoguemonTracker()
 	local WRAP_BUFFER = 7
 	local DESC_TEXT_HEIGHT = 68
 
-    function RewardScreen.drawScreen()
+    function self.RewardScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
 			w = Constants.SCREEN.RIGHT_GAP - (Constants.SCREEN.MARGIN * 2),
 			h = Constants.SCREEN.HEIGHT - (Constants.SCREEN.MARGIN * 2),
-			text = Theme.COLORS[RewardScreen.Colors.text],
-			border = Theme.COLORS[RewardScreen.Colors.border],
-			fill = Theme.COLORS[RewardScreen.Colors.fill],
-			shadow = Utils.calcShadowColor(Theme.COLORS[RewardScreen.Colors.fill]),
+			text = Theme.COLORS[self.RewardScreen.Colors.text],
+			border = Theme.COLORS[self.RewardScreen.Colors.border],
+			fill = Theme.COLORS[self.RewardScreen.Colors.fill],
+			shadow = Utils.calcShadowColor(Theme.COLORS[self.RewardScreen.Colors.fill]),
 		}
 		Drawing.drawBackgroundAndMargins()
 		gui.defaultTextBackground(canvas.fill)
 
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
-		for _, button in pairs(RewardScreen.Buttons or {}) do
+		for _, button in pairs(self.RewardScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
 
@@ -1928,7 +1928,7 @@ local function RoguemonTracker()
 		end
 	end
 
-	RewardScreen.Buttons = {
+	self.RewardScreen.Buttons = {
 		-- Option buttons
 		Option1 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
@@ -2035,12 +2035,12 @@ local function RoguemonTracker()
 	}
 
 	-- It took me an embarrassingly long time to realize I needed this function for my buttons to work
-	function RewardScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, RewardScreen.Buttons or {})
+	function self.RewardScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.RewardScreen.Buttons or {})
 	end
 
 	-- Screen for selecting an additional option.
-	local OptionSelectionScreen = {
+	self.OptionSelectionScreen = {
 		
 	}
 
@@ -2054,7 +2054,7 @@ local function RoguemonTracker()
 	local OSS_BUTTON_VERTICAL_GAP = 10
 	local OSS_WRAP_BUFFER = 2
 
-    function OptionSelectionScreen.drawScreen()
+    function self.OptionSelectionScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
@@ -2078,7 +2078,7 @@ local function RoguemonTracker()
 			for j = 0,3 do
 				for i = 0,1 do
 					local index = i + j*2 + 1
-					OptionSelectionScreen.Buttons[index].box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OSS_LEFT_TOP_LEFT_X + (i*(OSS_BUTTON_WIDTH + OSS_BUTTON_HORIZONTAL_GAP)), 
+					self.OptionSelectionScreen.Buttons[index].box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OSS_LEFT_TOP_LEFT_X + (i*(OSS_BUTTON_WIDTH + OSS_BUTTON_HORIZONTAL_GAP)), 
 					OSS_TOP_BUTTON_Y + (j*(OSS_BUTTON_SHORT_HEIGHT + OSS_BUTTON_VERTICAL_GAP)), OSS_BUTTON_WIDTH, OSS_BUTTON_SHORT_HEIGHT }
 				end
 			end
@@ -2086,7 +2086,7 @@ local function RoguemonTracker()
 			for j = 0,3 do
 				for i = 0,1 do
 					local index = i + j*2 + 1
-					OptionSelectionScreen.Buttons[index].box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OSS_LEFT_TOP_LEFT_X + (i*(OSS_BUTTON_WIDTH + OSS_BUTTON_HORIZONTAL_GAP)), 
+					self.OptionSelectionScreen.Buttons[index].box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OSS_LEFT_TOP_LEFT_X + (i*(OSS_BUTTON_WIDTH + OSS_BUTTON_HORIZONTAL_GAP)), 
 					OSS_TOP_BUTTON_Y + (j*(OSS_BUTTON_HEIGHT + OSS_BUTTON_VERTICAL_GAP)), OSS_BUTTON_WIDTH, OSS_BUTTON_HEIGHT }
 				end
 			end
@@ -2096,12 +2096,12 @@ local function RoguemonTracker()
 			self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 10, 120)
 		end
 
-		for _, button in pairs(OptionSelectionScreen.Buttons or {}) do
+		for _, button in pairs(self.OptionSelectionScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
 	end
 
-	OptionSelectionScreen.Buttons = {
+	self.OptionSelectionScreen.Buttons = {
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "Back" end,
@@ -2117,7 +2117,7 @@ local function RoguemonTracker()
 	for j = 0,3 do
 		for i = 0,1 do
 			local index = i + j*2 + 1
-			OptionSelectionScreen.Buttons[index] = {
+			self.OptionSelectionScreen.Buttons[index] = {
 				type = Constants.ButtonTypes.FULL_BORDER,
 				getText = function() 
 					return (additionalOptionsRemaining > 0) and self.wrapPixelsInline(additionalOptions[index], OSS_BUTTON_WIDTH - OSS_WRAP_BUFFER) or ""
@@ -2135,8 +2135,8 @@ local function RoguemonTracker()
 		end
 	end
 
-	function OptionSelectionScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, OptionSelectionScreen.Buttons or {})
+	function self.OptionSelectionScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.OptionSelectionScreen.Buttons or {})
 	end
 
 	function self.offerBinaryOption(opt1, opt2)
@@ -2146,11 +2146,11 @@ local function RoguemonTracker()
 			additionalOptions[i] = ""
 		end
 		additionalOptionsRemaining = 1
-		self.readyScreen(OptionSelectionScreen)
+		self.readyScreen(self.OptionSelectionScreen)
 	end
 
 	-- Screen for showing the special redeems
-	local SpecialRedeemScreen = {
+	self.SpecialRedeemScreen = {
 		
 	}
 
@@ -2167,7 +2167,7 @@ local function RoguemonTracker()
 	local SRS_LINE_COUNT = 8
 	local SRS_DESC_WIDTH = 105
 
-    function SpecialRedeemScreen.drawScreen()
+    function self.SpecialRedeemScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
@@ -2192,18 +2192,18 @@ local function RoguemonTracker()
 		end
 
 		for i = 1,SRS_LINE_COUNT do
-			local button = SpecialRedeemScreen.Buttons["X" .. i]
+			local button = self.SpecialRedeemScreen.Buttons["X" .. i]
 			local redeem = (i <= #specialRedeems.battle) and specialRedeems.consumable[i] or specialRedeems.consumable[i-#specialRedeems.unlocks-#specialRedeems.battle]
 			button.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + SRS_TOP_LEFT_X + SRS_TEXT_WIDTH, SRS_TOP_Y + ((i-1)*(SRS_LINE_HEIGHT)), 
 			(specialRedeems.battle[i] and specialRedeemInfo[specialRedeems.battle[i]].button == "Use") and SRS_USE_BUTTON_WIDTH or SRS_BUTTON_WIDTH, SRS_BUTTON_HEIGHT }
 		end
 
-		for _, button in pairs(SpecialRedeemScreen.Buttons or {}) do
+		for _, button in pairs(self.SpecialRedeemScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
 	end
 
-	SpecialRedeemScreen.Buttons = {
+	self.SpecialRedeemScreen.Buttons = {
 		-- Back to main screen button
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
@@ -2232,7 +2232,7 @@ local function RoguemonTracker()
 	-- Create the row buttons
 	for i = 1,SRS_LINE_COUNT do
 		-- Delete button
-		SpecialRedeemScreen.Buttons["X" .. i] = {
+		self.SpecialRedeemScreen.Buttons["X" .. i] = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function()
 				local redeem = nil
@@ -2295,7 +2295,7 @@ local function RoguemonTracker()
 		}
 
 		-- Redeem name button (it's a button because clicking on it brings up the description)
-		SpecialRedeemScreen.Buttons["Text" .. i] = {
+		self.SpecialRedeemScreen.Buttons["Text" .. i] = {
 			type = Constants.ButtonTypes.NO_BORDER,
 			getText = function() 
 				if i <= #specialRedeems.battle then
@@ -2318,12 +2318,12 @@ local function RoguemonTracker()
 		}
 	end
 
-	function SpecialRedeemScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, SpecialRedeemScreen.Buttons or {})
+	function self.SpecialRedeemScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.SpecialRedeemScreen.Buttons or {})
 	end
 
 	-- Screen for showing random messages
-	local NotificationScreen = {
+	self.NotificationScreen = {
 		message = "",
 		image = nil,
 		activeAuxiliary = {},
@@ -2356,19 +2356,19 @@ local function RoguemonTracker()
 					name = "Equip",
 					onClick = function()
 						local heldItem = Tracker.getPokemon(1, true).heldItem
-						self.removeItem(NotificationScreen.itemInQuestion)
+						self.removeItem(self.NotificationScreen.itemInQuestion)
 						if heldItem then
 							self.AddItemById(heldItem)
 						end
 						local pkmn = self.readLeadPokemonData()
-						pkmn.growth1 = Utils.getbits(pkmn.growth1, 0, 16) + Utils.bit_lshift(NotificationScreen.itemInQuestion, 16)
+						pkmn.growth1 = Utils.getbits(pkmn.growth1, 0, 16) + Utils.bit_lshift(self.NotificationScreen.itemInQuestion, 16)
 						self.writeLeadPokemonData(pkmn)
 					end
 				},
 				{
 					name = "Trash",
 					onClick = function()
-						self.removeItem(NotificationScreen.itemInQuestion)
+						self.removeItem(self.NotificationScreen.itemInQuestion)
 					end
 				}
 			},
@@ -2377,14 +2377,14 @@ local function RoguemonTracker()
 				{
 					name = "Trash",
 					onClick = function()
-						self.removeItem(NotificationScreen.itemInQuestion)
+						self.removeItem(self.NotificationScreen.itemInQuestion)
 					end
 				}
 			}
 		}
 	}
 
-	function NotificationScreen.drawScreen()
+	function self.NotificationScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
@@ -2401,40 +2401,40 @@ local function RoguemonTracker()
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
 		-- Image
-		if(NotificationScreen.image) then
-			Drawing.drawImage(NotificationScreen.image, canvas.x + 40, 15, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
+		if(self.NotificationScreen.image) then
+			Drawing.drawImage(self.NotificationScreen.image, canvas.x + 40, 15, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
 		end
 
 		-- Text
-		Drawing.drawText(canvas.x + 10, 64, self.wrapPixelsInline(NotificationScreen.message, canvas.w - 20), Theme.COLORS["Default text"])
+		Drawing.drawText(canvas.x + 10, 64, self.wrapPixelsInline(self.NotificationScreen.message, canvas.w - 20), Theme.COLORS["Default text"])
 
 		local aux = {}
-		if NotificationScreen.queuedAuxiliary then
-			aux = NotificationScreen.queuedAuxiliary
-			NotificationScreen.queuedAuxiliary = nil
+		if self.NotificationScreen.queuedAuxiliary then
+			aux = self.NotificationScreen.queuedAuxiliary
+			self.NotificationScreen.queuedAuxiliary = nil
 		else
-			for pre, info in pairs(NotificationScreen.auxiliaryButtonInfo) do
-				if string.sub(NotificationScreen.message, 1, string.len(pre)) == pre then
+			for pre, info in pairs(self.NotificationScreen.auxiliaryButtonInfo) do
+				if string.sub(self.NotificationScreen.message, 1, string.len(pre)) == pre then
 					aux = info
 				end
 			end
 		end
-		NotificationScreen.activeAuxiliary = aux
+		self.NotificationScreen.activeAuxiliary = aux
 		if aux[1] then
-			NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 143, 
+			self.NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 143, 
 			Utils.calcWordPixelLength(aux.name) + 4, 10} 
 		end
 		if aux[2] then
-			NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
+			self.NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
 			Utils.calcWordPixelLength(aux.name) + 4, 10} 
 		end
 
-		for _, button in pairs(NotificationScreen.Buttons or {}) do
+		for _, button in pairs(self.NotificationScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
 	end
 
-	NotificationScreen.Buttons = {
+	self.NotificationScreen.Buttons = {
 		-- Back to main screen button
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
@@ -2448,20 +2448,20 @@ local function RoguemonTracker()
 		AuxiliaryButton1 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function()
-				local i = NotificationScreen.activeAuxiliary[1]
+				local i = self.NotificationScreen.activeAuxiliary[1]
 				if i then
 					return i.name
 				end
 			end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 143, 30, 10},
 			onClick = function()
-				local i = NotificationScreen.activeAuxiliary[1]
+				local i = self.NotificationScreen.activeAuxiliary[1]
 				if i then
 					return i.onClick()
 				end
 			end,
 			isVisible = function()
-				local i = NotificationScreen.activeAuxiliary[1]
+				local i = self.NotificationScreen.activeAuxiliary[1]
 				if i then
 					if i.isVisible then 
 						return i.isVisible()
@@ -2476,20 +2476,20 @@ local function RoguemonTracker()
 		AuxiliaryButton2 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function()
-				local i = NotificationScreen.activeAuxiliary[2]
+				local i = self.NotificationScreen.activeAuxiliary[2]
 				if i then
 					return i.name
 				end
 			end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 30, 10},
 			onClick = function()
-				local i = NotificationScreen.activeAuxiliary[2]
+				local i = self.NotificationScreen.activeAuxiliary[2]
 				if i then
 					return i.onClick()
 				end
 			end,
 			isVisible = function()
-				local i = NotificationScreen.activeAuxiliary[2]
+				local i = self.NotificationScreen.activeAuxiliary[2]
 				if i then
 					if i.isVisible then 
 						return i.isVisible()
@@ -2503,12 +2503,12 @@ local function RoguemonTracker()
 		}
 	}
 
-	function NotificationScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, NotificationScreen.Buttons or {})
+	function self.NotificationScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.NotificationScreen.Buttons or {})
 	end
 
 	-- Options screen
-	local RoguemonOptionsScreen = {
+	self.RoguemonOptionsScreen = {
 		
 	}
 
@@ -2518,7 +2518,7 @@ local function RoguemonTracker()
 	local OS_BOX_TEXT_GAP = 10
 	local OS_BOX_VERTICAL_GAP = 5
 
-	function RoguemonOptionsScreen.drawScreen()
+	function self.RoguemonOptionsScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
@@ -2540,13 +2540,13 @@ local function RoguemonTracker()
 				if optionsList[i].options then
 					local runningX = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OS_LEFT_X + Utils.calcWordPixelLength(optionsList[i].text) + 5
 					for _, opt in pairs(optionsList[i].options) do
-						RoguemonOptionsScreen.Buttons[i .. " " .. opt] = {
+						self.RoguemonOptionsScreen.Buttons[i .. " " .. opt] = {
 							type = Constants.ButtonTypes.FULL_BORDER,
 							getText = function() return opt end,
 							box = {runningX, OS_TOP_Y + i*(OS_BOX_SIZE + OS_BOX_VERTICAL_GAP), Utils.calcWordPixelLength(opt) + 5, OS_BOX_SIZE},
 							onClick = function(this)
-								RoguemonOptionsScreen.Buttons[i .. " " .. RoguemonOptions[optionsList[i].text]].boxColors = {"Default text"}
-								RoguemonOptionsScreen.Buttons[i .. " " .. RoguemonOptions[optionsList[i].text]].textColor = Theme.COLORS["Default text"]
+								self.RoguemonOptionsScreen.Buttons[i .. " " .. RoguemonOptions[optionsList[i].text]].boxColors = {"Default text"}
+								self.RoguemonOptionsScreen.Buttons[i .. " " .. RoguemonOptions[optionsList[i].text]].textColor = Theme.COLORS["Default text"]
 								this.boxColors = {"Positive text"}
 								this.textColor = Theme.COLORS["Positive text"]
 								RoguemonOptions[optionsList[i].text] = opt
@@ -2558,7 +2558,7 @@ local function RoguemonTracker()
 						runningX = runningX + Utils.calcWordPixelLength(opt) + 8
 					end
 				else
-					RoguemonOptionsScreen.Buttons[i] = {
+					self.RoguemonOptionsScreen.Buttons[i] = {
 						type = Constants.ButtonTypes.CHECKBOX,
 						getText = function() return optionsList[i].text end,
 						box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OS_LEFT_X, OS_TOP_Y + i*(OS_BOX_SIZE + OS_BOX_VERTICAL_GAP), OS_BOX_SIZE, OS_BOX_SIZE},
@@ -2573,7 +2573,7 @@ local function RoguemonTracker()
 					}
 				end
 			end
-			RoguemonOptionsScreen.Buttons.BackButton = {
+			self.RoguemonOptionsScreen.Buttons.BackButton = {
 				type = Constants.ButtonTypes.FULL_BORDER,
 				getText = function() return "Back" end,
 				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 8, 22, 10},
@@ -2591,20 +2591,20 @@ local function RoguemonTracker()
 			end
 		end
 
-		for _, button in pairs(RoguemonOptionsScreen.Buttons or {}) do
+		for _, button in pairs(self.RoguemonOptionsScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
 	end
 
-	RoguemonOptionsScreen.Buttons = {
+	self.RoguemonOptionsScreen.Buttons = {
 		
 	}
 
-	function RoguemonOptionsScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, RoguemonOptionsScreen.Buttons or {})
+	function self.RoguemonOptionsScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.RoguemonOptionsScreen.Buttons or {})
 	end
 
-	local PrettyStatScreen = {
+	self.PrettyStatScreen = {
 		oldPoke = nil,
 		newPoke = nil
 	}
@@ -2654,7 +2654,7 @@ local function RoguemonTracker()
 		Drawing.drawText(canvas.x + PSS_MID_X - 10, PSS_IMAGE_Y + 10, "Lv. " .. level, Theme.COLORS["Default text"])
 	end
 
-    function PrettyStatScreen.drawScreen()
+    function self.PrettyStatScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
@@ -2670,16 +2670,16 @@ local function RoguemonTracker()
 
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
-		if PrettyStatScreen.oldPoke and PrettyStatScreen.newPoke then
-			self.drawPrettyStats(canvas, PrettyStatScreen.oldPoke, PrettyStatScreen.newPoke, PrettyStatScreen.newPoke.level)
+		if self.PrettyStatScreen.oldPoke and self.PrettyStatScreen.newPoke then
+			self.drawPrettyStats(canvas, self.PrettyStatScreen.oldPoke, self.PrettyStatScreen.newPoke, self.PrettyStatScreen.newPoke.level)
 		end
 
-		for _, button in pairs(PrettyStatScreen.Buttons or {}) do
+		for _, button in pairs(self.PrettyStatScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
 	end
 
-	PrettyStatScreen.Buttons = {
+	self.PrettyStatScreen.Buttons = {
 		-- Back to main screen button
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
@@ -2692,24 +2692,24 @@ local function RoguemonTracker()
 		},
 	}
 
-	function PrettyStatScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, PrettyStatScreen.Buttons or {})
+	function self.PrettyStatScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.PrettyStatScreen.Buttons or {})
 	end
 
-	function self.showPrettyStatScreen(oldmon, newmon)
-		PrettyStatScreen.oldPoke = oldmon
-		PrettyStatScreen.newPoke = newmon
-		table.insert(screenQueue, 1, PrettyStatScreen)
+	function self.showself.PrettyStatScreen(oldmon, newmon)
+		self.PrettyStatScreen.oldPoke = oldmon
+		self.PrettyStatScreen.newPoke = newmon
+		table.insert(screenQueue, 1, self.PrettyStatScreen)
 	end
 
-	local RunSummaryScreen = {
+	self.RunSummaryScreen = {
 		index = 1,
 		option1 = "",
 		option2 = "",
 		option3 = ""
 	}
 
-	function RunSummaryScreen.drawScreen()
+	function self.RunSummaryScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
@@ -2728,29 +2728,29 @@ local function RoguemonTracker()
 		if #runSummary > 1 and runSummary[1].type == "None" then
 			table.remove(runSummary, 1)
 		end
-		local summaryItem = runSummary[RunSummaryScreen.index]
+		local summaryItem = runSummary[self.RunSummaryScreen.index]
 		local title = summaryItem.title
 		if summaryItem.type == "Prize" then
-			RunSummaryScreen.Buttons.Option1.boxColors = {summaryItem.chosen[summaryItem.options[1]] and "Positive text" or "Default text"}
-			RunSummaryScreen.option1 = summaryItem.options[1]
-			Drawing.drawButton(RunSummaryScreen.Buttons.Option1)
+			self.RunSummaryScreen.Buttons.Option1.boxColors = {summaryItem.chosen[summaryItem.options[1]] and "Positive text" or "Default text"}
+			self.RunSummaryScreen.option1 = summaryItem.options[1]
+			Drawing.drawButton(self.RunSummaryScreen.Buttons.Option1)
 
-			RunSummaryScreen.Buttons.Option2.boxColors = {summaryItem.chosen[summaryItem.options[2]] and "Positive text" or "Default text"}
-			RunSummaryScreen.option2 = summaryItem.options[2]
-			Drawing.drawButton(RunSummaryScreen.Buttons.Option2)
+			self.RunSummaryScreen.Buttons.Option2.boxColors = {summaryItem.chosen[summaryItem.options[2]] and "Positive text" or "Default text"}
+			self.RunSummaryScreen.option2 = summaryItem.options[2]
+			Drawing.drawButton(self.RunSummaryScreen.Buttons.Option2)
 
-			RunSummaryScreen.Buttons.Option3.boxColors = {summaryItem.chosen[summaryItem.options[3]] and "Positive text" or "Default text"}
-			RunSummaryScreen.option3 = summaryItem.options[3]
-			Drawing.drawButton(RunSummaryScreen.Buttons.Option3)
+			self.RunSummaryScreen.Buttons.Option3.boxColors = {summaryItem.chosen[summaryItem.options[3]] and "Positive text" or "Default text"}
+			self.RunSummaryScreen.option3 = summaryItem.options[3]
+			Drawing.drawButton(self.RunSummaryScreen.Buttons.Option3)
 
-			if RunSummaryScreen.option1 ~= "" then
-				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[RunSummaryScreen.option1], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y, IMAGE_WIDTH, BUTTON_HEIGHT)
+			if self.RunSummaryScreen.option1 ~= "" then
+				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option1], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y, IMAGE_WIDTH, BUTTON_HEIGHT)
 			end
-			if RunSummaryScreen.option2 ~= "" then
-				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[RunSummaryScreen.option2], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, IMAGE_WIDTH, BUTTON_HEIGHT)
+			if self.RunSummaryScreen.option2 ~= "" then
+				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option2], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, IMAGE_WIDTH, BUTTON_HEIGHT)
 			end
-			if RunSummaryScreen.option3 ~= "" then
-				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[RunSummaryScreen.option3], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, IMAGE_WIDTH, BUTTON_HEIGHT)
+			if self.RunSummaryScreen.option3 ~= "" then
+				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option3], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, IMAGE_WIDTH, BUTTON_HEIGHT)
 			end
 		elseif summaryItem.type == "Curse" then
 			-- Image
@@ -2766,18 +2766,18 @@ local function RoguemonTracker()
 			self.drawPrettyStats(canvas, summaryItem.prev, summaryItem.new, summaryItem.level)
 		end
 
-		Drawing.drawButton(RunSummaryScreen.Buttons.BackButton)
-		Drawing.drawButton(RunSummaryScreen.Buttons.NextButton)
-		Drawing.drawButton(RunSummaryScreen.Buttons.PrevButton)
-		Drawing.drawButton(RunSummaryScreen.Buttons.LastButton)
-		Drawing.drawButton(RunSummaryScreen.Buttons.FirstButton)
-		Drawing.drawButton(RunSummaryScreen.Buttons.PrizeInfoButton)
+		Drawing.drawButton(self.RunSummaryScreen.Buttons.BackButton)
+		Drawing.drawButton(self.RunSummaryScreen.Buttons.NextButton)
+		Drawing.drawButton(self.RunSummaryScreen.Buttons.PrevButton)
+		Drawing.drawButton(self.RunSummaryScreen.Buttons.LastButton)
+		Drawing.drawButton(self.RunSummaryScreen.Buttons.FirstButton)
+		Drawing.drawButton(self.RunSummaryScreen.Buttons.PrizeInfoButton)
 		if title then
 			Drawing.drawText(canvas.x + 6, 5, self.wrapPixelsInline(title, 100), Theme.COLORS["Default text"])
 		end
 	end
 
-	RunSummaryScreen.Buttons = {
+	self.RunSummaryScreen.Buttons = {
 		-- Back to main screen button
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
@@ -2793,11 +2793,11 @@ local function RoguemonTracker()
 			getText = function() return "<" end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 138, 10, 10},
 			onClick = function()
-				RunSummaryScreen.index = RunSummaryScreen.index - 1
+				self.RunSummaryScreen.index = self.RunSummaryScreen.index - 1
 				Program.redraw(true)
 			end,
 			isVisible = function()
-				return RunSummaryScreen.index > 1
+				return self.RunSummaryScreen.index > 1
 			end,
 			boxColors = {"Default text"}
 		},
@@ -2806,11 +2806,11 @@ local function RoguemonTracker()
 			getText = function() return ">" end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 138, 10, 10},
 			onClick = function()
-				RunSummaryScreen.index = RunSummaryScreen.index + 1
+				self.RunSummaryScreen.index = self.RunSummaryScreen.index + 1
 				Program.redraw(true)
 			end,
 			isVisible = function()
-				return RunSummaryScreen.index < #runSummary
+				return self.RunSummaryScreen.index < #runSummary
 			end,
 			boxColors = {"Default text"}
 		},
@@ -2819,11 +2819,11 @@ local function RoguemonTracker()
 			getText = function() return "<<" end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 10, 138, 15, 10},
 			onClick = function()
-				RunSummaryScreen.index = 1
+				self.RunSummaryScreen.index = 1
 				Program.redraw(true)
 			end,
 			isVisible = function()
-				return RunSummaryScreen.index > 1
+				return self.RunSummaryScreen.index > 1
 			end,
 			boxColors = {"Default text"}
 		},
@@ -2832,11 +2832,11 @@ local function RoguemonTracker()
 			getText = function() return ">>" end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 115, 138, 15, 10},
 			onClick = function()
-				RunSummaryScreen.index = #runSummary
+				self.RunSummaryScreen.index = #runSummary
 				Program.redraw(true)
 			end,
 			isVisible = function()
-				return RunSummaryScreen.index < #runSummary
+				return self.RunSummaryScreen.index < #runSummary
 			end,
 			boxColors = {"Default text"}
 		},
@@ -2845,37 +2845,37 @@ local function RoguemonTracker()
 			getText = function() return "Inventory" end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 50, 138, 40, 10},
 			onClick = function()
-				Program.changeScreenView(SpecialRedeemScreen)
+				Program.changeScreenView(self.SpecialRedeemScreen)
 			end,
 			boxColors = {"Default text"}
 		},
 		Option1 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return self.wrapPixelsInline(RunSummaryScreen.option1, BUTTON_WIDTH - WRAP_BUFFER) end,
+			getText = function() return self.wrapPixelsInline(self.RunSummaryScreen.option1, BUTTON_WIDTH - WRAP_BUFFER) end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + TOP_LEFT_X + IMAGE_WIDTH + IMAGE_GAP, TOP_BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT },
-			isVisible = function() return RunSummaryScreen.option1 ~= "" and runSummary[RunSummaryScreen.index].type == "Prize" end,
+			isVisible = function() return self.RunSummaryScreen.option1 ~= "" and runSummary[self.RunSummaryScreen.index].type == "Prize" end,
 			boxColors = {"Default text"}
 		},
 		Option2 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return self.wrapPixelsInline(RunSummaryScreen.option2, BUTTON_WIDTH - WRAP_BUFFER) end,
+			getText = function() return self.wrapPixelsInline(self.RunSummaryScreen.option2, BUTTON_WIDTH - WRAP_BUFFER) end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + TOP_LEFT_X + IMAGE_WIDTH + IMAGE_GAP, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, 
 			BUTTON_WIDTH, BUTTON_HEIGHT },
-			isVisible = function() return RunSummaryScreen.option2 ~= "" and runSummary[RunSummaryScreen.index].type == "Prize" end,
+			isVisible = function() return self.RunSummaryScreen.option2 ~= "" and runSummary[self.RunSummaryScreen.index].type == "Prize" end,
 			boxColors = {"Default text"}
 		},
 		Option3 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return self.wrapPixelsInline(RunSummaryScreen.option3, BUTTON_WIDTH - WRAP_BUFFER) end,
+			getText = function() return self.wrapPixelsInline(self.RunSummaryScreen.option3, BUTTON_WIDTH - WRAP_BUFFER) end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + TOP_LEFT_X + IMAGE_WIDTH + IMAGE_GAP, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, 
 			BUTTON_WIDTH, BUTTON_HEIGHT },
-			isVisible = function() return RunSummaryScreen.option3 ~= "" and runSummary[RunSummaryScreen.index].type == "Prize" end,
+			isVisible = function() return self.RunSummaryScreen.option3 ~= "" and runSummary[self.RunSummaryScreen.index].type == "Prize" end,
 			boxColors = {"Default text"}
 		}
 	}
 
-	function RunSummaryScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, RunSummaryScreen.Buttons or {})
+	function self.RunSummaryScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.RunSummaryScreen.Buttons or {})
 	end
 
 	local SHOP_BUTTON_X = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 3
@@ -2884,7 +2884,7 @@ local function RoguemonTracker()
 	local SHOP_BUTTON_WIDTH = 16
 	local SHOP_BUTTON_HEIGHT = 16
 
-	local ShopScreen = {
+	self.ShopScreen = {
 		hp = 0,
 		status = 0,
 		updates = {}
@@ -2924,32 +2924,32 @@ local function RoguemonTracker()
 		return SHOP_BUTTON_X + ((index-1) % SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_WIDTH, SHOP_BUTTON_Y + math.floor((index-1) / SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_HEIGHT
 	end
 
-	function ShopScreen.addButton(item)
-		local index = #ShopScreen.Buttons + 1
+	function self.ShopScreen.addButton(item)
+		local index = #self.ShopScreen.Buttons + 1
 		local x,y = self.getShopButtonLocation(index)
 		local b = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			box = {x, y, SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT},
 			onClick = function(this)
-				if not ShopScreen.updates[this.item] then
-					ShopScreen.updates[this.item] = 0
+				if not self.ShopScreen.updates[this.item] then
+					self.ShopScreen.updates[this.item] = 0
 				end
-				ShopScreen.updates[this.item] = ShopScreen.updates[this.item] - 1
+				self.ShopScreen.updates[this.item] = self.ShopScreen.updates[this.item] - 1
 				local itemId = self.getItemId(this.item)
 				local itemInfo = MiscData.HealingItems[itemId]
 				if itemInfo then
-					ShopScreen.hp = ShopScreen.hp + itemInfo.amount
+					self.ShopScreen.hp = self.ShopScreen.hp + itemInfo.amount
 				else
 					itemInfo = MiscData.StatusItems[itemId]
-					ShopScreen.status = ShopScreen.status + (itemInfo.type == MiscData.StatusType.All and 3 or 1)
+					self.ShopScreen.status = self.ShopScreen.status + (itemInfo.type == MiscData.StatusType.All and 3 or 1)
 				end
-				for i = this.index,#ShopScreen.Buttons - 1 do
-					ShopScreen.Buttons[i] = ShopScreen.Buttons[i + 1]
-					ShopScreen.Buttons[i].index = i
+				for i = this.index,#self.ShopScreen.Buttons - 1 do
+					self.ShopScreen.Buttons[i] = self.ShopScreen.Buttons[i + 1]
+					self.ShopScreen.Buttons[i].index = i
 					local x1,y1 = self.getShopButtonLocation(i)
-					ShopScreen.Buttons[i].box = {x1, y1, SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT}
+					self.ShopScreen.Buttons[i].box = {x1, y1, SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT}
 				end
-				ShopScreen.Buttons[#ShopScreen.Buttons] = nil
+				self.ShopScreen.Buttons[#self.ShopScreen.Buttons] = nil
 				Program.redraw(true)
 			end,
 			boxColors = {"Default text"},
@@ -2961,22 +2961,22 @@ local function RoguemonTracker()
 			item = item,
 			index = index
 		}
-		ShopScreen.Buttons[index] = b
+		self.ShopScreen.Buttons[index] = b
 	end
 
 	function self.beginShop()
-		ShopScreen.hp = 0
-		ShopScreen.status = 0
-		ShopScreen.updates = {}
-		for i,b in ipairs(ShopScreen.Buttons) do
-			ShopScreen.Buttons[i] = nil
+		self.ShopScreen.hp = 0
+		self.ShopScreen.status = 0
+		self.ShopScreen.updates = {}
+		for i,b in ipairs(self.ShopScreen.Buttons) do
+			self.ShopScreen.Buttons[i] = nil
 		end
 		for id,ct in pairs(Program.GameData.Items.StatusHeals) do
 			if(ct <= 999) then
 				local name = TrackerAPI.getItemName(id)
 				if shopItemImages[name] then
 					for i = 1, ct do
-						ShopScreen.addButton(name)
+						self.ShopScreen.addButton(name)
 					end
 				end
 			end
@@ -2986,7 +2986,7 @@ local function RoguemonTracker()
 				local name = TrackerAPI.getItemName(id)
 				if shopItemImages[name] then
 					for i = 1, ct do
-						ShopScreen.addButton(name)
+						self.ShopScreen.addButton(name)
 					end
 				end
 			end
@@ -2994,7 +2994,7 @@ local function RoguemonTracker()
 	end
 
 	function self.endShop()
-		for item,ct in pairs(ShopScreen.updates) do
+		for item,ct in pairs(self.ShopScreen.updates) do
 			if ct > 0 then
 				self.AddItemImproved(item, ct)
 			elseif ct < 0 then
@@ -3008,7 +3008,7 @@ local function RoguemonTracker()
 		berryPocket = newBerryPocket
 	end
 
-	function ShopScreen.drawScreen()
+	function self.ShopScreen.drawScreen()
 		local canvas = {
 			x = Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN,
 			y = Constants.SCREEN.MARGIN,
@@ -3031,40 +3031,40 @@ local function RoguemonTracker()
 
 		local hpTextColor
 		local hpText
-		if ShopScreen.hp > 0 then
+		if self.ShopScreen.hp > 0 then
 			hpTextColor = Theme.COLORS["Positive text"]
-			hpText = "HP: +" .. ShopScreen.hp
-		elseif ShopScreen.hp < 0 then
+			hpText = "HP: +" .. self.ShopScreen.hp
+		elseif self.ShopScreen.hp < 0 then
 			hpTextColor = Theme.COLORS["Negative text"]
-			hpText = "HP: " .. ShopScreen.hp
+			hpText = "HP: " .. self.ShopScreen.hp
 		else
 			hpTextColor = Theme.COLORS["Default text"]
-			hpText = "HP: " .. ShopScreen.hp
+			hpText = "HP: " .. self.ShopScreen.hp
 		end
 		Drawing.drawText(canvas.x + 59, 120, hpText, hpTextColor)
 
 		local statusTextColor
 		local statusText
-		if ShopScreen.status > 0 then
+		if self.ShopScreen.status > 0 then
 			statusTextColor = Theme.COLORS["Positive text"]
-			statusText = "Status: +" .. ShopScreen.status
-		elseif ShopScreen.status < 0 then
+			statusText = "Status: +" .. self.ShopScreen.status
+		elseif self.ShopScreen.status < 0 then
 			statusTextColor = Theme.COLORS["Negative text"]
-			statusText = "Status: " .. ShopScreen.status
+			statusText = "Status: " .. self.ShopScreen.status
 		else
 			statusTextColor = Theme.COLORS["Default text"]
-			statusText = "Status: " .. ShopScreen.status
+			statusText = "Status: " .. self.ShopScreen.status
 		end
 		Drawing.drawText(canvas.x + 98, 120, statusText, statusTextColor)
 
-		for _, button in pairs(ShopScreen.Buttons or {}) do
+		for _, button in pairs(self.ShopScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
 
 		-- gui.drawLine(canvas.x, 109, canvas.x + 139, 109, Theme.COLORS["Lower box border"])
 	end
 
-	ShopScreen.Buttons = {
+	self.ShopScreen.Buttons = {
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "Back" end,
@@ -3090,9 +3090,9 @@ local function RoguemonTracker()
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 110, 136, 24, 10},
 			textColor = Theme.COLORS["Default text"],
 			onClick = function(this)
-				if ShopScreen.hp >= 0 and ShopScreen.status >= 0 then
+				if self.ShopScreen.hp >= 0 and self.ShopScreen.status >= 0 then
 					self.endShop()
-					currentRoguemonScreen = RunSummaryScreen
+					currentRoguemonScreen = self.RunSummaryScreen
 					self.returnToHomeScreen()
 				else
 					this.textColor = Theme.COLORS["Negative text"]
@@ -3118,24 +3118,24 @@ local function RoguemonTracker()
 	}
 
 	for item, info in pairs(shopAddButtonItems) do
-		ShopScreen.Buttons[item .. " Button"] = {
+		self.ShopScreen.Buttons[item .. " Button"] = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			box = {SHOP_BUTTON_X + info.x * SHOP_BUTTON_WIDTH, SHOP_BUTTON_Y + 78 + info.y * SHOP_BUTTON_HEIGHT,
 				SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT},
 			onClick = function(this)
-				if not ShopScreen.updates[this.item] then
-					ShopScreen.updates[this.item] = 0
+				if not self.ShopScreen.updates[this.item] then
+					self.ShopScreen.updates[this.item] = 0
 				end
-				ShopScreen.updates[this.item] = ShopScreen.updates[this.item] + 1
+				self.ShopScreen.updates[this.item] = self.ShopScreen.updates[this.item] + 1
 				local itemId = self.getItemId(this.item)
 				local itemInfo = MiscData.HealingItems[itemId]
 				if itemInfo then
-					ShopScreen.hp = ShopScreen.hp - itemInfo.amount
+					self.ShopScreen.hp = self.ShopScreen.hp - itemInfo.amount
 				else
 					itemInfo = MiscData.StatusItems[itemId]
-					ShopScreen.status = ShopScreen.status - (itemInfo.type == MiscData.StatusType.All and 3 or 1)
+					self.ShopScreen.status = self.ShopScreen.status - (itemInfo.type == MiscData.StatusType.All and 3 or 1)
 				end
-				ShopScreen.addButton(item)
+				self.ShopScreen.addButton(item)
 				Program.redraw(true)
 			end,
 			boxColors = {"Positive text"},
@@ -3151,14 +3151,14 @@ local function RoguemonTracker()
 		}
 	end
 
-	function ShopScreen.checkInput(xmouse, ymouse)
-		Input.checkButtonsClicked(xmouse, ymouse, ShopScreen.Buttons or {})
+	function self.ShopScreen.checkInput(xmouse, ymouse)
+		Input.checkButtonsClicked(xmouse, ymouse, self.ShopScreen.Buttons or {})
 	end
 
 	-- Helper function to change to or queue a screen
 	function self.readyScreen(screen)
-		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
-			if screen == OptionSelectionScreen or screen == RewardScreen or screen == ShopScreen then
+		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == self.RunSummaryScreen then
+			if screen == self.OptionSelectionScreen or screen == self.RewardScreen or screen == self.ShopScreen then
 				self.setCurrentRoguemonScreen(screen)
 			end
 			Program.changeScreenView(screen)
@@ -3178,12 +3178,12 @@ local function RoguemonTracker()
 	-- REWARD SPIN FUNCTIONS --
 
 	function self.displayNotification(message, image, dismissFunction)
-		NotificationScreen.message = message
-		NotificationScreen.image = IMAGES_DIRECTORY .. image
-		if Program.currentScreen == PrettyStatScreen or Program.currentScreen == OptionSelectionScreen then
-			self.readyScreen(NotificationScreen)
+		self.NotificationScreen.message = message
+		self.NotificationScreen.image = IMAGES_DIRECTORY .. image
+		if Program.currentScreen == self.PrettyStatScreen or Program.currentScreen == self.OptionSelectionScreen then
+			self.readyScreen(self.NotificationScreen)
 		else
-			Program.changeScreenView(NotificationScreen)
+			Program.changeScreenView(self.NotificationScreen)
 		end
 		Program.redraw(true)
 		shouldDismissNotification = dismissFunction
@@ -3205,7 +3205,7 @@ local function RoguemonTracker()
 			self.offerBinaryOption("Cash Out - " .. buyable, "Wait")
 		end
 		self.beginShop()
-		self.readyScreen(ShopScreen)
+		self.readyScreen(self.ShopScreen)
 	end
 
 	-- Handle the cleansing phase.
@@ -3383,9 +3383,9 @@ local function RoguemonTracker()
 			descriptionText = ""
 
 			if rerolled then
-				Program.changeScreenView(RewardScreen)
+				Program.changeScreenView(self.RewardScreen)
 			else
-				self.readyScreen(RewardScreen)
+				self.readyScreen(self.RewardScreen)
 			end
 			Program.redraw(true)
 		end
@@ -3453,7 +3453,7 @@ local function RoguemonTracker()
 				if reward == "Nature Mint" then
 					additionalOptions = {"+Atk", "+Def", "+SpAtk", "+SpDef", "+Speed", "", "", ""}
 					additionalOptionsRemaining = 1
-					nextScreen = OptionSelectionScreen
+					nextScreen = self.OptionSelectionScreen
 					specialRedeems.internal["Nature Mint"] = true
 				end
 				if reward == "Ability Capsule" then
@@ -3487,7 +3487,7 @@ local function RoguemonTracker()
 						optIndex = optIndex + 1
 					end
 					additionalOptionsRemaining = 1
-					nextScreen = OptionSelectionScreen
+					nextScreen = self.OptionSelectionScreen
 				end
 				if reward == "Tera Orb" then
 					local pkmn = self.readLeadPokemonData()
@@ -3507,7 +3507,7 @@ local function RoguemonTracker()
 						optIndex = optIndex + 1
 					end
 					additionalOptionsRemaining = 1
-					nextScreen = OptionSelectionScreen
+					nextScreen = self.OptionSelectionScreen
 				end
 				if string.sub(reward, 1, 3) == 'Any' then
 					-- This reward is a choice of items
@@ -3521,7 +3521,7 @@ local function RoguemonTracker()
 								end
 							end
 							additionalOptionsRemaining = itemCount
-							nextScreen = OptionSelectionScreen
+							nextScreen = self.OptionSelectionScreen
 						end
 					end
 				end
@@ -3565,7 +3565,7 @@ local function RoguemonTracker()
 
 		if option ~= "Choose 2" and specialRedeems.consumable["Choose 2"] and not milestoneTrainers[self.baseMilestone(lastMilestone)] then
 			self.removeSpecialRedeem("Choose 2")
-			self.readyScreen(RewardScreen)
+			self.readyScreen(self.RewardScreen)
 			if option1 == option then
 				option1 = ""
 				option1Desc = ""
@@ -3586,7 +3586,7 @@ local function RoguemonTracker()
 		end
 
 		if nextScreen == TrackerScreen then
-			currentRoguemonScreen = RunSummaryScreen
+			currentRoguemonScreen = self.RunSummaryScreen
 			self.returnToHomeScreen()
 		else
 			currentRoguemonScreen = nextScreen
@@ -3688,8 +3688,8 @@ local function RoguemonTracker()
 				additionalOptionsRemaining = 1
 				Program.redraw(true)
 			else
-				if currentRoguemonScreen == OptionSelectionScreen then
-					currentRoguemonScreen = RunSummaryScreen
+				if currentRoguemonScreen == self.OptionSelectionScreen then
+					currentRoguemonScreen = self.RunSummaryScreen
 				end
 				self.returnToHomeScreen()
 			end
@@ -4441,18 +4441,18 @@ local function RoguemonTracker()
 			end
 		end
 
-		if currentRoguemonScreen ~= RunSummaryScreen then
-			currentRoguemonScreen = RunSummaryScreen
+		if currentRoguemonScreen ~= self.RunSummaryScreen then
+			currentRoguemonScreen = self.RunSummaryScreen
 		end
 	end
 
 	-- DISPLAY/NOTIFICATION FUNCTIONS -- 
 
 	local screenPriorities = {
-		[RunSummaryScreen] = 1,
-		[ShopScreen] = 2,
-		[OptionSelectionScreen] = 3,
-		[RewardScreen] = 4
+		[self.RunSummaryScreen] = 1,
+		[self.ShopScreen] = 2,
+		[self.OptionSelectionScreen] = 3,
+		[self.RewardScreen] = 4
 	}
 	function self.setCurrentRoguemonScreen(newScreen)
 		if (not screenPriorities[newScreen]) or (not screenPriorities[currentRoguemonScreen]) or 
@@ -4463,7 +4463,7 @@ local function RoguemonTracker()
 
 	-- Buy phase notification followed by cleansing phase notification, once the player leaves the gym and takes their prize
 	function self.handleBuyCleanseNotifs(mapId)
-		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
+		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == self.RunSummaryScreen then
 			if needToBuy then
 				if not gymMapIds[mapId] then
 					needToBuy = false
@@ -4496,7 +4496,7 @@ local function RoguemonTracker()
 						box = {dx*imageGap, dy, imageSize, imageSize},
 						onClick = function()
 							specialRedeemToDescribe = r
-							Program.changeScreenView(SpecialRedeemScreen)
+							Program.changeScreenView(self.SpecialRedeemScreen)
 						end
 					}
 					Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
@@ -4519,7 +4519,7 @@ local function RoguemonTracker()
 							box = {dx*imageGap, dy, imageSize, imageSize},
 							onClick = function()
 								specialRedeemToDescribe = r
-								Program.changeScreenView(SpecialRedeemScreen)
+								Program.changeScreenView(self.SpecialRedeemScreen)
 							end
 						}
 						Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
@@ -4534,7 +4534,7 @@ local function RoguemonTracker()
 							box = {dx*imageGap, dy, imageSize, imageSize},
 							onClick = function()
 								specialRedeemToDescribe = r
-								Program.changeScreenView(SpecialRedeemScreen)
+								Program.changeScreenView(self.SpecialRedeemScreen)
 							end
 						}
 						Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
@@ -4633,7 +4633,7 @@ local function RoguemonTracker()
 		if Program.currentScreen == TrackerScreen and Battle.isViewingOwn and data.p.id ~= 0 then
 			gui.drawRectangle(Constants.SCREEN.WIDTH + 6, 58, Options["Show GachaMon stars on main Tracker Screen"] and 54 or 94, 21, Theme.COLORS["Upper box background"], Theme.COLORS["Upper box background"])
 			self.drawCapsAt(data, Constants.SCREEN.WIDTH + 6, 57)
-			TrackerScreen.Buttons.RogueMenuButton.textColor = (currentRoguemonScreen == RunSummaryScreen) and Theme.COLORS["Intermediate text"] or Theme.COLORS["Negative text"]
+			TrackerScreen.Buttons.RogueMenuButton.textColor = (currentRoguemonScreen == self.RunSummaryScreen) and Theme.COLORS["Intermediate text"] or Theme.COLORS["Negative text"]
 			if Options["Show GachaMon stars on main Tracker Screen"] then
 				TrackerScreen.Buttons.RogueMenuButton.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - 14, Constants.SCREEN.MARGIN + 130, 10, 10}
 				TrackerScreen.Buttons.CurseMenuButton.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.RIGHT_GAP - 14, Constants.SCREEN.MARGIN + 140, 10, 10}
@@ -4657,14 +4657,14 @@ local function RoguemonTracker()
 	end
 
 	function self.returnToHomeScreen()
-		if #screenQueue > 0  and currentRoguemonScreen == RunSummaryScreen then
+		if #screenQueue > 0  and currentRoguemonScreen == self.RunSummaryScreen then
 			local s = table.remove(screenQueue, 1)
 			Program.changeScreenView(s)
-			if s == OptionSelectionScreen or s == RewardScreen then
+			if s == self.OptionSelectionScreen or s == self.RewardScreen then
 				self.setCurrentRoguemonScreen(s)
 			end
-		elseif needToCleanse > 0 and not needToBuy and currentRoguemonScreen == RunSummaryScreen then
-			if Program.currentScreen == OptionSelectionScreen then
+		elseif needToCleanse > 0 and not needToBuy and currentRoguemonScreen == self.RunSummaryScreen then
+			if Program.currentScreen == self.OptionSelectionScreen then
 				Program.changeScreenView(TrackerScreen)
 			end
 			self.cleansingPhase(needToCleanse == 2)
@@ -4888,7 +4888,7 @@ local function RoguemonTracker()
 		end
 
 		-- Show the pretty stat screen immediately if it needs to be shown
-		if #screenQueue > 0 and screenQueue[1] == PrettyStatScreen then
+		if #screenQueue > 0 and screenQueue[1] == self.PrettyStatScreen then
 			local s = table.remove(screenQueue, 1)
 			Program.changeScreenView(s)
 		end
@@ -4951,7 +4951,7 @@ local function RoguemonTracker()
 	end
 	
 	self.configureOptions = function()
-		Program.changeScreenView(RoguemonOptionsScreen)
+		Program.changeScreenView(self.RoguemonOptionsScreen)
 	end
 	
 	function self.createAccessButtonsAndCarousel()
@@ -4977,7 +4977,7 @@ local function RoguemonTracker()
 
 			-- Draw the word-wrapped text, if any
 			local btnText = button:getCustomText()
-			local wrappedText = self.wrapPixelsInline(btnText, gachaOn and 117 or 125)
+			local wrappedText = self.wrapPixelsInline(btnText, gachaOn and 113 or 125)
 			if not string.find(wrappedText, "%\n") then
 				Drawing.drawText(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 140, wrappedText, Theme.COLORS["Lower box text"], shadowcolor)
 			else
@@ -5182,14 +5182,14 @@ local function RoguemonTracker()
 				getText = function() return ":" end,
 				box = { Constants.SCREEN.WIDTH + 93, 43, 6, 12},
 				onClick = function()
-					Program.changeScreenView(RewardScreen)
+					Program.changeScreenView(self.RewardScreen)
 				end,
 				textColor = Drawing.Colors.GREEN,
 				boxColors = {"Default text"}
 			}
 		end
 
-		currentRoguemonScreen = RunSummaryScreen
+		currentRoguemonScreen = self.RunSummaryScreen
 
 		-- Load data from file if it exists
 		self.loadData()
@@ -5247,14 +5247,14 @@ local function RoguemonTracker()
 	end
 
 	function self.inputCheckBizhawk()
-		if Program.currentScreen == NotificationScreen or Program.currentScreen == PrettyStatScreen then
+		if Program.currentScreen == self.NotificationScreen or Program.currentScreen == self.PrettyStatScreen then
 			local joypad = Input.getJoypadInputFormatted()
 			CustomCode.inputCheckMGBA()
 			local nextBtn = Options.CONTROLS["Next page"] or ""
 			if joypad[nextBtn] then
 				self.returnToHomeScreen()
 			end
-		elseif Program.currentScreen == OptionSelectionScreen then
+		elseif Program.currentScreen == self.OptionSelectionScreen then
 			local joypad = Input.getJoypadInputFormatted()
 			CustomCode.inputCheckMGBA()
 			local nextBtn = Options.CONTROLS["Next page"] or ""
@@ -5262,7 +5262,7 @@ local function RoguemonTracker()
 				for _,a in pairs(additionalOptions) do
 					if a == "Skip" or a == "Wait" then
 						self.returnToHomeScreen()
-						currentRoguemonScreen = RunSummaryScreen
+						currentRoguemonScreen = self.RunSummaryScreen
 					end
 				end
 			end
@@ -5421,7 +5421,7 @@ local function RoguemonTracker()
 		end
 
 		-- Check if the notification should be dismissed
-		if Program.currentScreen == NotificationScreen then
+		if Program.currentScreen == self.NotificationScreen then
 			if shouldDismissNotification and shouldDismissNotification() then
 				self.returnToHomeScreen()
 			end
@@ -5453,11 +5453,11 @@ local function RoguemonTracker()
 		self.determineCurses()
 
 		-- Display any queued screens
-		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
+		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == self.RunSummaryScreen then
 			if #screenQueue > 0 then
 				local s = table.remove(screenQueue, 1)
 				Program.changeScreenView(s)
-				if s == OptionSelectionScreen or s == RewardScreen or s == ShopScreen then
+				if s == self.OptionSelectionScreen or s == self.RewardScreen or s == self.ShopScreen then
 					self.setCurrentRoguemonScreen(s)
 				end
 			else
