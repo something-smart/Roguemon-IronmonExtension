@@ -768,7 +768,7 @@ local function RoguemonTracker()
 		end
 		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.pokemonID ~= newPokeInfo.pokemonID then
 			-- We evolved :D
-			self.showself.PrettyStatScreen(pokeInfo, newPokeInfo)
+			self.showPrettyStatScreen(pokeInfo, newPokeInfo)
 			runSummary[#runSummary + 1] = {
 				type = "Evolution",
 				prev = {stats = pokeInfo.stats, pokemonID = pokeInfo.pokemonID},
@@ -2696,7 +2696,7 @@ local function RoguemonTracker()
 		Input.checkButtonsClicked(xmouse, ymouse, self.PrettyStatScreen.Buttons or {})
 	end
 
-	function self.showself.PrettyStatScreen(oldmon, newmon)
+	function self.showPrettyStatScreen(oldmon, newmon)
 		self.PrettyStatScreen.oldPoke = oldmon
 		self.PrettyStatScreen.newPoke = newmon
 		table.insert(screenQueue, 1, self.PrettyStatScreen)
