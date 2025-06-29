@@ -10,7 +10,7 @@ local function RoguemonTracker()
 	local RoguemonUtils = dofile(FileManager.getExtensionsFolderPath() .. "roguemon" .. FileManager.slash .. "utils.lua")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = false
+	local DEBUG_MODE = true
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
@@ -507,6 +507,10 @@ local function RoguemonTracker()
 		if itemChoice == Constants.BLANKLINE or quantity == nil or quantity == 0 then return false end
 	
 		local itemID = self.getItemId(itemChoice)
+		return self.AddItemById(itemID, quantity)
+	end
+
+	function self.AddItemById(itemID, quantity)
 		local bagPocketOffset, bagPocketCapacity, limitQuantity = self.getBagPocketData(itemID)
 		if bagPocketOffset == nil then return false end
 	
@@ -913,26 +917,6 @@ local function RoguemonTracker()
 			return string.sub(str, string.len(prefix) + 1)
 		end
 		return nil
-	end
-
-	-- Helper function to change to or queue a screen
-	function self.readyScreen(screen)
-		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
-			if screen == OptionSelectionScreen or screen == RewardScreen or screen == ShopScreen then
-				self.setCurrentRoguemonScreen(screen)
-			end
-			Program.changeScreenView(screen)
-		else
-			local found = false
-			for _,s in ipairs(screenQueue) do
-				if s == screen then
-					found = true
-				end
-			end
-			if not found then
-				screenQueue[#screenQueue + 1] = screen
-			end
-		end
 	end
 
 	function self.resetTheme()
@@ -1414,12 +1398,16 @@ local function RoguemonTracker()
 			local itemId = self.getItemId(item)
 			if notifyOnPickup.consumables[item] and not (specialRedeems.unlocks["Berry Pouch"] and string.sub(item, string.len(item)-4, string.len(item)) == "Berry")
 			and not (specialRedeems.unlocks["Cooler Bag"] and item == "Berry Juice") then
-				if notifyOnPickup.consumables[item] == 2 then
+				NotificationScreen.queuedAuxiliary = NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
+				NotificationScreen.itemInQuestion = item
+				if notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse == "Kaizo Curse") then
 					return (item .. " must be used, equipped, or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
 					return (item .. " must be equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				end
 			elseif notifyOnPickup.vitamins[item] then
+				NotificationScreen.queuedAuxiliary = NotificationScreen.auxiliaryButtonInfo["TrashPickup"]
+				NotificationScreen.itemInQuestion = item
 				return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 			elseif notifyOnPickup.candies[item] and not specialRedeems.unlocks["Candy Jar"] then
 				if item == "PP Max" and gymMapIds[TrackerAPI.getMapId()] then
@@ -2338,22 +2326,60 @@ local function RoguemonTracker()
 	local NotificationScreen = {
 		message = "",
 		image = nil,
+		activeAuxiliary = {},
+		queuedAuxiliary = nil,
+		itemInQuestion = nil,
 		auxiliaryButtonInfo = {
 			["Buy Phase"] = {
-				name = "Heals",
-				onClick = function() 
-					HealsInBagScreen.changeTab(HealsInBagScreen.Tabs.All)
-					Program.changeScreenView(HealsInBagScreen) 
-				end
+				{
+					name = "Heals",
+					onClick = function() 
+						HealsInBagScreen.changeTab(HealsInBagScreen.Tabs.All)
+						Program.changeScreenView(HealsInBagScreen) 
+					end
+				}
 			},
 			["Curse:"] = {
-				name = "Ward",
-				onClick = function()
-					self.wardCurse()
-				end,
-				isVisible = function()
-					return specialRedeems.consumable["Warding Charm"]
-				end
+				nil,
+				{
+					name = "Ward",
+					onClick = function()
+						self.wardCurse()
+					end,
+					isVisible = function()
+						return specialRedeems.consumable["Warding Charm"]
+					end
+				}
+			},
+			["EquipTrashPickup"] = {
+				{
+					name = "Equip",
+					onClick = function()
+						local heldItem = Tracker.getPokemon(1, true).heldItem
+						self.removeItem(NotificationScreen.itemInQuestion)
+						if heldItem then
+							self.AddItemById(heldItem)
+						end
+						local pkmn = self.readLeadPokemonData()
+						pkmn.growth1 = Utils.getbits(pkmn.growth1, 0, 16) + Utils.bit_lshift(NotificationScreen.itemInQuestion, 16)
+						self.writeLeadPokemonData(pkmn)
+					end
+				},
+				{
+					name = "Trash",
+					onClick = function()
+						self.removeItem(NotificationScreen.itemInQuestion)
+					end
+				}
+			},
+			["TrashPickup"] = {
+				nil,
+				{
+					name = "Trash",
+					onClick = function()
+						self.removeItem(NotificationScreen.itemInQuestion)
+					end
+				}
 			}
 		}
 	}
@@ -2382,15 +2408,24 @@ local function RoguemonTracker()
 		-- Text
 		Drawing.drawText(canvas.x + 10, 64, self.wrapPixelsInline(NotificationScreen.message, canvas.w - 20), Theme.COLORS["Default text"])
 
-		local aux = nil
-		for pre, info in pairs(NotificationScreen.auxiliaryButtonInfo) do
-			if string.sub(NotificationScreen.message, 1, string.len(pre)) == pre then
-				aux = info
+		local aux = {}
+		if NotificationScreen.queuedAuxiliary then
+			aux = NotificationScreen.queuedAuxiliary
+			NotificationScreen.queuedAuxiliary = nil
+		else
+			for pre, info in pairs(NotificationScreen.auxiliaryButtonInfo) do
+				if string.sub(NotificationScreen.message, 1, string.len(pre)) == pre then
+					aux = info
+				end
 			end
 		end
 		NotificationScreen.activeAuxiliary = aux
-		if aux then
-			NotificationScreen.Buttons.AuxiliaryButton.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
+		if aux[1] then
+			NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 143, 
+			Utils.calcWordPixelLength(aux.name) + 4, 10} 
+		end
+		if aux[2] then
+			NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
 			Utils.calcWordPixelLength(aux.name) + 4, 10} 
 		end
 
@@ -2410,23 +2445,51 @@ local function RoguemonTracker()
 			end,
 			boxColors = {"Default text"}
 		},
-		AuxiliaryButton = {
+		AuxiliaryButton1 = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function()
-				local i = NotificationScreen.activeAuxiliary
+				local i = NotificationScreen.activeAuxiliary[1]
+				if i then
+					return i.name
+				end
+			end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 143, 30, 10},
+			onClick = function()
+				local i = NotificationScreen.activeAuxiliary[1]
+				if i then
+					return i.onClick()
+				end
+			end,
+			isVisible = function()
+				local i = NotificationScreen.activeAuxiliary[1]
+				if i then
+					if i.isVisible then 
+						return i.isVisible()
+					else
+						return true
+					end
+				end
+				return false
+			end,
+			boxColors = {"Default text"}
+		},
+		AuxiliaryButton2 = {
+			type = Constants.ButtonTypes.FULL_BORDER,
+			getText = function()
+				local i = NotificationScreen.activeAuxiliary[2]
 				if i then
 					return i.name
 				end
 			end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 30, 10},
 			onClick = function()
-				local i = NotificationScreen.activeAuxiliary
+				local i = NotificationScreen.activeAuxiliary[2]
 				if i then
 					return i.onClick()
 				end
 			end,
 			isVisible = function()
-				local i = NotificationScreen.activeAuxiliary
+				local i = NotificationScreen.activeAuxiliary[2]
 				if i then
 					if i.isVisible then 
 						return i.isVisible()
@@ -2710,7 +2773,7 @@ local function RoguemonTracker()
 		Drawing.drawButton(RunSummaryScreen.Buttons.FirstButton)
 		Drawing.drawButton(RunSummaryScreen.Buttons.PrizeInfoButton)
 		if title then
-			Drawing.drawText(canvas.x + 6, 5, title, Theme.COLORS["Default text"])
+			Drawing.drawText(canvas.x + 6, 5, self.wrapPixelsInline(title, 100), Theme.COLORS["Default text"])
 		end
 	end
 
@@ -3092,6 +3155,26 @@ local function RoguemonTracker()
 		Input.checkButtonsClicked(xmouse, ymouse, ShopScreen.Buttons or {})
 	end
 
+	-- Helper function to change to or queue a screen
+	function self.readyScreen(screen)
+		if Program.currentScreen == TrackerScreen and currentRoguemonScreen == RunSummaryScreen then
+			if screen == OptionSelectionScreen or screen == RewardScreen or screen == ShopScreen then
+				self.setCurrentRoguemonScreen(screen)
+			end
+			Program.changeScreenView(screen)
+		else
+			local found = false
+			for _,s in ipairs(screenQueue) do
+				if s == screen then
+					found = true
+				end
+			end
+			if not found then
+				screenQueue[#screenQueue + 1] = screen
+			end
+		end
+	end
+
 	-- REWARD SPIN FUNCTIONS --
 
 	function self.displayNotification(message, image, dismissFunction)
@@ -3174,6 +3257,11 @@ local function RoguemonTracker()
 
 	-- Spin the reward for a given milestone.
 	function self.spinReward(milestoneName, rerolled)
+		local minHealingPrizes = 1
+		local maxHealingPrizes = 2
+		if milestoneName == "Mt. Moon" then
+			minHealingPrizes = 0
+		end
 		local rerollBans = nil
 		if rerolled then
 			rerollBans = {[option1] = true,
@@ -3201,7 +3289,12 @@ local function RoguemonTracker()
 				haunted["2 Prize Options"] = nil
 				choiceCount = 2
 			end
-			while #choices < choiceCount do
+
+			local healingPrizes = 0
+			local nonHealingPrizes = 0
+
+			local loopCount = 0
+			while #choices < choiceCount and loopCount < 10000 do
 				local choice = rewardOptions[math.random(#rewardOptions)]
 				if string.sub(choice, 1, 6) == "Revive" and specialRedeems.consumable["Revive"] then
 					choice = "Max Revive: Upgrade your Revive to a Max Revive."
@@ -3209,6 +3302,7 @@ local function RoguemonTracker()
 				local choiceName = Utils.split(choice, ":", true)[1]
 				local choiceParts = Utils.split(choiceName, '&', true)
 				local add = true
+				local healingPrize = false
 				for _,part in pairs(choiceParts) do
 					if specialRedeems.unlocks[part] or specialRedeems.consumable[part] or specialRedeems.internal[part] or 
 						(part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"]) then
@@ -3228,6 +3322,17 @@ local function RoguemonTracker()
 							choice = choice .. ": Change ability to " .. otherAbil .. "."
 						end
 					end
+					for _,itm in pairs(MiscData.HealingItems) do
+						if itm.name == part then
+							healingPrize = true
+						end
+					end
+				end
+				if healingPrize and healingPrizes == maxHealingPrizes then
+					add = false
+				end
+				if not healingPrize and nonHealingPrizes == (choiceCount - minHealingPrizes) then
+					add = false
 				end
 				if rerollBans and rerollBans[choiceName] then
 					add = false
@@ -3250,8 +3355,14 @@ local function RoguemonTracker()
 					end
 				end
 				if add and choice then 
-					choices[#choices + 1] = choice 
+					choices[#choices + 1] = choice
+					if healingPrize then
+						healingPrizes = healingPrizes + 1
+					else
+						nonHealingPrizes = nonHealingPrizes + 1
+					end
 				end
+				loopCount = loopCount + 1
 			end
 
 			local option1Split = Utils.split(choices[1], ":", true)
