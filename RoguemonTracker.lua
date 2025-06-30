@@ -324,6 +324,7 @@ local function RoguemonTracker()
 	local specialRedeemToDescribe = nil
 
 	local patchedChangedEvos = false
+	local randomizingROM = false
 	local committed = false
 	local caughtSomethingYet = false
 
@@ -1181,18 +1182,27 @@ local function RoguemonTracker()
 			GS.BattleIntroOpponentSendsOutMonAnimation = 0x080141fc + 0x1 -- BattleIntroRecordMonsToDex + 0x1
 			GS.HandleTurnActionSelectionState = 0x08014c68 + 0x1 -- HandleTurnActionSelectionState + 0x1
 			GS.ReturnFromBattleToOverworld = 0x08016768 + 0x1 -- ReturnFromBattleToOverworld + 0x1
+			GS.gMultiUsePlayerCursor = 0x03004c24
+			GS.gSaveBlock1ptr = 0x03004c38
 			GS.sSpecialFlags = expectedsSpecialFlags
+			GS.gTasks = 0x03004cc0
+			GS.gSaveBlock3 = 0x0202458c
 
 			GS.roguemon = {
 				romCompat                 = 0x08000200,
+				romUid                    = 0x08000175,
 
 				-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
+				varType                   = 0x5c,
 				varAscension              = 0x5e,
 				varCurse                  = 0x7e,
 				varMilestone              = 0x82,
 
 				-- these are offset from SaveBlock2Addr
 				optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
+
+				-- these are offset from sSpecialFlags, in bits
+				flagAwaitingRandomization = 0x2
 			}
 		end
 	end
@@ -1544,14 +1554,8 @@ local function RoguemonTracker()
 
 	function self.ascensionLevel()
 		if RoguemonOptions["Ascension"] == "Auto" then
-			local profile = QuickloadScreen.getActiveProfile()
-			if profile then
-			    local settingsName = FileManager.extractFileNameFromPath(profile.Paths.Settings or "")
-			    if Utils.containsText(settingsName, "Ascension", true) then
-					return tonumber(settingsName:match("(%d+)") or "") or 1
-			    end
-			end
-			return 1
+			_, ascension, _ = self.getRomStamp()
+			return ascension
 		else
 			return tonumber(RoguemonOptions["Ascension"])
 		end
@@ -4718,7 +4722,8 @@ local function RoguemonTracker()
 	end
 
 	function self.getSaveDataFilePath()
-		return self.Paths.SAVED_DATA_PREFIX .. GameSettings.getRomName() .. ".tdat"
+		local _, ascension, runIndex = self.getRomStamp()
+		return self.Paths.SAVED_DATA_PREFIX .. self.getAscensionString(ascension, runIndex) .. ".tdat"
 	end
 
 	-- Save roguemon data to file
@@ -5356,6 +5361,14 @@ local function RoguemonTracker()
 			self.updateGameSettings()
 		end
 
+		if self.checkAwaitingRandomization() and not randomizingROM then
+			-- Trigger the main loop to LoadNextRom
+			randomizingROM = true
+			Main.loadNextSeed = true
+			return
+		end
+		randomizingROM = false
+
 		for name,counter in pairs(updateCounters) do
 			counter.currentUpdateCount = counter.currentUpdateCount - 1
 			if counter.currentUpdateCount == 0 then
@@ -5582,6 +5595,18 @@ local function RoguemonTracker()
 		return self
 	end
 
+	-- Override of Main.ExitSafely(). Restores any overridden core tracker functions
+	-- (including Main.ExitSafely) and calls Main.ExitSafely().
+	function self.ExitSafely(crashed)
+		-- we must restore functions before the tracker tries to exit.
+		-- Otherwise, the tracker will try to call getRomHash, which
+		-- will try to read from memory, which can crash bizhawk if
+		-- it's trying to reboot the core.
+
+		self.restoreCoreTrackerFunctions()
+		Main.ExitSafely(crashed)
+	end
+
 	-- FORM FUNCTIONS --
 
 	-- Calls callbackFunc with true if we want to patch, and false if we don't.
@@ -5649,6 +5674,47 @@ local function RoguemonTracker()
 	-- value to the ROM. All ROM game vars are u16.
 	function self.writeGameVar(offset, value)
 		return Memory.writeword(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + offset, value)
+	end
+
+	function self.getROMRunType()
+		return self.readGameVar(GameSettings.roguemon.varType)
+	end
+
+	function self.getROMAscension()
+		return self.readGameVar(GameSettings.roguemon.varAscension)
+	end
+
+	function self.getAscensionString(ascension, typeIndex)
+		local typeName = PokemonData.TypeIndexMap[typeIndex]
+		if typeName == 'unknown' then
+			typeName = 'typeless'
+		end
+		typeName = typeName:gsub("^%l", string.upper)
+		return string.format("Ascension %d %s", ascension, typeName)
+	end
+
+	function self.getSettingsFilePath(ascension, typeIndex)
+		local directory = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "Roguemon Settings Files" .. FileManager.slash
+		return string.format("%s%s.rnqs", directory, self.getAscensionString(ascension, typeIndex))
+	end
+
+	-- Fetches the Roguemon stamp from the running ROM. The stamp includes
+	-- a UID, and the ascension and type that the ROM was randomized with.
+	-- Returns a table of {uid, ascension, typeIndex}.
+	function self.getRomStamp()
+		-- ROM header struct fields:
+		-- u32 roguemonUidStamp;
+		-- u8 roguemonAscensionStamp:3;
+		-- u8 roguemonTypeStamp:5;
+
+		local uid = Memory.readdword(GameSettings.roguemon.romUid)
+		local ascensionTypeByte = Memory.readbyte(GameSettings.roguemon.romUid+4)
+
+		local ascension = ascensionTypeByte >> 5
+		local typeMask = 0x1f -- 0b11111
+		local typeIndex = ascensionTypeByte & typeMask
+
+		return uid, ascension, typeIndex
 	end
 
 
@@ -5763,6 +5829,148 @@ local function RoguemonTracker()
 		return result
 	end
 
+	function self.checkAwaitingRandomization()
+		return Utils.getbits(Memory.readbyte(GameSettings.sSpecialFlags), GameSettings.roguemon.flagAwaitingRandomization, 1) == 1
+	end
+
+	function self.markRandomizationComplete()
+		local flagBit = 1 << GameSettings.roguemon.flagAwaitingRandomization
+		local newFlags = Memory.readbyte(GameSettings.sSpecialFlags) & ~flagBit
+		Memory.writebyte(GameSettings.sSpecialFlags, newFlags)
+	end
+
+	-- Override of GameSettings.getRomHash. Since the hash of the running
+	-- ROM file that BizHawk sees will not be affected by in-memory
+	-- randomization, we need another unique identifier to determine what
+	-- randomization we're currently on. We read the UID stamp to determine
+	-- that.
+	function self.getRomHash()
+		local uidStamp = Memory.readdword(GameSettings.roguemon.romUid)
+		return string.format('%x', uidStamp)
+	end
+
+	function self.sendPlayerToTower()
+		-- TODO
+	end
+
+	-- Override of Main.LoadNextRom. Generates a new ROM and swaps it into
+	-- the running ROM, then restarts the tracker.
+	function self.LoadNextRom(v1, v2)
+		Main.loadNextSeed = false
+
+		-- In this case, someone used the New Run Combo buttons. We don't
+		-- actually want to randomize in this case. Instead, tell the
+		-- ROM to ship the player to the ascension tower so they can
+		-- pick a new run.
+		if not randomizingROM then
+			self.sendPlayerToTower()
+			Main.ExitSafely(false)
+			Main.Run()
+			return
+		end
+
+		Program.GameTimer:reset()
+		Utils.tempDisableBizhawkSound()
+
+		if Main.IsOnBizhawk() then
+			Drawing.clearImageCache()
+			Utils.printDebug("--------Randomizing--------")
+		else
+			MGBA.clearConsole()
+		end
+
+		local ascension = self.getROMAscension()
+		local runType = self.getROMRunType()
+
+		local settingsFile = self.getSettingsFilePath(ascension, runType)
+		Options.FILES["Settings File"] = settingsFile
+
+		local nextRomInfo = Main.GenerateNextRom()
+
+		if nextRomInfo == nil then
+			self.markRandomizationComplete()
+		end
+
+		Main.ExitSafely(false)
+
+		if nextRomInfo ~= nil then
+			Main.currentSeed = Main.currentSeed + 1
+			Main.WriteAttemptsCountToFile(nextRomInfo.attemptsFilePath)
+			QuickloadScreen.afterNewRunProfileCheckup(nextRomInfo.filePath)
+			Tracker.clearTrackerNotesAndFile()
+
+			local successStamp = self.stampRomFile(nextRomInfo.filePath, ascension, runType)
+			local successRewrite = self.rewriteRom(nextRomInfo.filePath)
+			local successOverwrite = FileManager.CopyFile(nextRomInfo.filePath, self.Paths.ROGUEMON_ROM, 'overwrite')
+			if successStamp and successRewrite and successOverwrite then
+				self.markRandomizationComplete()
+
+				if not Main.IsOnBizhawk() then
+					-- MGBA is ready to restart, no other code needs to run
+					return
+				end
+			else
+				print(string.format('> ERROR: Unable to load generated ROM: %s', nextRomInfo.fileName or "N/A"))
+			end
+		end
+
+		Utils.tempEnableBizhawkSound()
+
+		Main.Run()
+	end
+
+
+	-- Takes a ROM file path and dynamically writes it into the running
+	-- memory of the current ROM.
+	function self.rewriteRom(romFilePath)
+		local file = assert(io.open(romFilePath, "rb"))
+		if file == nil then
+			return false
+		end
+
+		local t = {}
+		repeat
+			local str = file:read(4*1024)
+			for c in (str or ''):gmatch'.' do
+			byte = c:byte()
+				t[#t+1] = byte
+			end
+		until not str
+
+		file:close()
+
+		memory.write_bytes_as_array(0x0, t, "ROM")
+		return true
+	end
+
+	-- Stamps the header of the rom at the given file path with
+	-- variables indicating the ascension and runType, along with
+	-- a unique ID that will be used as our ROM "hash".
+	function self.stampRomFile(romFilePath, ascension, runType)
+		local file = assert(io.open(romFilePath, "r+b"))
+		if file == nil then
+			return false
+		end
+
+		local uid = math.random(0, 2^32 - 1)
+
+		local stampAddress = GameSettings.roguemon.romUid - 0x08000000
+		file:seek('set', stampAddress)
+
+		-- ROM header struct fields:
+		-- u8 roguemonAscensionStamp:3;
+		-- u8 roguemonTypeStamp:5;
+		local ascensionTypeStamp = (ascension << 5) | runType
+
+		for _, b in ipairs(RoguemonUtils.uint32_to_bytes(uid)) do
+			file:write(string.char(b))
+		end
+
+		file:write(string.char(ascensionTypeStamp))
+		file:close()
+
+		return true
+	end
 
 	-- we use this to track the original function call so we can restore them during `unload()`.
 	local originalCoreFunctions = {}
@@ -5791,10 +5999,16 @@ local function RoguemonTracker()
 	end
 
 	function self.overrideCoreTrackerFunctions()
+		overrideFunction(Main, "Main", "ExitSafely", self.ExitSafely)
+		overrideFunction(Main, "Main", "LoadNextRom", self.LoadNextRom)
+		overrideFunction(GameSettings, "GameSettings", "getRomHash", self.getRomHash)
 	end
 
 	-- restores the original core functions. Called when we unload().
 	function self.restoreCoreTrackerFunctions()
+		restoreFunctions(Main, "Main")
+		restoreFunctions(FileManager, "FileManager")
+		restoreFunctions(GameSettings, "GameSettings")
 	end
 
 	return self
