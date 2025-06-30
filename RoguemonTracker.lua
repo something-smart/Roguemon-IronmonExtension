@@ -231,7 +231,7 @@ local function RoguemonTracker()
 	-- This is incremented whenever we make a change in the ROM that
 	-- requires a change in the tracker, or vice versa. We check it against
 	-- what is the ROM, and throw an error if it doesn't match.
-	local trackerCompatVersion = 0x01
+	local trackerCompatVersion = 0x02
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
