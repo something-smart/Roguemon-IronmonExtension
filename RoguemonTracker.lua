@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.3.2-rc1"
+	self.version = "1.4.0-beta1"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -51,10 +51,10 @@ local function RoguemonTracker()
 		["Spidey Sense"] = {consumable = false, image = "spidey-sense.png", description = "Learn if enemies have Counter, Mirror Coat, or Destiny Bond."},
 		["Temporary Item Pass"] = {consumable = true, image = "tempvoucher.png", description = "All legal items are unlocked for the next two gyms."},
 		["Smuggler's Pouch"] = {consumable = false, image = "smugglers-pouch.png", description = "May choose one item not to cleanse each Cleansing Phase."},
-		["Pocket Sand"] = {consumable = false, button = "Use", charges = 4, image = "safari.png", description = "4 times in the run, may reduce enemy's accuracy to -6."},
-		["Tera Orb"] = {consumable = false, button = "Use", charges = -1, image = "safari.png", description = "Choose a type matching a move; once per segment, Terastalize to that type."},
-		["Notetaker"] = {consumable = false, image = "safari.png", description = "Notes on enemy pokemon transfer to their evolution."},
-		["Midas Touch"] = {consumable = false, image = "safari.png", description = "If you trash an HP heal, gain 30% of its value as HP cap."},
+		["Pocket Sand"] = {consumable = false, button = "Use", charges = 5, image = "pocket-sand.png", description = "5 times in the run, may reduce enemy's accuracy to -6."},
+		["Tera Orb"] = {consumable = false, button = "Use", charges = 5, image = "tera-orb.png", description = "Choose a type matching a move; 5 times, you may Terastalize to that type."},
+		-- ["Notetaker"] = {consumable = false, image = "safari.png", description = "Notes on enemy pokemon transfer to their evolution."},
+		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash an HP heal, gain 30% of its value as HP cap."},
 	}
 
 	local gymLeaders = {[414] = true, [415] = true, [416] = true, [417] = true, [418] = true, [420] = true, [419] = true, [350] = true}
@@ -114,14 +114,14 @@ local function RoguemonTracker()
 		["Misty"] = {["routes"] = {12}, ["allMandatory"] = true, ["gymCursable"] = true},
 		["Route 6/11"] = {["routes"] = {182, 94, 99}, ["trainers"] = {355, 111, 112, 145, 146, 151, 152, 97, 98, 99, 100, 221, 222, 258, 259, 260, 261}, ["mandatory"] = {355, 146}, ["cursable"] = true,
 			["items"] = {1119, 1118, 1048, 1041, 0x1CF, 0x1CE, 0x1C1}},
-		["Rival 4"] = {["routes"] = {119, 120, 121, 122}, ["trainers"] = {426, 427, 428}, ["allMandatory"] = true, ["rival"] = true, ["items"] = {1008, 1190, 1121, 1122, 1120, 0x16A}},
+		["Rival 4"] = {["routes"] = {119, 120, 121, 122}, ["trainers"] = {426, 427, 428}, ["allMandatory"] = true, ["rival"] = true, ["items"] = {1008, 1121, 1122, 1120, 0x16A}},
 		["Lt. Surge"] = {["routes"] = {25}, ["allMandatory"] = true, ["gymCursable"] = true},
 		["Route 9/10 N"] = {["routes"] = {97, 98}, ["trainers"] = {114, 115, 148, 149, 154, 155, 185, 186, 465, 156}, ["mandatory"] = {154, 115}, ["cursable"] = true, ["items"] = {1150, 1006, 1123, 0x1C2, 0x16B, 1126, 1125, 1009}},
 		["Rock Tunnel/Rt 10 S"] = {["routes"] = {154, 155}, ["trainers"] = {192, 193, 194, 168, 476, 475, 474, 158, 159, 189, 190, 191, 164, 165, 166, 157, 163, 187, 188}, ["mandatory"] = {168, 166, 159, 158, 189, 474}, ["choicePairs"] = {{191, 190}, {192, 193}}, ["cursable"] = true,
 			["items"] = {0x1C5, 0x1C4, 0x1C3, 0x1C7, 0x1C6, 1151}},
 		["Rival 5"] = {["routes"] = {161, 162}, ["trainers"] = {429, 430, 431}, ["allMandatory"] = true, ["rival"] = true},
 		["Route 8"] = {["routes"] = {96}, ["choicePairs"] = {{131, 264}}, ["cursable"] = true, ["items"] = {1129, 1128, 1127}},
-		["Erika"] = {["routes"] = {15}, ["allMandatory"] = true, ["gymCursable"] = true, ["itemsBefore"] = {1047, 0x1D1}},
+		["Erika"] = {["routes"] = {15}, ["allMandatory"] = true, ["gymCursable"] = true, ["itemsBefore"] = {1152, 1047, 0x1D1}},
 		["Game Corner"] = {["routes"] = {27, 128, 129, 130, 131}, ["mandatory"] = {357, 368, 366, 367, 348}, ["cursable"] = true, ["items"] = {1011, 0x16C, 0x16D, 0x16F, 0x171, 0x170, 0x16E, 1012, 0x1D2, 0x172, 0x173, 1013, 1134, 0x176, 0x175, 0x174}},
 		["Pokemon Tower"] = {["routes"] = {161, 163, 164, 165, 166, 167}, ["mandatory"] = {447, 453, 452, 369, 370, 371}, ["cursable"] = true, ["items"] = {0x177, 0x179, 0x178, 0x17A, 1014, 0x1D0, 0x17B, 0x17C, 0x17D}},
 		["Cycling Rd/Rt 18/19"] = {["routes"] = {104, 105, 106, 107}, ["trainers"] = {199, 201, 202, 249, 250, 251, 203, 204, 205, 206, 252, 253, 254, 255, 256, 470, 307, 308, 309, 235, 236}, ["cursable"] = true,
@@ -170,8 +170,8 @@ local function RoguemonTracker()
 		["No Cover"] = {description = "Enemies cannot miss you", segment = true, gym = true},
 		["Relay Race"] = {description = "Enemy stat stages carry over, with +1 Speed", segment = true, gym = true,
 							longDescription = "All enemy pokemon start with +1 Speed, plus any stat changes that the previous pokemon in the fight had."},
-		["Resourceful"] = {description = "Lose 1-3 PP after a fight; moves at 0 PP change randomly", segment = true, gym = false,
-							longDescription = "After each battle, lose 1-3 PP on your last used move. Then, if any moves are at 0 PP, they are changed to a random move."},
+		["Resourceful"] = {description = "Lose PP after fights; moves at 0 change", segment = true, gym = false,
+							longDescription = "After each battle, lose 0-2 PP on your last used move. Then, if any moves are at 0 PP, they are changed to a random move."},
 		["Safety Zone"] = {description = "If fighting, <75% HP, 30% to lose a heal", segment = true, gym = false,
 							longDescription = "If you start a fight with less than 75% of your max HP, 30% chance to lose a random HP heal from your bag."},
 		["Live Audience"] = {description = "When hit by a move, Encored for 2-3 turns", segment = true, gym = false,
@@ -184,8 +184,8 @@ local function RoguemonTracker()
 		["Time Warp"] = {description = "Lose 25% of your EXP until the segment ends", segment = true, gym = true},
 		["TikTok"] = {description = "One move per fight is secretly Metronome", segment = true, gym = false},
 		["Bloodborne"] = {description = "When you use an HP heal, lose 20% of its value from your cap", segment = true, gym = false},
-		["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, 
-							longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
+		-- ["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, 
+		-- 					longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
 		["Backseating"] = {description = "Don't use marked move: -1 to a random stat", segment = true, gym = false,
 							longDescription = "Each turn, 'chat' suggests one move; if you don't use that move on that turn, you get -1 to a random stat for the fight."},
 		-- ["Children's Puzzle"] = {description = "Failed trash can = +1 random stat to one of Surge's mons", segment = false, gym = true,
@@ -194,14 +194,14 @@ local function RoguemonTracker()
 							longDescription = "-1 in attacking stat corresponding to lead's lower defense",},
 		["Conversion"] = {description = "Enemy pokemon become a type matching a move", segment = true, gym = true,
 							longDescription = "Enemy pokemon change to a type matching one of their moves"},
-		["Mediocritize"] = {description = "Your BST is redistributed evenly for this segment", segment = true, gym = true},
+		-- ["Mediocritize"] = {description = "Your BST is redistributed evenly for this segment", segment = true, gym = true},
 		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight", segment = true, gym = false,
 							longDescription = "HP is randomized to 25%, 50%, 75%, or 100% after each fight"},
-		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false},
-		["Distorted Heart"] = {description = "Your moves' typings are randomized each battle", segment = true, gym = false,
-								longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
-		["Distorted Soul"] = {description = "Your moves' powers are randomized each battle", segment = true, gym = false,
-								longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
+		-- ["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false},
+		-- ["Distorted Heart"] = {description = "Your moves' typings are randomized each battle", segment = true, gym = false,
+		-- 						longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
+		-- ["Distorted Soul"] = {description = "Your moves' powers are randomized each battle", segment = true, gym = false,
+		-- 						longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
 	}
 
 	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
@@ -565,7 +565,8 @@ local function RoguemonTracker()
 	end
 
 	function self.removeItem(itemChoice, quantity)
-		if itemChoice == Constants.BLANKLINE or quantity == nil or quantity == 0 then return false end
+		quantity = quantity or 1
+		if itemChoice == Constants.BLANKLINE or quantity == 0 then return false end
 	
 		local itemID = self.getItemId(itemChoice)
 		local bagPocketOffset, bagPocketCapacity, limitQuantity = self.getBagPocketData(itemID)
@@ -861,16 +862,19 @@ local function RoguemonTracker()
 
 	-- Insert newlines into a string so that words are not split up and no line is longer than a specified number of pixels.
 	-- Use @ to manually insert a newline.
-	function self.wrapPixelsInline(input, limit)
+	function self.wrapPixelsInline(input, limit, lineLimit, alternate)
 		local ret = ""
 		local currentLine = ""
+		local lineCount = 1
 		for _,word in pairs(Utils.split(input, " ", true)) do
 			if word == "@" then
 				ret = ret .. currentLine .. "\n"
 				currentLine = ""
+				lineCount = lineCount + 1
 			elseif Utils.calcWordPixelLength(currentLine .. " " .. word) > limit and currentLine ~= "" then
 				ret = ret .. currentLine .. "\n"
 				currentLine = word
+				lineCount = lineCount + 1
 			elseif currentLine == "" then
 				currentLine = word
 			else
@@ -882,6 +886,11 @@ local function RoguemonTracker()
 		else
 			ret = ret .. currentLine
 		end
+
+		if lineLimit and alternate and lineCount > lineLimit then
+			return self.wrapPixelsInline(alternate, limit)
+		end
+
 		return ret
 	end
 
@@ -1582,26 +1591,36 @@ local function RoguemonTracker()
 
 	function self.getItemsInCurrentSegment()
 		local segInfo = segments[segmentOrder[currentSegment]]
-		local addrList = nil
+		local prevSegInfo = nil
+		if segmentOrder[currentSegment - 1] then
+			prevSegInfo = segments[segmentOrder[currentSegment - 1]]
+		end
+		local addrList = {}
 		if segmentStarted then
 			if segInfo["items"] then
-				addrList = segInfo["items"]
-				
+				for _,itm in pairs(segInfo["items"]) do
+					addrList[#addrList + 1] = itm
+				end
 			end
 		else
 			if segInfo["itemsBefore"] then
-				addrList = segInfo["itemsBefore"]
+				for _,itm in pairs(segInfo["itemsBefore"]) do
+					addrList[#addrList + 1] = itm
+				end
+			end
+			if prevSegInfo and prevSegInfo["items"] then
+				for _,itm in pairs(prevSegInfo["items"]) do
+					addrList[#addrList + 1] = itm
+				end
 			end
 		end
 		local count = 0
 		local saveBlock1Addr = Utils.getSaveBlock1Addr()
-		if addrList then
-			for _,addr in pairs(addrList) do
-				local itemAddrOffset = math.floor(addr / 8)
-				local itemBit = addr % 8
-				if Utils.getbits(Memory.readbyte(saveBlock1Addr + GameSettings.gameFlagsOffset + itemAddrOffset), itemBit, 1) == 0 then
-					count = count + 1
-				end
+		for _,addr in pairs(addrList) do
+			local itemAddrOffset = math.floor(addr / 8)
+			local itemBit = addr % 8
+			if Utils.getbits(Memory.readbyte(saveBlock1Addr + GameSettings.gameFlagsOffset + itemAddrOffset), itemBit, 1) == 0 then
+				count = count + 1
 			end
 		end
 		return count
@@ -1658,8 +1677,8 @@ local function RoguemonTracker()
 			self.nullifyTrainers(currentSegment)
 		end
 
-		for c,info in pairs(specialRedeems.consumable) do
-			if specialRedeemInfo[c].charges and specialRedeemInfo[c].charges == -1 then
+		for c,info in pairs(specialRedeems.battle) do
+			if specialRedeemInfo[c] and specialRedeemInfo[c].charges and specialRedeemInfo[c].charges == -1 then
 				specialRedeems[c] = -1
 			end
 		end
@@ -2092,7 +2111,7 @@ local function RoguemonTracker()
 			end
 		end
 
-		if not additionalOptions[3] then
+		if (not additionalOptions[3]) or (additionalOptions[3] == "") then
 			self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 10, 120)
 		end
 
@@ -2358,17 +2377,19 @@ local function RoguemonTracker()
 						local heldItem = Tracker.getPokemon(1, true).heldItem
 						self.removeItem(self.NotificationScreen.itemInQuestion)
 						if heldItem then
-							self.AddItemById(heldItem)
+							self.AddItemById(heldItem, 1)
 						end
 						local pkmn = self.readLeadPokemonData()
-						pkmn.growth1 = Utils.getbits(pkmn.growth1, 0, 16) + Utils.bit_lshift(self.NotificationScreen.itemInQuestion, 16)
+						pkmn.growth1 = Utils.getbits(pkmn.growth1, 0, 16) + Utils.bit_lshift(self.getItemId(self.NotificationScreen.itemInQuestion), 16)
 						self.writeLeadPokemonData(pkmn)
+						self.returnToHomeScreen()
 					end
 				},
 				{
 					name = "Trash",
 					onClick = function()
 						self.removeItem(self.NotificationScreen.itemInQuestion)
+						self.returnToHomeScreen()
 					end
 				}
 			},
@@ -2378,6 +2399,7 @@ local function RoguemonTracker()
 					name = "Trash",
 					onClick = function()
 						self.removeItem(self.NotificationScreen.itemInQuestion)
+						self.returnToHomeScreen()
 					end
 				}
 			}
@@ -2411,7 +2433,6 @@ local function RoguemonTracker()
 		local aux = {}
 		if self.NotificationScreen.queuedAuxiliary then
 			aux = self.NotificationScreen.queuedAuxiliary
-			self.NotificationScreen.queuedAuxiliary = nil
 		else
 			for pre, info in pairs(self.NotificationScreen.auxiliaryButtonInfo) do
 				if string.sub(self.NotificationScreen.message, 1, string.len(pre)) == pre then
@@ -2422,11 +2443,11 @@ local function RoguemonTracker()
 		self.NotificationScreen.activeAuxiliary = aux
 		if aux[1] then
 			self.NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 143, 
-			Utils.calcWordPixelLength(aux.name) + 4, 10} 
+			Utils.calcWordPixelLength(aux[1].name) + 5, 10} 
 		end
 		if aux[2] then
-			self.NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
-			Utils.calcWordPixelLength(aux.name) + 4, 10} 
+			self.NotificationScreen.Buttons.AuxiliaryButton2.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
+			Utils.calcWordPixelLength(aux[2].name) + 5, 10} 
 		end
 
 		for _, button in pairs(self.NotificationScreen.Buttons or {}) do
@@ -4227,7 +4248,7 @@ local function RoguemonTracker()
 			local pkmn = self.readLeadPokemonData()
 			local pps = self.getPPValues(pkmn)
 			if lastUsedMove then
-				pps[lastUsedMove] = math.max(pps[lastUsedMove] - math.random(3), 0)
+				pps[lastUsedMove] = math.max(pps[lastUsedMove] - (math.random(3)-1), 0)
 			end
 			pkmn.attack3 = pps[1] + Utils.bit_lshift(pps[2], 8)  + Utils.bit_lshift(pps[3], 16) + Utils.bit_lshift(pps[4], 24)
 			self.writeLeadPokemonData(pkmn)
@@ -4973,11 +4994,11 @@ local function RoguemonTracker()
 			local colorList = TrackerScreen.PokeBalls.ColorList
 			Drawing.drawImageAsPixels(Constants.PixelImages.POKEBALL_SMALL, Constants.SCREEN.WIDTH + (gachaOn and 124 or 136), Constants.SCREEN.MARGIN + 132, colorList)
 			local itemCt = self.getItemsInCurrentSegment()
-			Drawing.drawText(Constants.SCREEN.WIDTH + (gachaOn and 121 or 133) + ((itemCt > 10) and 0 or 3), Constants.SCREEN.MARGIN + 140, itemCt, Theme.COLORS["Lower box text"])
+			Drawing.drawText(Constants.SCREEN.WIDTH + (gachaOn and 122 or 133) + ((itemCt > 10) and 0 or 3), Constants.SCREEN.MARGIN + 140, itemCt, Theme.COLORS["Lower box text"])
 
 			-- Draw the word-wrapped text, if any
 			local btnText = button:getCustomText()
-			local wrappedText = self.wrapPixelsInline(btnText, gachaOn and 113 or 125)
+			local wrappedText = self.wrapPixelsInline(btnText, gachaOn and 113 or 125, 2, Utils.replaceText(btnText, "mandatory", "mand."))
 			if not string.find(wrappedText, "%\n") then
 				Drawing.drawText(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 1, 140, wrappedText, Theme.COLORS["Lower box text"], shadowcolor)
 			else
@@ -5425,6 +5446,11 @@ local function RoguemonTracker()
 			if shouldDismissNotification and shouldDismissNotification() then
 				self.returnToHomeScreen()
 			end
+		end
+
+		-- Reset queuedAuxiliary for NotificationScreen
+		if Program.currentScreen ~= self.NotificationScreen then
+			self.NotificationScreen.queuedAuxiliary = nil
 		end
 
 		-- Check if the game should be over but there's a Revive

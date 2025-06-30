@@ -49,6 +49,7 @@ PP Up & Ether|ppupether.png
 Choose 2: Choose 2 prizes at the next gym milestone.|choose-2.png
 Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
+Midas Touch: If you trash an HP heal, gain 30% of its value as HP cap.|midas-touch.png
 
 *Mt. Moon Prize
 Super Potion|super-potion.png
@@ -84,6 +85,7 @@ Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
 Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 Special Insight: Learn every enemy pokemon's ability.|special-insight.png
+Midas Touch: If you trash an HP heal, gain 30% of its value as HP cap.|midas-touch.png
 
 *Surge Prize
 TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
@@ -150,6 +152,7 @@ HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
 
 *Silph Co Prize
 Teach 1 currently held TM|tm.png
@@ -189,6 +192,7 @@ HP Cap +50 & Move Tutor & Poke Doll: May use the Copycat move tutor. Cannot pre-
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Ether & Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
 
 *Blaine Prize
 Teach 1 currently held TM|tm.png
@@ -207,6 +211,7 @@ Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in the Cinnabar Lab. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
+Max Ether & Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
 
 *Giovanni Prize
 Teach 1 currently held TM|tm.png
@@ -237,3 +242,4 @@ Revive: Gain a Revive which may be used. Keep your HM friend with you; send it o
 Full Heal x2 & Elixir x2|twofulltwoelixir.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 Moomoo Milk & Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
+Tera Orb: Choose a type matching a move; 5 times, you may Terastalize to that type.|tera-orb.png
