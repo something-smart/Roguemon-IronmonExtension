@@ -222,18 +222,6 @@ local function RoguemonTracker()
 	-- what is the ROM, and throw an error if it doesn't match.
 	local trackerCompatVersion = 0x01
 
-	local addressOffsets = {
-		-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
-		-- Note that GameSettings.gameVarsOffset may be modified by the NatDex
-		-- extension _after_ we initialize.
-		varAscension              = 0x5e,
-		varCurse                  = 0x7e,
-		varRoguemonSegment        = 0x82,
-
-		-- these are offset from SaveBlock2Addr
-		optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
-	}
-
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
 
@@ -1181,6 +1169,18 @@ local function RoguemonTracker()
 			GS.BattleIntroOpponentSendsOutMonAnimation = 0x080141fc + 0x1 -- BattleIntroRecordMonsToDex + 0x1
 			GS.HandleTurnActionSelectionState = 0x08014c68 + 0x1 -- HandleTurnActionSelectionState + 0x1
 			GS.ReturnFromBattleToOverworld = 0x08016768 + 0x1 -- ReturnFromBattleToOverworld + 0x1
+
+			GS.roguemon = {
+				romCompat                 = 0x08000200,
+
+				-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
+				varAscension              = 0x5e,
+				varCurse                  = 0x7e,
+				varMilestone              = 0x82,
+
+				-- these are offset from SaveBlock2Addr
+				optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
+			}
 		end
 	end
 
@@ -1189,14 +1189,14 @@ local function RoguemonTracker()
 	end
 
 	function self.setROMAscension()
-		Memory.writebyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varAscension, self.ascensionLevel())
+		self.writeGameVar(GameSettings.roguemon.varAscension, self.ascensionLevel())
 	end
 
 	-- Read rules enforcement state from the ROM. Set in game options menu.
 	function self.getRulesEnforcement()
 		local saveBlock2Addr = Utils.getSaveBlock2Addr()
 
-		local options = Memory.readbyte(saveBlock2Addr + addressOffsets.optionsRoguemonRules)
+		local options = Memory.readbyte(saveBlock2Addr + GameSettings.roguemon.optionsRoguemonRules)
 		enforceRules = Utils.getbits(options, 5, 1) ~= 0
 	end
 
@@ -1845,18 +1845,14 @@ local function RoguemonTracker()
 		self.saveData()
 	end
 
-	function self.getCurseVarAddr()
-		return Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varCurse
-	end
-
 	function self.romCurseOn(curse)
-		local newVal = Utils.bit_or(Memory.readbyte(self.getCurseVarAddr()), curse)
-		Memory.writebyte(self.getCurseVarAddr(), newVal)
+		local newVal = self.readGameVar(GameSettings.roguemon.varCurse) | curse
+		self.writeGameVar(GameSettings.roguemon.varCurse, newVal)
 	end
 
 	function self.romCurseOff(curse)
-		local newVal = Utils.bit_and(Memory.readbyte(self.getCurseVarAddr()), bit_not(curse))
-		Memory.writebyte(self.getCurseVarAddr(), newVal)
+		local newVal = self.readGameVar(GameSettings.roguemon.varCurse) & ~curse
+		self.writeGameVar(GameSettings.roguemon.varCurse, newVal)
 	end
 
 	-- Determine if a particular segment has been reached yet
@@ -5367,7 +5363,7 @@ local function RoguemonTracker()
 		if not caughtSomethingYet and #Program.GameData.PlayerTeam > 1 then
 			caughtSomethingYet = true
 		end
-		if not committed and Memory.readbyte(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varRoguemonSegment) == 2 then
+		if not committed and self.readGameVar(GameSettings.roguemon.varMilestone) == 2 then
 			committed = true
 			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
 				self.displayNotification("Use the Egg, Luke!", "lucky-egg.png", function()
@@ -5560,6 +5556,22 @@ local function RoguemonTracker()
 	function RoguemonObj()
 		return self
 	end
+
+
+	-- ROM READING/WRITING FUNCTIONS --
+
+	-- Takes the offset of a known game var offset and returns the current value of
+	-- that variable from the ROM. All ROM game vars are u16.
+	function self.readGameVar(offset)
+		return Memory.readword(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + offset)
+	end
+
+	-- Takes the offset of a known game var offset and a value, and writes that
+	-- value to the ROM. All ROM game vars are u16.
+	function self.writeGameVar(offset, value)
+		return Memory.writeword(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + offset, value)
+	end
+
 
 	return self
 end
