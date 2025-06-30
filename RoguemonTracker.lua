@@ -31,6 +31,8 @@ local function RoguemonTracker()
 
 	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
 
+	local STATIC_PROFILE_ID = "8cca5a43-967c-469a-858b-123456789abc"
+
 	local REQUIRED_BIZHAWK_VERSION = "2.9"
 
 	local prize_images = {} -- will get updated when config file is read
@@ -1169,6 +1171,37 @@ local function RoguemonTracker()
 				end
 			end
 		end
+	end
+
+	-- Manages a static run profile that is used for RogueMon.
+	-- Actions are idempotent.
+	function self.setupRunProfile()
+		local uid, ascension, typeIndex = self.getRomStamp()
+
+		Options["Generate ROM each time"] = true
+		Options["Game Over condition"]    = "EntirePartyFaints"
+		Options.FILES["Randomizer JAR"]   = self.Paths.RANDOMIZER_JAR
+		Options.FILES["Source ROM"]       = self.Paths.ROGUEMON_UNRAND_ROM
+
+		local profile = QuickloadScreen.IProfile:new({
+			Name = "RogueMon",
+			Mode = "Generate",
+			GameVersion = "firered",
+			GameOverCondition = Options["Game Over condition"],
+			GUID = STATIC_PROFILE_ID,
+			Paths = {
+				Rom = Options.FILES["Source ROM"],
+				Jar = Options.FILES["Randomizer JAR"],
+			}
+		})
+
+		if ascension > 0 then
+			local settingsFile = self.getSettingsFilePath(ascension, typeIndex)
+			Options.FILES["Settings File"] = settingsFile
+			profile.Paths.Settings = Options.FILES["Settings File"]
+		end
+
+		QuickloadScreen.addUpdateProfile(profile, true)
 	end
 
 	function self.updateGameSettings()
@@ -5232,6 +5265,8 @@ local function RoguemonTracker()
 			return
 		end
 
+		self.setupRunProfile()
+
 		-- Read & populate configuration info
 		self.readConfig()
 		self.populateSegmentData()
@@ -5276,9 +5311,6 @@ local function RoguemonTracker()
 
 		-- User may toggle this in the options menu of the game
 		self.addUpdateCounter("Get Rules Enforcement", 6, self.getRulesEnforcement)
-
-		-- Add a setting so Roguemon seeds default to being over when the entire party faints
-		QuickloadScreen.SettingsKeywordToGameOverMap["Ascension"] = "EntirePartyFaints"
 
 		-- Set tracker to use whole number heal value
 		hpHealsSetting = TrackerAPI.getOption("Show heals as whole number")
