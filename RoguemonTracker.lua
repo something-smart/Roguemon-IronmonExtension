@@ -1834,16 +1834,6 @@ local function RoguemonTracker()
 		return Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + addressOffsets.varCurse
 	end
 
-	local function bit_not(n)
-		local p,c=1,0
-		while n>0 do
-			local r=n%2
-			if r<1 then c=c+p end
-			n,p=(n-r)/2,p*2
-		end
-		return c
-	end
-
 	function self.romCurseOn(curse)
 		local newVal = Utils.bit_or(Memory.readbyte(self.getCurseVarAddr()), curse)
 		Memory.writebyte(self.getCurseVarAddr(), newVal)

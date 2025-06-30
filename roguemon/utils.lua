@@ -96,4 +96,24 @@ function utils.compare_semver(v1, v2)
     return 0 -- Versions are equal
 end
 
+function utils.bit_not(n)
+	local p,c=1,0
+	while n>0 do
+		local r=n%2
+		if r<1 then c=c+p end
+		n,p=(n-r)/2,p*2
+	end
+	return c
+end
+
+function utils.uint32_to_bytes(n)
+	n = n & 0xFFFFFFFF
+	local b1 = (n >> 24) & 0xFF
+	local b2 = (n >> 16) & 0xFF
+	local b3 = (n >> 8) & 0xFF
+	local b4 = n & 0xFF
+
+	return {b1, b2, b3, b4}
+end
+
 return utils
