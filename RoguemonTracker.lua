@@ -327,6 +327,7 @@ local function RoguemonTracker()
 
 	local patchedChangedEvos = false
 	local randomizingROM = false
+	local syncedAttempts = false
 	local committed = false
 	local caughtSomethingYet = false
 
@@ -1234,6 +1235,9 @@ local function RoguemonTracker()
 				-- these are offset from SaveBlock2Addr
 				optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
 
+				-- these are offset from SaveBlock3
+				ascensionTypeStats        = 0x73e4,
+
 				-- these are offset from sSpecialFlags, in bits
 				flagAwaitingRandomization = 0x2
 			}
@@ -1246,6 +1250,26 @@ local function RoguemonTracker()
 
 	function self.setROMAscension()
 		self.writeGameVar(GameSettings.roguemon.varAscension, self.ascensionLevel())
+	end
+
+	-- Gets the address of the attempts byte for the given ascension and
+	-- typeIndex.
+	function self.getAttemptsAddr(ascension, typeIndex)
+		local roguemonStatsStructSize = 8
+		local GS = GameSettings
+		local ascensionIndex = ascension - 1
+		-- attempts is the first DWORD in the struct
+		return GS.gSaveBlock3 + GS.roguemon.ascensionTypeStats + (roguemonStatsStructSize * (ascensionIndex * 19 + typeIndex))
+	end
+
+	-- Reads the ROM attempts count for the given ascension and typeIndex.
+	function self.getROMAttempts(ascension, typeIndex)
+		return Memory.readdword(self.getAttemptsAddr(ascension, typeIndex))
+	end
+
+	-- Writes the attempts count for the given ascension and typeIndex.
+	function self.writeROMAttempts(ascension, typeIndex, attempts)
+		return Memory.writedword(self.getAttemptsAddr(ascension, typeIndex), attempts)
 	end
 
 	-- Read rules enforcement state from the ROM. Set in game options menu.
@@ -5469,6 +5493,10 @@ local function RoguemonTracker()
 			self.updateFriendshipValues()
 		end
 
+		if not syncedAttempts then
+			syncedAttempts = self.syncAttempts()
+		end
+
 		-- Check if we are in battle for curses
 		local curse = self.getActiveCurse()
 		if curse then
@@ -5716,6 +5744,39 @@ local function RoguemonTracker()
 		return self.readGameVar(GameSettings.roguemon.varAscension)
 	end
 
+	-- Synchronizes the tracker attempt counts with the ROM.
+	function self.syncAttempts()
+		-- We backup the the original seed since Main.ReadAttemptsCount will update
+		-- it. Note that the "currentSeed" is just a count of attempts.
+		local backupSeed = Main.currentSeed
+		local backupSettingsFile = Options.FILES["Settings File"]
+
+		-- for each ascension/type pair, read the current attempts count from the
+		-- tracker and from the ROM. If the tracker is higher, write to the ROM. If
+		-- the ROM is higher, write to the tracker.
+		for typeIndex, type in pairs(PokemonData.TypeIndexMap) do
+			for _, ascension in ipairs({1, 2, 3}) do
+				local settingsFile = self.getSettingsFilePath(ascension, typeIndex)
+
+				Options.FILES["Settings File"] = settingsFile
+				-- reads the attempts into Main.currentSeed
+				Main.ReadAttemptsCount(true)
+				local trackerAttempts = Main.currentSeed
+
+				local romAttempts = self.getROMAttempts(ascension, typeIndex)
+
+				if trackerAttempts > romAttempts then
+					self.writeROMAttempts(ascension, typeIndex, trackerAttempts)
+				end
+			end
+		end
+
+		Main.currentSeed = backupSeed
+		Options.FILES["Settings File"] = backupSettingsFile
+
+		return true
+	end
+
 	function self.getAscensionString(ascension, typeIndex)
 		local typeName = PokemonData.TypeIndexMap[typeIndex]
 		if typeName == 'unknown' then
@@ -5723,6 +5784,12 @@ local function RoguemonTracker()
 		end
 		typeName = typeName:gsub("^%l", string.upper)
 		return string.format("Ascension %d %s", ascension, typeName)
+	end
+
+	function self.getAttemptsFilePath(ascension, typeIndex)
+		local directory = FileManager.getPathOverride("Attempt Counts") or FileManager.dir
+		local fileName = string.format("%s%s", self.getAscensionString(ascension, typeIndex), FileManager.Extensions.ATTEMPTS)
+		return directory .. fileName
 	end
 
 	function self.getSettingsFilePath(ascension, typeIndex)
