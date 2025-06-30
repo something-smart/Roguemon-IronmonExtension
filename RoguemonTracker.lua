@@ -26,6 +26,8 @@ local function RoguemonTracker()
 
 	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
 
+	local REQUIRED_BIZHAWK_VERSION = "2.9"
+
 	local prize_images = {} -- will get updated when config file is read
 
 	local specialRedeemInfo = {
@@ -5193,6 +5195,14 @@ local function RoguemonTracker()
 	end
 
 	function self.startup()
+		local bizhawkVersion = client.getversion()
+		if Utils.isNewerVersion(REQUIRED_BIZHAWK_VERSION, bizhawkVersion) then
+			self.errorLog("This extension does not support BizHawk %s. " ..
+			              "Please update to BizHawk %s or newer.",
+			              bizhawkVersion, REQUIRED_BIZHAWK_VERSION)
+			return
+		end
+
 		local romCompatVersion = self.getROMCompatVersion()
 		if romCompatVersion ~= trackerCompatVersion then
 			self.errorLog("This tracker does not support this ROM. " ..
