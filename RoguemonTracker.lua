@@ -5204,6 +5204,7 @@ local function RoguemonTracker()
 			return
 		end
 
+		self.overrideCoreTrackerFunctions()
 		self.updateGameSettings()
 		local romCompatVersion = self.getROMCompatVersion()
 		if romCompatVersion ~= trackerCompatVersion then
@@ -5292,6 +5293,8 @@ local function RoguemonTracker()
 		MiscData.Items[94] = "Moon Stone"
 		MiscData.EvolutionStones[94].name = "Moon Stone"
 		TrackerAPI.setOption("Show heals as whole number", hpHealsSetting)
+
+		self.restoreCoreTrackerFunctions()
 	end
 
 	function self.inputCheckBizhawk()
@@ -5582,6 +5585,38 @@ local function RoguemonTracker()
 		return Memory.writeword(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + offset, value)
 	end
 
+	-- we use this to track the original function call so we can restore them during `unload()`.
+	local originalCoreFunctions = {}
+
+	-- Overrides the given function from the given module with `newFunc`.
+	-- `moduleName` and `funcName` are used to track what was overridden so
+	-- we can restore it later.
+	local function overrideFunction(module, moduleName, funcName, newFunc)
+		if originalCoreFunctions[moduleName] == nil then
+			originalCoreFunctions[moduleName] = {}
+		end
+		originalCoreFunctions[moduleName][funcName] = module[funcName]
+		module[funcName] = newFunc
+	end
+
+	local function restoreFunctions(module, moduleName)
+		local funcs = originalCoreFunctions[moduleName]
+		if funcs == nil then
+			return
+		end
+		for name, func in pairs(funcs) do
+			if type(func) == "function" then
+				module[name] = func
+			end
+		end
+	end
+
+	function self.overrideCoreTrackerFunctions()
+	end
+
+	-- restores the original core functions. Called when we unload().
+	function self.restoreCoreTrackerFunctions()
+	end
 
 	return self
 end
