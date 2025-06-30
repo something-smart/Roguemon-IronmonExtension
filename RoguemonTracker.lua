@@ -7,17 +7,22 @@ local function RoguemonTracker()
 	self.github = "something-smart/Roguemon-IronmonExtension"
 	self.url = string.format("https://github.com/%s", self.github or "")
 
-	local RoguemonUtils = dofile(FileManager.getExtensionsFolderPath() .. "roguemon" .. FileManager.slash .. "utils.lua")
+	EXTENSION_DIRECTORY = FileManager.getCustomFolderPath() .. "roguemon" .. FileManager.slash
+
+	local RoguemonUtils = dofile(EXTENSION_DIRECTORY .. "utils.lua")
 
 	-- turn this on to have the reward screen accessible at any time
 	local DEBUG_MODE = true
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
-	local CONFIG_FILE_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_config.txt"
-	local SAVED_DATA_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_data-"
-	local SAVED_OPTIONS_PATH = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_options.tdat"
-	local IMAGES_DIRECTORY = FileManager.getCustomFolderPath() .. FileManager.slash .. "roguemon" .. FileManager.slash .. "roguemon_images" .. FileManager.slash
+	self.Paths = {
+		IMAGES_DIRECTORY    = EXTENSION_DIRECTORY .. "roguemon_images" .. FileManager.slash,
+		CONFIG_FILE         = EXTENSION_DIRECTORY .. "roguemon_config.txt",
+		SAVED_DATA_PREFIX   = EXTENSION_DIRECTORY .. "roguemon_data-",
+		SAVED_OPTIONS       = EXTENSION_DIRECTORY .. "roguemon_options.tdat",
+		RANDOMIZER_JAR      = EXTENSION_DIRECTORY .. "roguemon_randomizer_natdex.jar",
+	}
 
 	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
 
@@ -949,7 +954,7 @@ local function RoguemonTracker()
 
 	-- Read the config file. Executed once, on startup.
 	function self.readConfig()
-		local linesRead = io.lines(CONFIG_FILE_PATH)
+		local linesRead = io.lines(self.Paths.CONFIG_FILE)
 		local lines = {}
 		for l in linesRead do lines[#lines + 1] = l end
 		local readIndex = 2
@@ -1927,13 +1932,13 @@ local function RoguemonTracker()
 
 		-- Draw the images
 		if option1 ~= "" then
-			Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[option1], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y, IMAGE_WIDTH, BUTTON_HEIGHT)
+			Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. prize_images[option1], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y, IMAGE_WIDTH, BUTTON_HEIGHT)
 		end
 		if option2 ~= "" then
-			Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[option2], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, IMAGE_WIDTH, BUTTON_HEIGHT)
+			Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. prize_images[option2], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, IMAGE_WIDTH, BUTTON_HEIGHT)
 		end
 		if option3 ~= "" then
-			Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[option3], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, IMAGE_WIDTH, BUTTON_HEIGHT)
+			Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. prize_images[option3], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, IMAGE_WIDTH, BUTTON_HEIGHT)
 		end
 	end
 
@@ -2197,7 +2202,7 @@ local function RoguemonTracker()
 
 		-- Display image, if any
 		if specialRedeemToDescribe then
-			Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[specialRedeemToDescribe].image, canvas.x + SRS_DESC_WIDTH + 2, SRS_TOP_Y + SRS_LINE_COUNT*SRS_LINE_HEIGHT)
+			Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[specialRedeemToDescribe].image, canvas.x + SRS_DESC_WIDTH + 2, SRS_TOP_Y + SRS_LINE_COUNT*SRS_LINE_HEIGHT)
 		end
 
 		for i = 1,SRS_LINE_COUNT do
@@ -2756,13 +2761,13 @@ local function RoguemonTracker()
 			Drawing.drawButton(self.RunSummaryScreen.Buttons.Option3)
 
 			if self.RunSummaryScreen.option1 ~= "" then
-				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option1], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y, IMAGE_WIDTH, BUTTON_HEIGHT)
+				Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option1], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y, IMAGE_WIDTH, BUTTON_HEIGHT)
 			end
 			if self.RunSummaryScreen.option2 ~= "" then
-				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option2], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, IMAGE_WIDTH, BUTTON_HEIGHT)
+				Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option2], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP + BUTTON_HEIGHT, IMAGE_WIDTH, BUTTON_HEIGHT)
 			end
 			if self.RunSummaryScreen.option3 ~= "" then
-				Drawing.drawImage(IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option3], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, IMAGE_WIDTH, BUTTON_HEIGHT)
+				Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. prize_images[self.RunSummaryScreen.option3], canvas.x + TOP_LEFT_X, TOP_BUTTON_Y + BUTTON_VERTICAL_GAP*2 + BUTTON_HEIGHT*2, IMAGE_WIDTH, BUTTON_HEIGHT)
 			end
 		elseif summaryItem.type == "Curse" then
 			-- Image
@@ -2770,7 +2775,7 @@ local function RoguemonTracker()
 			if summaryItem.title and #summaryItem.title > 8 and string.sub(summaryItem.title, #summaryItem.title - 8, #summaryItem.title) == "(Warded)" then
 				imgName = "warding-charm.png"
 			end
-			Drawing.drawImage(IMAGES_DIRECTORY .. imgName, canvas.x + 40, 20, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
+			Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. imgName, canvas.x + 40, 20, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
 
 			-- Text
 			Drawing.drawText(canvas.x + 10, 69, self.wrapPixelsInline("Curse: " .. summaryItem.curse .. " @ " .. self.getCurseDescription(summaryItem.curse), canvas.w - 20), Theme.COLORS["Default text"])
@@ -2969,7 +2974,7 @@ local function RoguemonTracker()
 				local x, y, w, h = this.box[1], this.box[2], this.box[3], this.box[4]
 				Drawing.drawImage(this.image, x + 1, y + 1, w - 2, h - 2)
 			end,
-			image = IMAGES_DIRECTORY .. shopItemImages[item],
+			image = self.Paths.IMAGES_DIRECTORY .. shopItemImages[item],
 			item = item,
 			index = index
 		}
@@ -3158,7 +3163,7 @@ local function RoguemonTracker()
 			isVisible = function()
 				return (not info.segment or self.reachedSegment(info.segment))
 			end,
-			image = IMAGES_DIRECTORY .. shopItemImages[item],
+			image = self.Paths.IMAGES_DIRECTORY .. shopItemImages[item],
 			item = item
 		}
 	end
@@ -3191,7 +3196,7 @@ local function RoguemonTracker()
 
 	function self.displayNotification(message, image, dismissFunction)
 		self.NotificationScreen.message = message
-		self.NotificationScreen.image = IMAGES_DIRECTORY .. image
+		self.NotificationScreen.image = self.Paths.IMAGES_DIRECTORY .. image
 		if Program.currentScreen == self.PrettyStatScreen or Program.currentScreen == self.OptionSelectionScreen then
 			self.readyScreen(self.NotificationScreen)
 		else
@@ -4518,7 +4523,7 @@ local function RoguemonTracker()
 							Program.changeScreenView(self.SpecialRedeemScreen)
 						end
 					}
-					Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+					Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
 					if screen.Buttons then
 						screen.Buttons["RoguemonPrize" .. dx] = imageButton
 					end
@@ -4541,7 +4546,7 @@ local function RoguemonTracker()
 								Program.changeScreenView(self.SpecialRedeemScreen)
 							end
 						}
-						Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+						Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
 						if screen.Buttons then
 							screen.Buttons["RoguemonPrize" .. dx] = imageButton
 						end
@@ -4556,7 +4561,7 @@ local function RoguemonTracker()
 								Program.changeScreenView(self.SpecialRedeemScreen)
 							end
 						}
-						Drawing.drawImage(IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+						Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
 						if screen.Buttons then
 							screen.Buttons["RoguemonPrize" .. dx] = imageButton
 						end
@@ -4693,10 +4698,14 @@ local function RoguemonTracker()
 		end
 	end
 
+	function self.getSaveDataFilePath()
+		return self.Paths.SAVED_DATA_PREFIX .. GameSettings.getRomName() .. ".tdat"
+	end
+
 	-- Save roguemon data to file
 	function self.saveData()
 		if not loadedData then
-			local saveDataCheck = FileManager.readTableFromFile(SAVED_DATA_PATH .. GameSettings.getRomName() .. ".tdat")
+			local saveDataCheck = FileManager.readTableFromFile(self.getSaveDataFilePath())
 			if saveDataCheck and GameSettings.getRomHash() == saveDataCheck['romHash'] then
 				self.loadData()
 			end
@@ -4730,16 +4739,16 @@ local function RoguemonTracker()
 		}
 
 		if not DEBUG_MODE then
-			FileManager.writeTableToFile(saveData, SAVED_DATA_PATH .. GameSettings.getRomName() .. ".tdat")
+			FileManager.writeTableToFile(saveData, self.getSaveDataFilePath())
 		end
 
-		FileManager.writeTableToFile(RoguemonOptions, SAVED_OPTIONS_PATH)
+		FileManager.writeTableToFile(RoguemonOptions, self.Paths.SAVED_OPTIONS)
 		loadedData = true
 	end
 
 	-- Load roguemon data from file
 	function self.loadData()
-		local saveData = FileManager.readTableFromFile(SAVED_DATA_PATH .. GameSettings.getRomName() .. ".tdat")
+		local saveData = FileManager.readTableFromFile(self.getSaveDataFilePath())
 		if saveData and GameSettings.getRomHash() == saveData['romHash'] then
 			loadedData = true
 			seedNumber = saveData['seedNumber'] or self.generateSeed()
@@ -4789,7 +4798,7 @@ local function RoguemonTracker()
 			RoguemonOptions[o.text] = o.default
 		end
 
-		local readOptions = FileManager.readTableFromFile(SAVED_OPTIONS_PATH)
+		local readOptions = FileManager.readTableFromFile(self.Paths.SAVED_OPTIONS)
 		if readOptions then
 			for k,v in pairs(readOptions) do
 				RoguemonOptions[k] = v
@@ -5299,7 +5308,7 @@ local function RoguemonTracker()
 			self.undoCurse(self.getActiveCurse())
 		end
 		if Program.currentScreen == TrackerScreen and Battle.isViewingOwn and backseatingMove then
-			Drawing.drawImage(IMAGES_DIRECTORY .. "Chatting.png", Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 2, 86 + 10 * backseatingMove)
+			Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. "Chatting.png", Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 2, 86 + 10 * backseatingMove)
 		end
 	end
 
