@@ -950,6 +950,14 @@ local function RoguemonTracker()
 		updateCounters[name] = null
 	end
 
+	function self.errorLog(msg, ...)
+		Utils.printDebug("!! RogueMon Error: " .. msg, ...)
+	end
+
+	function self.warningLog(msg, ...)
+		Utils.printDebug("> RogueMon Warning: " .. msg, ...)
+	end
+
 	-- DATA FUNCTIONS --
 
 	-- Read the config file. Executed once, on startup.
@@ -4855,7 +4863,7 @@ local function RoguemonTracker()
 		-- Determine if we have just defeated a trainer
 		local trainerId = lastFoughtTrainerId
 		if trainerId == 0 then
-			Utils.printDebug("Roguemon Error: Battle ended but we don't know the trainerId. Please report to #bug-reporting on Roguemon discord.")
+			self.errorLog("Battle ended but we don't know the trainerId. Please report to #bug-reporting on Roguemon discord.")
 			return
 		end
 		if defeatedTrainerIds[trainerId] then
@@ -4880,9 +4888,9 @@ local function RoguemonTracker()
 		local segInfo = segments[segmentOrder[currentSegment]]
 		for _,t in pairs(segInfo["trainers"]) do
 			if TrackerAPI.hasDefeatedTrainer(t) and not defeatedTrainerIds[t] then
-				local warningMsg = "Roguemon Warning: Missed that we defeated trainer %d. Fixing. " ..
+				local warningMsg = "Missed that we defeated trainer %d. Fixing. " ..
 				                   "Please report to #bug-reporting on Roguemon Discord."
-				Utils.printDebug(warningMsg, t)
+				self.warningLog(warningMsg, t)
 				defeatedTrainerIds[t] = true
 			end
 		end
@@ -5187,10 +5195,10 @@ local function RoguemonTracker()
 	function self.startup()
 		local romCompatVersion = self.getROMCompatVersion()
 		if romCompatVersion ~= trackerCompatVersion then
-			Utils.printDebug("!! Roguemon Error: This tracker does not support this ROM. " ..
-			                 "Either the ROM or the tracker needs an update.\n" ..
-					 "romCompatVersion: %d, trackerCompatVersion: %d",
-					 romCompatVersion, trackerCompatVersion)
+			self.errorLog("This tracker does not support this ROM. " ..
+			              "Either the ROM or the tracker needs an update.\n" ..
+			              "romCompatVersion: %d, trackerCompatVersion: %d",
+			              romCompatVersion, trackerCompatVersion)
 			return
 		end
 
