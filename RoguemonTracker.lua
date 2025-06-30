@@ -225,6 +225,10 @@ local function RoguemonTracker()
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
 
+	-- We use this value as a sentinel to determine if NatDexExtension has overridden
+	-- our game settings update due to unpredictable load ordering.
+	local expectedsSpecialFlags = 0x02036ad8
+
 	local notifyOnPickup = {
 		consumables = {
 			["Oran Berry"] = 2,
@@ -1169,6 +1173,7 @@ local function RoguemonTracker()
 			GS.BattleIntroOpponentSendsOutMonAnimation = 0x080141fc + 0x1 -- BattleIntroRecordMonsToDex + 0x1
 			GS.HandleTurnActionSelectionState = 0x08014c68 + 0x1 -- HandleTurnActionSelectionState + 0x1
 			GS.ReturnFromBattleToOverworld = 0x08016768 + 0x1 -- ReturnFromBattleToOverworld + 0x1
+			GS.sSpecialFlags = expectedsSpecialFlags
 
 			GS.roguemon = {
 				romCompat                 = 0x08000200,
@@ -1185,7 +1190,7 @@ local function RoguemonTracker()
 	end
 
 	function self.getROMCompatVersion()
-		return Memory.readbyte(0x08000200)
+		return Memory.readbyte(GameSettings.roguemon.romCompat)
 	end
 
 	function self.setROMAscension()
@@ -5199,6 +5204,7 @@ local function RoguemonTracker()
 			return
 		end
 
+		self.updateGameSettings()
 		local romCompatVersion = self.getROMCompatVersion()
 		if romCompatVersion ~= trackerCompatVersion then
 			self.errorLog("This tracker does not support this ROM. " ..
@@ -5330,6 +5336,11 @@ local function RoguemonTracker()
 		if not loadedExtension then
 			return
 		end
+
+		if GameSettings.sSpecialFlags ~= expectedsSpecialFlags then
+			self.updateGameSettings()
+		end
+
 		for name,counter in pairs(updateCounters) do
 			counter.currentUpdateCount = counter.currentUpdateCount - 1
 			if counter.currentUpdateCount == 0 then
@@ -5395,7 +5406,6 @@ local function RoguemonTracker()
 		-- Check if NatDex is loaded and we haven't yet changed everything's evo method to RogueStone and update some evo levels & friendship values
 		if not patchedChangedEvos and PokemonData.Pokemon[412] ~= nil then
 			self.patchChangedEvos()
-			self.updateGameSettings()
 			self.updateFriendshipValues()
 		end
 
