@@ -22,6 +22,11 @@ local function RoguemonTracker()
 		SAVED_DATA_PREFIX   = EXTENSION_DIRECTORY .. "roguemon_data-",
 		SAVED_OPTIONS       = EXTENSION_DIRECTORY .. "roguemon_options.tdat",
 		RANDOMIZER_JAR      = EXTENSION_DIRECTORY .. "roguemon_randomizer_natdex.jar",
+		PATCHER_JAR         = EXTENSION_DIRECTORY .. "jbps.jar",
+		ROM_BPS             = EXTENSION_DIRECTORY .. "roguemon.bps",
+		ROGUEMON_ROM        = EXTENSION_DIRECTORY .. "roguemon.gba",
+		ROGUEMON_UNRAND_ROM = EXTENSION_DIRECTORY .. "roguemon_unrandomized.gba",
+		VANILLA_ROM         = EXTENSION_DIRECTORY .. "vanilla.gba",
 	}
 
 	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
@@ -216,6 +221,9 @@ local function RoguemonTracker()
 	local ROM_CURSE_TIKTOK      = 1
 	local ROM_CURSE_TOXIC_FUMES = 2
 	local ROM_CURSE_MOODY       = 4
+
+	local FIRERED_11_SHA1SUM = "dd5945db9b930750cb39d00c84da8571feebf417"
+	local FIRERED_11_SIZE = 16777216
 
 	-- This is incremented whenever we make a change in the ROM that
 	-- requires a change in the tracker, or vice versa. We check it against
@@ -5204,6 +5212,10 @@ local function RoguemonTracker()
 			return
 		end
 
+		if self.tryPatchVanillaROM() ~= nil then
+			return
+		end
+
 		self.overrideCoreTrackerFunctions()
 		self.updateGameSettings()
 		local romCompatVersion = self.getROMCompatVersion()
@@ -5570,6 +5582,60 @@ local function RoguemonTracker()
 		return self
 	end
 
+	-- FORM FUNCTIONS --
+
+	-- Calls callbackFunc with true if we want to patch, and false if we don't.
+	function self.patchVanillaROMPrompt(callbackFunc)
+		local profile = QuickloadScreen.getActiveProfile()
+		local lastPlayedRomPath
+		if profile and not Utils.isNilOrEmpty(profile.Paths.CurrentRom) then
+			lastPlayedRomPath = profile.Paths.CurrentRom
+		end
+
+		local _failSafe = function()
+			callbackFunc(false)
+		end
+		local form = ExternalUI.BizForms.createForm("RogueMon Patch", 480, 100, 100, 20, _failSafe)
+
+		local x = 15
+		local iy = 10
+		form:createLabel("Would you like to create the RogueMon ROM using this Vanilla FireRed ROM?", x, iy)
+		iy = iy + 22
+		form.Controls.labelStopIt = form:createLabel("(Note: If you want to stop this from popping up, simply disable the RogueMon tracker extension.)", x, iy)
+		ExternalUI.BizForms.setProperty(form.Controls.labelStopIt, ExternalUI.BizForms.Properties.FORE_COLOR, "blue")
+		iy = iy + 28
+
+		form.Controls.patchIt = form:createButton("Patch", 145, iy, function()
+			if type(callbackFunc) == "function" then
+				callbackFunc(true)
+			end
+			form:destroy()
+		end, 75, 25)
+		form.Controls.buttonDismiss = form:createButton("Dismiss", 260, iy, function()
+			if type(callbackFunc) == "function" then
+				callbackFunc(false)
+			end
+			form:destroy()
+		end, 75, 25)
+	end
+
+	-- Informs the player that patching is complete and the RogueMon ROM is ready to launch.
+	function self.patchCompletePrompt(callbackFunc)
+		local form = ExternalUI.BizForms.createForm("RogueMon Patch Complete", 320, 100, 100, 20, callbackFunc)
+
+		local x = 15
+		local iy = 10
+		form:createLabel("Vanilla FireRed ROM successfully patched!", x, iy)
+		iy = iy + 22
+		form:createLabel("Simply open 'roguemon.gba' from now on.", x, iy)
+		iy = iy + 28
+
+		form.Controls.close = form:createButton("Launch RogueMon", 108, iy, function()
+			form:destroy()
+		end, 105, 25)
+	end
+
+
 
 	-- ROM READING/WRITING FUNCTIONS --
 
@@ -5584,6 +5650,119 @@ local function RoguemonTracker()
 	function self.writeGameVar(offset, value)
 		return Memory.writeword(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + offset, value)
 	end
+
+
+	-- ROM RANDOMIZATION FUNCTIONS --
+
+
+	-- Returns true if the current running ROM seems to be Vanilla
+	-- FireRed 1.1.
+	function self.isROMVanilla()
+		if gameinfo.getromhash():lower() == FIRERED_11_SHA1SUM:lower() then
+			return true
+		end
+
+		-- todo: Some people use binpatch-safe changes like sprite swaps that
+		-- we should allow. Use less stringent checks to determine if this is
+		-- a Vanilla ROM that we can patch.
+
+		return false
+	end
+
+	-- Stores the Vanilla FireRed ROM in a known location, then applies the
+	-- RogueMon BPS patch against it to generate the ROM.
+	function self.patchVanillaROM()
+		if not FileManager.fileExists(self.Paths.PATCHER_JAR) then
+			self.errorLog("Cannot patch ROM: JBPS JAR not found.")
+			return false
+		end
+		if not FileManager.fileExists(self.Paths.ROM_BPS) then
+			self.errorLog("Cannot patch ROM: RogueMon BPS not found.")
+			return false
+		end
+
+		-- TODO - Skip this if there is a matching ROM at the expected path?
+		local out = assert(io.open(self.Paths.VANILLA_ROM, "wb"))
+		if out == nil then
+			return false
+		end
+
+		local data = memory.read_bytes_as_array(0x08000000, FIRERED_11_SIZE)
+		for _, byte in ipairs(data) do
+			out:write(string.char(byte))
+		end
+		io.close(out)
+
+		-- let this 16MB array get GCd
+		data = nil
+
+		local javaPath = Options.PATHS["Java Path"]
+		if Utils.isNilOrEmpty(javaPath) then
+			javaPath = "java" -- Default for most operating systems
+		end
+
+		local javacommand = string.format(
+			'%s -jar "%s" "%s" "%s" "%s"',
+			javaPath,
+			self.Paths.PATCHER_JAR,
+			self.Paths.ROM_BPS,
+			self.Paths.VANILLA_ROM,
+			self.Paths.ROGUEMON_UNRAND_ROM
+		)
+
+		local success, outputLines = FileManager.tryOsExecute(javacommand)
+		if not success then
+			self.errorLog("Failed to patch")
+			Utils.printDebug(javacommand)
+		end
+
+		success = FileManager.CopyFile(self.Paths.ROGUEMON_UNRAND_ROM, self.Paths.ROGUEMON_ROM, 'overwrite')
+		if not success then
+			self.errorLog("Failed to copy ROM")
+		end
+		return success
+	end
+
+
+	-- If we appear to be running a Vanilla FireRed ROM, prompt the user if they'd like to
+	-- patch it. If they accept, patch the ROM and prompt them to launch RogueMon.
+	-- Returns nil if this isn't a FireRed ROM.
+	-- Returns true if we tried to patch and succeeded.
+	-- Returns false if we tried to patch and failed.
+	function self.tryPatchVanillaROM()
+		if not self.isROMVanilla() then
+			return nil
+		end
+
+		local result = nil
+		local complete = false
+		local _completePromptCB = function()
+			client.openrom(self.Paths.ROGUEMON_ROM)
+			Main.forceRestart = true
+			complete = true
+		end
+
+		local _patchPromptCB = function(shouldPatch)
+			if shouldPatch then
+				result = self.patchVanillaROM()
+				if result then
+					self.patchCompletePrompt(_completePromptCB)
+					return
+				end
+			end
+
+			complete = true
+		end
+
+		self.patchVanillaROMPrompt(_patchPromptCB)
+
+		while not complete do
+			Main.frameAdvance()
+		end
+
+		return result
+	end
+
 
 	-- we use this to track the original function call so we can restore them during `unload()`.
 	local originalCoreFunctions = {}
