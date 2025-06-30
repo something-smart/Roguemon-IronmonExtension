@@ -27,6 +27,7 @@ local function RoguemonTracker()
 		ROGUEMON_ROM        = EXTENSION_DIRECTORY .. "roguemon.gba",
 		ROGUEMON_UNRAND_ROM = EXTENSION_DIRECTORY .. "roguemon_unrandomized.gba",
 		VANILLA_ROM         = EXTENSION_DIRECTORY .. "vanilla.gba",
+		DEBUG_LOG           = EXTENSION_DIRECTORY .. "roguemon_debug_log.txt",
 	}
 
 	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
@@ -962,6 +963,13 @@ local function RoguemonTracker()
 
 	function self.warningLog(msg, ...)
 		Utils.printDebug("> RogueMon Warning: " .. msg, ...)
+	end
+
+	-- writes a message in a single line to the debug log file.
+	function self.debugLog(msg)
+		local file = io.open(self.Paths.DEBUG_LOG, "a")
+		file:write(msg .. "\n")
+		file:close()
 	end
 
 	-- DATA FUNCTIONS --
