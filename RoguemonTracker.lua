@@ -1220,15 +1220,22 @@ local function RoguemonTracker()
 		if GS.game == 3 then
 			GS.FriendshipRequiredToEvo = 0x08042fa8 + 0x13e -- GetEvolutionTargetSpecies + 0x13e
 			GS.BattleIntroDrawPartySummaryScreens = 0x08013f00 + 0x1 -- BattleIntroDrawPartySummaryScreens + 0x1
-			GS.ReturnFromBattleToOverworld = 0x08016768 + 0x1 -- ReturnFromBattleToOverworld + 0x1
+			GS.ReturnFromBattleToOverworld = 0x08016724 + 0x1 -- ReturnFromBattleToOverworld + 0x1
 			GS.BattleIntroOpponentSendsOutMonAnimation = 0x080141fc + 0x1 -- BattleIntroRecordMonsToDex + 0x1
 			GS.HandleTurnActionSelectionState = 0x08014c68 + 0x1 -- HandleTurnActionSelectionState + 0x1
-			GS.ReturnFromBattleToOverworld = 0x08016768 + 0x1 -- ReturnFromBattleToOverworld + 0x1
 			GS.gMultiUsePlayerCursor = 0x03004c24
 			GS.gSaveBlock1ptr = 0x03004c38
 			GS.sSpecialFlags = expectedsSpecialFlags
 			GS.gTasks = 0x03004cc0
 			GS.gSaveBlock3 = 0x0202458c
+			GS.gMapHeader = 0x020367f4
+			GS.gSpecialVar_Result = 0x02036ac8
+			GS.gTrainerBattleOpponent_A = 0x020380a6
+			GS.gSpecialVar_ItemId = 0x0203bf34
+			GS.sEvoStructPtr = 0x02039418
+			GS.sBattlerAbilities = 0x02039428
+			GS.sStartMenuWindowId = 0x0203a5d4
+			GS.sMonSummaryScreen = 0x0203c340
 
 			GS.roguemon = {
 				romCompat                 = 0x08000200,
