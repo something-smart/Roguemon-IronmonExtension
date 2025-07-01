@@ -1254,7 +1254,8 @@ local function RoguemonTracker()
 				ascensionTypeStats        = 0x73e4,
 
 				-- these are offset from sSpecialFlags, in bits
-				flagAwaitingRandomization = 0x2
+				flagAwaitingRandomization = 0x2,
+				flagBackToTower           = 0x3,
 			}
 		end
 	end
@@ -5964,7 +5965,9 @@ local function RoguemonTracker()
 	end
 
 	function self.sendPlayerToTower()
-		-- TODO
+		local flagBit = 1 << GameSettings.roguemon.flagBackToTower
+		local newFlags = Memory.readbyte(GameSettings.sSpecialFlags) | flagBit
+		Memory.writebyte(GameSettings.sSpecialFlags, newFlags)
 	end
 
 	-- Override of Main.LoadNextRom. Generates a new ROM and swaps it into
