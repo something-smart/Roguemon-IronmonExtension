@@ -1288,6 +1288,14 @@ local function RoguemonTracker()
 		return Memory.writedword(self.getAttemptsAddr(ascension, typeIndex), attempts)
 	end
 
+	function self.getWinsAddr(ascension, typeIndex)
+		return self.getAttemptsAddr(ascension, typeIndex) + 4;
+	end
+
+	function self.writeROMWins(ascension, typeIndex, wins)
+		return Memory.writedword(self.getWinsAddr(ascension, typeIndex), wins)
+	end
+
 	-- Read rules enforcement state from the ROM. Set in game options menu.
 	function self.getRulesEnforcement()
 		local saveBlock2Addr = Utils.getSaveBlock2Addr()
