@@ -10,7 +10,7 @@ local function RoguemonTracker()
 	local RoguemonUtils = dofile(FileManager.getExtensionsFolderPath() .. "roguemon" .. FileManager.slash .. "utils.lua")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = false
+	local DEBUG_MODE = true
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
@@ -37,7 +37,7 @@ local function RoguemonTracker()
 		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
 		["Item Voucher"] = {consumable = true, image = "voucher.png", description = "Permanently unlock one non-revive item found in the future (immediate decision)."},
 		["Fight wilds in Rts 1/2/22"] = {consumable = "true", image = "exp-charm.png", description = "Fight the first encounter on each. You may PC heal anytime, but must stop there."},
-		["Fight up to 5 wilds in Forest"] = {consumable = "true", image = "exp-forest.png", description = "Can't heal in between. Can run but counts as 1 of the 5."},
+		["Fight first 5 wilds in Forest"] = {consumable = "true", image = "exp-forest.png", description = "Can't heal in between. Can run but counts as 1 of the 5."},
 		["TM Voucher"] = {consumable = true, image = "tmvoucher.png", description = "Teach 1 TM found in the future (immediate decision)."},
 		["Revive"] = {consumable = true, image = "revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."},
 		["Max Revive"] = {consumable = true, image = "max-revive.png", description = "May be used in any battle. Keep your HM friend with you; send it out and revive if you faint."},
@@ -776,7 +776,7 @@ local function RoguemonTracker()
 				new = {stats = newPokeInfo.stats, pokemonID = newPokeInfo.pokemonID},
 				level = newPokeInfo.level
 			}
-			offeredMoonStoneFirst = 0
+			offeredMoonStoneFirst = 1
 		end
 		pokeInfo = newPokeInfo
 	end
@@ -2446,8 +2446,9 @@ local function RoguemonTracker()
 			Utils.calcWordPixelLength(aux[1].name) + 5, 10} 
 		end
 		if aux[2] then
-			self.NotificationScreen.Buttons.AuxiliaryButton2.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 
-			Utils.calcWordPixelLength(aux[2].name) + 5, 10} 
+			local width = Utils.calcWordPixelLength(aux[2].name) + 5
+			self.NotificationScreen.Buttons.AuxiliaryButton2.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 120 - width, 143, 
+			width, 10} 
 		end
 
 		for _, button in pairs(self.NotificationScreen.Buttons or {}) do
@@ -2502,7 +2503,7 @@ local function RoguemonTracker()
 					return i.name
 				end
 			end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 143, 30, 10},
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 90, 143, 30, 10},
 			onClick = function()
 				local i = self.NotificationScreen.activeAuxiliary[2]
 				if i then
@@ -3289,7 +3290,6 @@ local function RoguemonTracker()
 						[option2] = true,
 						[option3] = true}
 		end
-		lastMilestone = milestoneName
 		if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
 			GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
 			LogOverlay.isGameOver = false
@@ -3299,6 +3299,7 @@ local function RoguemonTracker()
 			GameOverScreen.Buttons.SaveGameFiles:reset()
 		end
 		if milestonesByName[milestoneName] then
+			lastMilestone = milestoneName
 			local pkmn = self.readLeadPokemonData()
 			local isShiny = Utils.bit_xor(Utils.bit_xor(Utils.bit_xor(Utils.getbits(pkmn.otid, 0, 16), Utils.getbits(pkmn.otid, 16, 16)), math.floor(pkmn.personality / 65536)), pkmn.personality % 65536) < Program.Values.ShinyOdds
 
@@ -3344,7 +3345,7 @@ local function RoguemonTracker()
 						end
 					end
 					for _,itm in pairs(MiscData.HealingItems) do
-						if itm.name == part then
+						if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name then
 							healingPrize = true
 						end
 					end
@@ -3557,7 +3558,8 @@ local function RoguemonTracker()
 						if reward == "Revive" then
 							specialRedeems.internal["Revive"] = true
 						end
-						if reward == "Fight up to 5 wilds in Forest" then
+						if reward == "Fight first 5 wilds in Forest" then
+							print("aa")
 							wildBattleCounter = 5
 							wildBattlesStarted = false
 						end
@@ -4562,7 +4564,7 @@ local function RoguemonTracker()
 						if screen.Buttons then
 							screen.Buttons["RoguemonPrize" .. dx] = imageButton
 						end
-						if r == "Fight wilds in Rts 1/2/22" or r == "Fight up to 5 wilds in Forest" then
+						if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
 							Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
 						end
 						dx = dx + 1
@@ -4860,7 +4862,7 @@ local function RoguemonTracker()
 					wildBattleCounter = wildBattleCounter - 1
 					if wildBattleCounter <= 0 then
 						self.removeSpecialRedeem("Fight wilds in Rts 1/2/22")
-						self.removeSpecialRedeem("Fight up to 5 wilds in Forest")
+						self.removeSpecialRedeem("Fight first 5 wilds in Forest")
 					end
 				end
 			end
@@ -4994,7 +4996,7 @@ local function RoguemonTracker()
 			local colorList = TrackerScreen.PokeBalls.ColorList
 			Drawing.drawImageAsPixels(Constants.PixelImages.POKEBALL_SMALL, Constants.SCREEN.WIDTH + (gachaOn and 124 or 136), Constants.SCREEN.MARGIN + 132, colorList)
 			local itemCt = self.getItemsInCurrentSegment()
-			Drawing.drawText(Constants.SCREEN.WIDTH + (gachaOn and 122 or 133) + ((itemCt > 10) and 0 or 3), Constants.SCREEN.MARGIN + 140, itemCt, Theme.COLORS["Lower box text"])
+			Drawing.drawText(Constants.SCREEN.WIDTH + (gachaOn and 122 or 133) + ((itemCt >= 10) and 0 or 3), Constants.SCREEN.MARGIN + 140, itemCt, Theme.COLORS["Lower box text"])
 
 			-- Draw the word-wrapped text, if any
 			local btnText = button:getCustomText()
