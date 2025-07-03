@@ -3369,6 +3369,12 @@ local function RoguemonTracker()
 						add = false
 					else
 						choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Keep items found."
+						if rInd == 1 then
+							choice = choice .. " (4 items, 1 TM)"
+						end
+						if rInd == 2 then
+							choice = choice .. " (2 items, 1 TM)"
+						end
 					end
 				end
 				for _, v in pairs(choices) do
