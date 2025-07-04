@@ -28,6 +28,7 @@ local function RoguemonTracker()
 		ROGUEMON_UNRAND_ROM = EXTENSION_DIRECTORY .. "roguemon_unrandomized.gba",
 		VANILLA_ROM         = EXTENSION_DIRECTORY .. "vanilla.gba",
 		DEBUG_LOG           = EXTENSION_DIRECTORY .. "roguemon_debug_log.txt",
+		RANDOMIZING_STATE   = EXTENSION_DIRECTORY .. "randomizing.State",
 	}
 
 	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
@@ -5679,18 +5680,6 @@ local function RoguemonTracker()
 		return self
 	end
 
-	-- Override of Main.ExitSafely(). Restores any overridden core tracker functions
-	-- (including Main.ExitSafely) and calls Main.ExitSafely().
-	function self.ExitSafely(crashed)
-		-- we must restore functions before the tracker tries to exit.
-		-- Otherwise, the tracker will try to call getRomHash, which
-		-- will try to read from memory, which can crash bizhawk if
-		-- it's trying to reboot the core.
-
-		self.restoreCoreTrackerFunctions()
-		Main.ExitSafely(crashed)
-	end
-
 	-- FORM FUNCTIONS --
 
 	-- Calls callbackFunc with true if we want to patch, and false if we don't.
@@ -5962,16 +5951,6 @@ local function RoguemonTracker()
 		Memory.writebyte(GameSettings.sSpecialFlags, newFlags)
 	end
 
-	-- Override of GameSettings.getRomHash. Since the hash of the running
-	-- ROM file that BizHawk sees will not be affected by in-memory
-	-- randomization, we need another unique identifier to determine what
-	-- randomization we're currently on. We read the UID stamp to determine
-	-- that.
-	function self.getRomHash()
-		local uidStamp = Memory.readdword(GameSettings.roguemon.romUid)
-		return string.format('%x', uidStamp)
-	end
-
 	function self.sendPlayerToTower()
 		local flagBit = 1 << GameSettings.roguemon.flagBackToTower
 		local newFlags = Memory.readbyte(GameSettings.sSpecialFlags) | flagBit
@@ -6026,9 +6005,11 @@ local function RoguemonTracker()
 			Tracker.clearTrackerNotesAndFile()
 
 			local successStamp = self.stampRomFile(nextRomInfo.filePath, ascension, runType)
-			local successRewrite = self.rewriteRom(nextRomInfo.filePath)
 			local successOverwrite = FileManager.CopyFile(nextRomInfo.filePath, self.Paths.ROGUEMON_ROM, 'overwrite')
-			if successStamp and successRewrite and successOverwrite then
+			if successStamp and successOverwrite then
+				savestate.save(self.Paths.RANDOMIZING_STATE)
+				client.openrom(self.Paths.ROGUEMON_ROM)
+				savestate.load(self.Paths.RANDOMIZING_STATE)
 				self.markRandomizationComplete()
 
 				if not Main.IsOnBizhawk() then
@@ -6125,9 +6106,7 @@ local function RoguemonTracker()
 	end
 
 	function self.overrideCoreTrackerFunctions()
-		overrideFunction(Main, "Main", "ExitSafely", self.ExitSafely)
 		overrideFunction(Main, "Main", "LoadNextRom", self.LoadNextRom)
-		overrideFunction(GameSettings, "GameSettings", "getRomHash", self.getRomHash)
 	end
 
 	-- restores the original core functions. Called when we unload().
