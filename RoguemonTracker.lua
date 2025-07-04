@@ -5775,8 +5775,7 @@ local function RoguemonTracker()
 		local backupSettingsFile = Options.FILES["Settings File"]
 
 		-- for each ascension/type pair, read the current attempts count from the
-		-- tracker and from the ROM. If the tracker is higher, write to the ROM. If
-		-- the ROM is higher, write to the tracker.
+		-- tracker and from the ROM. If the tracker is higher, write to the ROM.
 		for typeIndex, type in pairs(PokemonData.TypeIndexMap) do
 			for _, ascension in ipairs({1, 2, 3}) do
 				local settingsFile = self.getSettingsFilePath(ascension, typeIndex)
