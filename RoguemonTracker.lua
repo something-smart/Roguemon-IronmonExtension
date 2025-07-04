@@ -34,7 +34,7 @@ local function RoguemonTracker()
 
 	local STATIC_PROFILE_ID = "8cca5a43-967c-469a-858b-123456789abc"
 
-	local REQUIRED_BIZHAWK_VERSION = "2.9"
+	local REQUIRED_BIZHAWK_VERSION = "2.10"
 
 	local prize_images = {} -- will get updated when config file is read
 
