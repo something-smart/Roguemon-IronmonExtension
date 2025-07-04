@@ -6019,6 +6019,7 @@ local function RoguemonTracker()
 		Main.ExitSafely(false)
 
 		if nextRomInfo ~= nil then
+			Main.ReadAttemptsCount(true)
 			Main.currentSeed = Main.currentSeed + 1
 			Main.WriteAttemptsCountToFile(nextRomInfo.attemptsFilePath)
 			QuickloadScreen.afterNewRunProfileCheckup(nextRomInfo.filePath)
