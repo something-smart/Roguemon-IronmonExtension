@@ -4808,6 +4808,16 @@ local function RoguemonTracker()
 		return self.Paths.SAVED_DATA_PREFIX .. self.getAscensionString(ascension, runIndex) .. ".tdat"
 	end
 
+	-- This is dependent on both Tracker and Randomization implementation
+	-- details, which may change in the future.
+	function self.getLogFilePath()
+		local _, ascension, runTypeIndex = self.getRomStamp()
+		local fileName = self.getAscensionString(ascension, runTypeIndex) .. " " ..
+		             FileManager.PostFixes.AUTORANDOMIZED ..
+			     ".gba.log"
+		return FileManager.prependDir(fileName)
+	end
+
 	-- Save roguemon data to file
 	function self.saveData()
 		if not loadedData then
@@ -6026,6 +6036,16 @@ local function RoguemonTracker()
 		Main.Run()
 	end
 
+	-- This overrides LogOverlay.getLogFileAutodetected.
+	function self.getLogFileAutodetected(postFix)
+		local logPath = self.getLogFilePath()
+		if FileManager.fileExists(logPath) then
+			return logPath
+		else
+			return nil
+		end
+	end
+
 
 	-- Takes a ROM file path and dynamically writes it into the running
 	-- memory of the current ROM.
@@ -6107,6 +6127,7 @@ local function RoguemonTracker()
 
 	function self.overrideCoreTrackerFunctions()
 		overrideFunction(Main, "Main", "LoadNextRom", self.LoadNextRom)
+		overrideFunction(LogOverlay, "LogOverlay", "getLogFileAutodetected", self.getLogFileAutodetected)
 	end
 
 	-- restores the original core functions. Called when we unload().
@@ -6114,6 +6135,7 @@ local function RoguemonTracker()
 		restoreFunctions(Main, "Main")
 		restoreFunctions(FileManager, "FileManager")
 		restoreFunctions(GameSettings, "GameSettings")
+		restoreFunctions(LogOverlay, "LogOverlay")
 	end
 
 	return self
