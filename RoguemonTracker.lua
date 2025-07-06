@@ -235,14 +235,14 @@ local function RoguemonTracker()
 	-- This is incremented whenever we make a change in the ROM that
 	-- requires a change in the tracker, or vice versa. We check it against
 	-- what is the ROM, and throw an error if it doesn't match.
-	local trackerCompatVersion = 0x02
+	local trackerCompatVersion = 0x03
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
 
 	-- We use this value as a sentinel to determine if NatDexExtension has overridden
 	-- our game settings update due to unpredictable load ordering.
-	local expectedsSpecialFlags = 0x02036ad8
+	local expectedsSpecialFlags = 0x02036f48
 
 	local notifyOnPickup = {
 		consumables = {
@@ -1243,7 +1243,7 @@ local function RoguemonTracker()
 
 		-- FireRed
 		if GS.game == 3 then
-			GS.FriendshipRequiredToEvo = 0x08042fa8 + 0x13e -- GetEvolutionTargetSpecies + 0x13e
+			GS.FriendshipRequiredToEvo = 0x0804305c + 0x13e -- GetEvolutionTargetSpecies + 0x13e
 			GS.BattleIntroDrawPartySummaryScreens = 0x08013f00 + 0x1 -- BattleIntroDrawPartySummaryScreens + 0x1
 			GS.ReturnFromBattleToOverworld = 0x08016724 + 0x1 -- ReturnFromBattleToOverworld + 0x1
 			GS.BattleIntroOpponentSendsOutMonAnimation = 0x080141fc + 0x1 -- BattleIntroRecordMonsToDex + 0x1
@@ -1253,14 +1253,14 @@ local function RoguemonTracker()
 			GS.sSpecialFlags = expectedsSpecialFlags
 			GS.gTasks = 0x03004cc0
 			GS.gSaveBlock3 = 0x0202458c
-			GS.gMapHeader = 0x020367f4
-			GS.gSpecialVar_Result = 0x02036ac8
-			GS.gTrainerBattleOpponent_A = 0x020380a6
-			GS.gSpecialVar_ItemId = 0x0203bf34
-			GS.sEvoStructPtr = 0x02039418
-			GS.sBattlerAbilities = 0x02039428
-			GS.sStartMenuWindowId = 0x0203a5d4
-			GS.sMonSummaryScreen = 0x0203c340
+			GS.gMapHeader = 0x02036c64
+			GS.gSpecialVar_Result = 0x02036f38
+			GS.gTrainerBattleOpponent_A = 0x02038516
+			GS.gSpecialVar_ItemId = 0x0203c3a4
+			GS.sEvoStructPtr = 0x02039888
+			GS.sBattlerAbilities = 0x02039898
+			GS.sStartMenuWindowId = 0x0203aa44
+			GS.sMonSummaryScreen = 0x0203c7b0
 
 			GS.roguemon = {
 				romCompat                 = 0x08000200,
