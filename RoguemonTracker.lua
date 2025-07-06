@@ -4651,7 +4651,7 @@ local function RoguemonTracker()
 
 	-- Draw special redeem images on the main screen.
 	function self.redrawScreenImages()
-		if RoguemonOptions["Display prizes on screen"] then
+		if RoguemonOptions["Display prizes on screen"] and not self.isInAscensionTower() then
 			local screen = Program.currentScreen
 			--local dx = 180 - (#specialRedeems.unlocks + #specialRedeems.consumable)*30 - use this for top right display
 			local dx = 0
@@ -5506,6 +5506,10 @@ local function RoguemonTracker()
 		end
 		randomizingROM = false
 
+		if self.isInAscensionTower() then
+			return
+		end
+
 		for name,counter in pairs(updateCounters) do
 			counter.currentUpdateCount = counter.currentUpdateCount - 1
 			if counter.currentUpdateCount == 0 then
@@ -5952,6 +5956,11 @@ local function RoguemonTracker()
 
 	function self.getROMAscension()
 		return self.readGameVar(GameSettings.roguemon.varAscension)
+	end
+
+	-- Returns True if we're currently in the ascension tower.
+	function self.isInAscensionTower()
+		return TrackerAPI.getMapId() >= 298 and TrackerAPI.getMapId() <= 300
 	end
 
 	-- Synchronizes the tracker attempt counts with the ROM.
