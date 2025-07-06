@@ -6283,14 +6283,18 @@ local function RoguemonTracker()
 				module[name] = func
 			end
 		end
+		originalCoreFunctions[moduleName] = nil
 	end
 
 	function self.overrideCoreTrackerFunctions()
+		event.onexit(self.restoreCoreTrackerFunctions, "restoreCoreTrackerFunctions")
+		event.onconsoleclose(self.restoreCoreTrackerFunctions, "restoreCoreTrackerFunctions")
 		overrideFunction(Main, "Main", "LoadNextRom", self.LoadNextRom)
 		overrideFunction(LogOverlay, "LogOverlay", "getLogFileAutodetected", self.getLogFileAutodetected)
 	end
 
-	-- restores the original core functions. Called when we unload().
+	-- restores overridden functions. Called when we unload(), or when the
+	-- console exits or closes.
 	function self.restoreCoreTrackerFunctions()
 		restoreFunctions(Main, "Main")
 		restoreFunctions(FileManager, "FileManager")
