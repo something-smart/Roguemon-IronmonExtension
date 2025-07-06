@@ -14,6 +14,9 @@ local function RoguemonTracker()
 	-- turn this on to have the reward screen accessible at any time
 	local DEBUG_MODE = true
 
+	-- turn this on to be noisy about any io.open failures (except "No such file")
+	self.DEBUG_IO_OPEN_ERRORS = false
+
 	-- STATIC OR READ IN AT LOAD TIME:
 
 	self.Paths = {
@@ -6262,6 +6265,20 @@ local function RoguemonTracker()
 	-- we use this to track the original function call so we can restore them during `unload()`.
 	local originalCoreFunctions = {}
 
+	-- The core Tracker code ignores io.open errors in most cases, which
+	-- can make diagnosing certain bugs difficult. This function can be
+	-- used as an override for io.open to print all io.open errors other
+	-- than "No such file".
+	function self.noisyIOOpen(...)
+		local f, errMsg, errNo = originalCoreFunctions.io.open(...)
+		if f == nil and errMsg ~= nil then
+			if errMsg:find("No such file or directory") == nil then
+				Utils.printDebug("Error opening %s - code %d", errMsg, errNo)
+			end
+		end
+		return f, errMsg, errNo
+	end
+
 	-- Overrides the given function from the given module with `newFunc`.
 	-- `moduleName` and `funcName` are used to track what was overridden so
 	-- we can restore it later.
@@ -6291,6 +6308,10 @@ local function RoguemonTracker()
 		event.onconsoleclose(self.restoreCoreTrackerFunctions, "restoreCoreTrackerFunctions")
 		overrideFunction(Main, "Main", "LoadNextRom", self.LoadNextRom)
 		overrideFunction(LogOverlay, "LogOverlay", "getLogFileAutodetected", self.getLogFileAutodetected)
+
+		if self.DEBUG_IO_OPEN_ERRORS then
+			overrideFunction(io, "io", "open", self.noisyIOOpen)
+		end
 	end
 
 	-- restores overridden functions. Called when we unload(), or when the
@@ -6300,6 +6321,7 @@ local function RoguemonTracker()
 		restoreFunctions(FileManager, "FileManager")
 		restoreFunctions(GameSettings, "GameSettings")
 		restoreFunctions(LogOverlay, "LogOverlay")
+		restoreFunctions(io, "io")
 	end
 
 	return self
