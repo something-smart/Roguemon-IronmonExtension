@@ -2714,6 +2714,16 @@ local function RoguemonTracker()
 				end,
 				boxColors = {"Default text"}
 			}
+
+			self.RoguemonOptionsScreen.Buttons.EditAttempts = {
+				type = Constants.ButtonTypes.FULL_BORDER,
+				getText = function() return "Edit Attempts" end,
+				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + OS_LEFT_X + 60, OS_TOP_Y + (#optionsList+1)*(OS_BOX_SIZE + OS_BOX_VERTICAL_GAP), 58, 10},
+				onClick = function()
+					self.editAttemptsForm()
+				end,
+				boxColors = {"Default text"}
+			}
 		end
 
 		for i = 1,#optionsList do
@@ -5814,6 +5824,78 @@ local function RoguemonTracker()
 			form:destroy()
 		end, 50, 25)
 		form.Controls.buttonCancel = form:createButton("Cancel", 115, iy, function()
+			form:destroy()
+		end, 50, 25)
+
+
+		while not complete do
+			Main.frameAdvance()
+		end
+	end
+
+	function self.editAttemptsForm()
+		local complete = false
+		local _failSafe = function()
+			complete = true
+		end
+		local form = ExternalUI.BizForms.createForm("Edit Attempts", 310, 170, 100, 20, _failSafe)
+
+		local ascensions = {"1", "2", "3"}
+		local x = 25
+		local iy = 8
+		form:createLabel("Use this to manually set attempts in the ROM and the Tracker.", x, iy)
+		iy = iy + 18
+
+		local labelNote = form:createLabel("Note: You must save the game to persist these in the ROM.", x, iy)
+		iy = iy + 24
+		ExternalUI.BizForms.setProperty(labelNote, ExternalUI.BizForms.Properties.FORE_COLOR, "red")
+
+		x = 35
+		form:createLabel("Ascension:", x, iy)
+		x = x + 70
+		local ascensionDropdown = form:createDropdown(ascensions, x, iy-4, 40, 1)
+		iy = iy + 24
+
+		local types = {}
+		local typeNameToIndex = {}
+
+		for i, name in pairs(PokemonData.TypeIndexMap) do
+			types[i] = name:gsub("^%l", string.upper)
+			typeNameToIndex[types[i]] = i
+		end
+		types[9] = "Typeless"
+		typeNameToIndex[types[9]] = 9
+
+		x = 35
+		form:createLabel("Type:", x, iy)
+		x = x + 70
+		local typeDropdown = form:createDropdown(types, x, iy-4, 80, 1)
+		iy = iy + 24
+
+		x = 35
+		form:createLabel("Attempts:", x, iy)
+		x = x + 70
+		local attemptsBox = form:createTextBox("", x, iy-4, 30, 1, "UNSIGNED")
+		iy = iy + 30
+
+
+		form.Controls.buttonSubmit = form:createButton("Submit", 102, iy, function()
+			local ascension = tonumber(ExternalUI.BizForms.getText(ascensionDropdown))
+			local type = typeNameToIndex[ExternalUI.BizForms.getText(typeDropdown)]
+			local attempts = tonumber(ExternalUI.BizForms.getText(attemptsBox))
+
+			if ascension == nil or type == nil or attempts == nil then
+				-- pass - something not set
+			elseif not (ascension > 0 and ascension <= 3 and type >= 0 and type <= 18) then
+				Utils.printDebug("Invalid data - attempts not updated.")
+			else
+				self.writeROMAttempts(ascension, type, attempts)
+				Main.WriteAttemptsCountToFile(self.getAttemptsFilePath(ascension, type), attempts)
+			end
+			complete = true
+			form:destroy()
+		end, 50, 25)
+		form.Controls.buttonCancel = form:createButton("Cancel", 157, iy, function()
 			form:destroy()
 		end, 50, 25)
 
