@@ -5845,7 +5845,7 @@ local function RoguemonTracker()
 		local _failSafe = function()
 			complete = true
 		end
-		local form = ExternalUI.BizForms.createForm("Edit Attempts", 310, 170, 100, 20, _failSafe)
+		local form = ExternalUI.BizForms.createForm("Edit Attempts", 330, 170, 100, 20, _failSafe)
 
 		local ascensions = {"1", "2", "3"}
 		local x = 25
