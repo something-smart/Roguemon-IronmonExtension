@@ -4833,11 +4833,11 @@ local function RoguemonTracker()
 
 	-- This is dependent on both Tracker and Randomization implementation
 	-- details, which may change in the future.
-	function self.getLogFilePath()
+	function self.getLogFilePath(postFix)
+		postFix = postFix or FileManager.PostFixes.AUTORANDOMIZED
 		local _, ascension, runTypeIndex = self.getRomStamp()
 		local fileName = self.getAscensionString(ascension, runTypeIndex) .. " " ..
-		             FileManager.PostFixes.AUTORANDOMIZED ..
-			     ".gba.log"
+		                  postFix .. ".gba.log"
 		return FileManager.prependDir(fileName)
 	end
 
@@ -6210,7 +6210,7 @@ local function RoguemonTracker()
 
 	-- This overrides LogOverlay.getLogFileAutodetected.
 	function self.getLogFileAutodetected(postFix)
-		local logPath = self.getLogFilePath()
+		local logPath = self.getLogFilePath(postFix)
 		if FileManager.fileExists(logPath) then
 			return logPath
 		else
