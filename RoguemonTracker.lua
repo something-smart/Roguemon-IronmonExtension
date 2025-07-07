@@ -1217,27 +1217,6 @@ local function RoguemonTracker()
 		QuickloadScreen.addUpdateProfile(profile, true)
 	end
 
-	function self.toggleMessagesBackOn()
-		-- This global is set in LoadNextRom to suppress message spam.
-		if type(RoguemonTurnMessagesBackOn) ~= "boolean" or not RoguemonTurnMessagesBackOn then
-			return
-		end
-
-		-- Messages still exist even if they're not displayed, so we
-		-- have to wait a couple of seconds until they disappear.
-		local waitFrames = 120
-		if client.getconfig().Unthrottled then
-			waitFrames = waitFrames * 10
-		else
-			local speed = client.getconfig().SpeedPercent
-			if speed > 100 then
-				waitFrames = waitFrames * client.getconfig().SpeedPercent / 100
-			end
-		end
-		Program.addFrameCounter("Toggle Messages Back On", waitFrames, function() client.displaymessages(true) end, 1)
-		RoguemonTurnMessagesBackOn = false
-	end
-
 	function self.updateGameSettings()
 		local GS = GameSettings
 
@@ -5368,8 +5347,6 @@ local function RoguemonTracker()
 			return
 		end
 
-		self.toggleMessagesBackOn()
-
 		self.setupRunProfile()
 
 		-- Read & populate configuration info
@@ -6212,16 +6189,9 @@ local function RoguemonTracker()
 			local successStamp = self.stampRomFile(nextRomInfo.filePath, ascension, runType)
 			local successOverwrite = FileManager.CopyFile(nextRomInfo.filePath, self.Paths.ROGUEMON_ROM, 'overwrite')
 			if successStamp and successOverwrite then
-
-				-- Hack: Suppress spammy on-screen messages which show up with the save state / ROM swap and scare users.
-				if client.getconfig().DisplayMessages then
-					client.displaymessages(false)
-					-- A global which needs to persist through a complete reload of this module.
-					RoguemonTurnMessagesBackOn = true
-				end
-				savestate.save(self.Paths.RANDOMIZING_STATE)
+				savestate.save(self.Paths.RANDOMIZING_STATE, true)
 				client.openrom(self.Paths.ROGUEMON_ROM)
-				savestate.load(self.Paths.RANDOMIZING_STATE)
+				savestate.load(self.Paths.RANDOMIZING_STATE, true)
 				self.markRandomizationComplete()
 
 				if not Main.IsOnBizhawk() then
