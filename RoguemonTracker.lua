@@ -15,7 +15,7 @@ local function RoguemonTracker()
 	local DEBUG_MODE = true
 
 	-- turn this on to be noisy about any io.open failures (except "No such file")
-	self.DEBUG_IO_OPEN_ERRORS = false
+	self.DEBUG_IO_OPEN_ERRORS = true
 
 	-- STATIC OR READ IN AT LOAD TIME:
 
