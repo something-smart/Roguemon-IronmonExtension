@@ -5520,7 +5520,7 @@ local function RoguemonTracker()
 		if not caughtSomethingYet and #Program.GameData.PlayerTeam > 1 then
 			caughtSomethingYet = true
 		end
-		if not committed and self.readGameVar(GameSettings.roguemon.varMilestone) == 2 then
+		if not committed and self.readGameVar(GameSettings.roguemon.varMilestone) >= 2 then
 			committed = true
 			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
 				self.displayNotification("Use the Egg, Luke!", "lucky-egg.png", function()
