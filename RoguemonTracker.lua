@@ -235,14 +235,10 @@ local function RoguemonTracker()
 	-- This is incremented whenever we make a change in the ROM that
 	-- requires a change in the tracker, or vice versa. We check it against
 	-- what is the ROM, and throw an error if it doesn't match.
-	local trackerCompatVersion = 0x03
+	local trackerCompatVersion = 0x04
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
-
-	-- We use this value as a sentinel to determine if NatDexExtension has overridden
-	-- our game settings update due to unpredictable load ordering.
-	local expectedsSpecialFlags = 0x02036f48
 
 	local notifyOnPickup = {
 		consumables = {
@@ -1218,50 +1214,83 @@ local function RoguemonTracker()
 	end
 
 	function self.updateGameSettings()
-		local GS = GameSettings
 
-		-- FireRed
-		if GS.game == 3 then
-			GS.FriendshipRequiredToEvo = 0x0804305c + 0x13e -- GetEvolutionTargetSpecies + 0x13e
-			GS.BattleIntroDrawPartySummaryScreens = 0x08013f00 + 0x1 -- BattleIntroDrawPartySummaryScreens + 0x1
-			GS.ReturnFromBattleToOverworld = 0x08016724 + 0x1 -- ReturnFromBattleToOverworld + 0x1
-			GS.BattleIntroOpponentSendsOutMonAnimation = 0x080141fc + 0x1 -- BattleIntroRecordMonsToDex + 0x1
-			GS.HandleTurnActionSelectionState = 0x08014c68 + 0x1 -- HandleTurnActionSelectionState + 0x1
-			GS.gMultiUsePlayerCursor = 0x03004c24
-			GS.gSaveBlock1ptr = 0x03004c38
-			GS.sSpecialFlags = expectedsSpecialFlags
-			GS.gTasks = 0x03004cc0
-			GS.gSaveBlock3 = 0x0202458c
-			GS.gMapHeader = 0x02036c64
-			GS.gSpecialVar_Result = 0x02036f38
-			GS.gTrainerBattleOpponent_A = 0x02038516
-			GS.gSpecialVar_ItemId = 0x0203c3a4
-			GS.sEvoStructPtr = 0x02039888
-			GS.sBattlerAbilities = 0x02039898
-			GS.sStartMenuWindowId = 0x0203aa44
-			GS.sMonSummaryScreen = 0x0203c7b0
-
-			GS.roguemon = {
-				romCompat                 = 0x08000200,
-				romUid                    = 0x08000175,
-
-				-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
-				varType                   = 0x5c,
-				varAscension              = 0x5e,
-				varCurse                  = 0x7e,
-				varMilestone              = 0x82,
-
-				-- these are offset from SaveBlock2Addr
-				optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
-
-				-- these are offset from SaveBlock3
-				ascensionTypeStats        = 0x73e4,
-
-				-- these are offset from sSpecialFlags, in bits
-				flagAwaitingRandomization = 0x2,
-				flagBackToTower           = 0x3,
-			}
+		-- We use this particular setting as a sentinel to determine if
+		-- NatDexExtension has overridden our game settings, which can happen
+		-- if it reloads after we have already loaded. In that case, the checks
+		-- in `startup` don't even save us, because the global Move data has
+		-- already been updated.
+		local sSpecialFlagsPtr = 0x08000354
+		if GameSettings["sSpecialFlags"] == Memory.readdword(sSpecialFlagsPtr) then
+			-- settings are updated
+			return
 		end
+
+		-- A table of GameSettings keys to the pointers which contain
+		-- the addresses they should be set to.
+		-- Commented addresses are cases where the symbol we're pointing at
+		-- doesn't match the name of the setting, either because the
+		-- tracker calls it something else, or because NatDex wants an
+		-- alternate function pointed at.
+		local pointers = {
+			["BattleIntroDrawPartySummaryScreens"]         = 0x08000300,
+			["ReturnFromBattleToOverworld"]                = 0x08000304,
+			["BattleIntroOpponentSendsOutMonAnimation"]    = 0x0800030c, -- BattleIntroRecordMonsToDex
+			["HandleTurnActionSelectionState"]             = 0x08000310,
+			["gBattleMainFunc"]                            = 0x08000314,
+			["Task_EvolutionScene"]                        = 0x08000318,
+			["gSaveBlock1ptr"]                             = 0x0800031c,
+			["gSaveBlock3"]                                = 0x08000320,
+			["gTasks"]                                     = 0x08000324,
+			["gMapHeader"]                                 = 0x08000328,
+			["estats"]                                     = 0x0800032c, -- gEnemyParty
+			["pstats"]                                     = 0x08000330, -- gPlayerParty
+			["gBattleResults"]                             = 0x08000334,
+			["gBattleMoves"]                               = 0x08000338,
+			["gBaseStats"]                                 = 0x0800033c, -- gSpeciesInfo
+			["sEvoStructPtr"]                              = 0x08000340,
+			["sMonSummaryScreen"]                          = 0x08000344,
+			["gBattleStructPtr"]                           = 0x08000348, -- gBattleStruct
+			["gExperienceTables"]                          = 0x0800034c,
+			["gMultiUsePlayerCursor"]                      = 0x08000350,
+			["sSpecialFlags"]                              = sSpecialFlagsPtr,
+			["gSpecialVar_Result"]                         = 0x08000358,
+			["gTrainerBattleOpponent_A"]                   = 0x0800035c,
+			["gSpecialVar_ItemId"]                         = 0x08000360,
+			["sBattlerAbilities"]                          = 0x08000364,
+			["sStartMenuWindowId"]                         = 0x08000368,
+			["FriendshipRequiredToEvo"]                    = 0x0800036c,
+			["gBattleTerrain"]                             = 0x08000370,
+			["gMoveToLearn"]                               = 0x08000374,
+			["gPlayerPartyCount"]                          = 0x08000378,
+			["sTMHMMoves"]                                 = 0x08000380,
+		}
+
+		for setting, ptrAddr in pairs(pointers) do
+			local address = Memory.readdword(ptrAddr);
+			GameSettings[setting] = address
+		end
+
+		GameSettings.roguemon = {
+			romCompat                 = 0x08000200,
+			romUid                    = 0x08000175,
+
+			-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
+			varType                   = 0x5c,
+			varAscension              = 0x5e,
+			varCurse                  = 0x7e,
+			varMilestone              = 0x82,
+
+			-- these are offset from SaveBlock2Addr
+			optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
+
+			-- these are offset from SaveBlock3
+			ascensionTypeStats        = 0x73e4,
+
+			-- these are offset from sSpecialFlags, in bits
+			flagAwaitingRandomization = 0x2,
+			flagBackToTower           = 0x3,
+		}
 	end
 
 	function self.getROMCompatVersion()
@@ -5494,9 +5523,8 @@ local function RoguemonTracker()
 			return
 		end
 
-		if GameSettings.sSpecialFlags ~= expectedsSpecialFlags then
-			self.updateGameSettings()
-		end
+		-- Check if NatDex has swapped GameSettings out from under us.
+		self.updateGameSettings()
 
 		if self.checkAwaitingRandomization() and not randomizingROM then
 			-- Trigger the main loop to LoadNextRom
