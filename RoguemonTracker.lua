@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.4.1-beta.1"
+	self.version = "1.4.1-beta.2"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -5322,6 +5322,14 @@ local function RoguemonTracker()
 		}
 	end
 
+	function self.isNatDexLoaded()
+		return #MoveData.Moves > 354
+	end
+
+
+	local startupTries = 0
+	local maxTries = 10
+	local startupCounterLabel = "Startup RoguemonTracker"
 	function self.startup()
 		local bizhawkVersion = client.getversion()
 		if Utils.isNewerVersion(REQUIRED_BIZHAWK_VERSION, bizhawkVersion) then
@@ -5334,6 +5342,22 @@ local function RoguemonTracker()
 		if self.tryPatchVanillaROM() ~= nil then
 			return
 		end
+
+		startupTries = startupTries + 1
+		if not self.isNatDexLoaded() then
+			if startupTries >= maxTries then
+				self.errorLog("NatDex Tracker Extension appears to be missing. Cannot start Roguemon Tracker.")
+				Program.removeFrameCounter(startupCounterLabel)
+				return
+			end
+
+			print("> Waiting on NatDex Tracker Extension before starting Roguemon Tracker...")
+			Program.addFrameCounter(startupCounterLabel, 60, function () self.startup() end)
+			return
+		end
+
+		Program.removeFrameCounter(startupCounterLabel)
+		print("> Roguemon Tracker starting")
 
 		self.overrideCoreTrackerFunctions()
 		self.updateGameSettings()
