@@ -3688,7 +3688,6 @@ local function RoguemonTracker()
 							specialRedeems.internal["Revive"] = true
 						end
 						if reward == "Fight first 5 wilds in Forest" then
-							print("aa")
 							wildBattleCounter = 5
 							wildBattlesStarted = false
 						end
