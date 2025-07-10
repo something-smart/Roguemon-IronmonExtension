@@ -1290,7 +1290,19 @@ local function RoguemonTracker()
 			-- these are offset from sSpecialFlags, in bits
 			flagAwaitingRandomization = 0x2,
 			flagBackToTower           = 0x3,
+
+			-- these are offset from gRoguemonTrackerData
+			queuedMoveLearn           = 0xa,
 		}
+
+		local roguemonSettingPointers = {
+			["gRoguemonTrackerData"]                      = 0x08000384,
+		}
+
+		for setting, ptrAddr in pairs(roguemonSettingPointers) do
+			local address = Memory.readdword(ptrAddr);
+			GameSettings.roguemon[setting] = address
+		end
 	end
 
 	function self.getROMCompatVersion()
@@ -1299,6 +1311,11 @@ local function RoguemonTracker()
 
 	function self.setROMAscension()
 		self.writeGameVar(GameSettings.roguemon.varAscension, self.ascensionLevel())
+	end
+
+	function self.triggerROMLearnMove(moveId)
+		local addr = GameSettings.roguemon.gRoguemonTrackerData + GameSettings.roguemon.queuedMoveLearn
+		Memory.writeword(addr, moveId)
 	end
 
 	-- Gets the address of the attempts byte for the given ascension and
