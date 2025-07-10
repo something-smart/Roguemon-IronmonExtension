@@ -1292,6 +1292,7 @@ local function RoguemonTracker()
 			-- these are offset from sSpecialFlags, in bits
 			flagAwaitingRandomization = 0x2,
 			flagBackToTower           = 0x3,
+			flagSentToTower           = 0x4,
 
 			-- these are offset from gRoguemonTrackerData
 			queuedMoveLearn           = 0xa,
@@ -6011,9 +6012,17 @@ local function RoguemonTracker()
 		return self.readGameVar(GameSettings.roguemon.varAscension)
 	end
 
-	-- Returns True if we're currently in the ascension tower.
+	-- Returns True if we're currently in the ascension tower, or if we've been sent there.
 	function self.isInAscensionTower()
-		return TrackerAPI.getMapId() >= 298 and TrackerAPI.getMapId() <= 300
+		local inTower = TrackerAPI.getMapId() >= 298 and TrackerAPI.getMapId() <= 300
+		if inTower then
+			return true
+		end
+
+		local mask = 1 << GameSettings.roguemon.flagSentToTower
+		local sentToTower = Memory.readbyte(GameSettings.sSpecialFlags) & mask ~= 0
+
+		return sentToTower
 	end
 
 	-- Synchronizes the tracker attempt counts with the ROM.
