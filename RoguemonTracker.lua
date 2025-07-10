@@ -5371,7 +5371,13 @@ local function RoguemonTracker()
 	end
 
 	function self.isNatDexLoaded()
-		return #MoveData.Moves > 354
+		-- This is a setting that IronmonTracker will set to one thing,
+		-- and NatDex will set to another. Critically, that application
+		-- will happen in that order (Tracker, then NatDex), on every
+		-- re-execution of Main.Run, every time.
+		--
+		-- We use this as a sentinel to determine if NatDex has loaded or not.
+		return GameSettings.gameStatsOffset == 0x1394
 	end
 
 
