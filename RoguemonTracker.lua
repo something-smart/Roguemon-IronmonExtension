@@ -654,9 +654,14 @@ local function RoguemonTracker()
 		Program.updatePokemonTeams()
 		local newPokeInfo = Tracker.getPokemon(1, true)
 
-		local itemToIgnore = nil
+		local itemUnequipped = nil
 		if pokeInfo and newPokeInfo and pokeInfo.heldItem ~= newPokeInfo.heldItem then
-			itemToIgnore = pokeInfo.heldItem
+			itemUnequipped = pokeInfo.heldItem
+		end
+
+		local itemEquipped = nil
+		if pokeInfo and newPokeInfo and pokeInfo.heldItem ~= newPokeInfo.heldItem then
+			itemEquipped = newPokeInfo.heldItem
 		end
 
 		-- Check for info that changed
@@ -674,7 +679,7 @@ local function RoguemonTracker()
 			if olderq == q and oldq ~= q then
 				redFlags = redFlags + 1
 			end
-			if q ~= oldq and i ~= itemToIgnore then
+			if q ~= oldq and i ~= itemUnequipped then
 				currentStatusVal = self.countStatusHeals()
 				if not (empty and TrackerAPI.getMapId() ~= 5) and TrackerAPI.getItemName(i, true) then
 					toProcess[TrackerAPI.getItemName(i, true)] = q - oldq
@@ -686,7 +691,7 @@ local function RoguemonTracker()
 		for i,oldq in pairs(itemsPocket) do
 			local q = newItemsPocket[i] or 0
 			local olderq = priorItemsPocket[i] or 0
-			if q == 0 and q ~= oldq and i ~= itemToIgnore then
+			if q == 0 and q ~= oldq and i ~= itemUnequipped then
 				currentStatusVal = self.countStatusHeals()
 				if not (empty and TrackerAPI.getMapId() ~= 5) and TrackerAPI.getItemName(i, true) then
 					toProcess[TrackerAPI.getItemName(i, true)] = q - oldq
@@ -702,7 +707,7 @@ local function RoguemonTracker()
 			if olderq == q and oldq ~= q then
 				redFlags = redFlags + 1
 			end
-			if q ~= oldq and i ~= itemToIgnore then
+			if q ~= oldq and i ~= itemUnequipped and i ~= itemEquipped then
 				currentStatusVal = self.countStatusHeals()
 				if not (empty and TrackerAPI.getMapId() ~= 5) then
 					toProcess[TrackerAPI.getItemName(i, true)] = q - oldq
@@ -714,7 +719,7 @@ local function RoguemonTracker()
 		for i,oldq in pairs(berryPocket) do
 			local q = newBerryPocket[i] or 0
 			local olderq = priorBerryPocket[i] or 0
-			if q == 0 and q ~= oldq and i ~= itemToIgnore then
+			if q == 0 and q ~= oldq and i ~= itemUnequipped then
 				currentStatusVal = self.countStatusHeals()
 				if not (empty and TrackerAPI.getMapId() ~= 5) and TrackerAPI.getItemName(i, true) then
 					toProcess[TrackerAPI.getItemName(i, true)] = q - oldq
