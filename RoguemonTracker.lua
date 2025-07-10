@@ -771,13 +771,13 @@ local function RoguemonTracker()
 		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.level + 1 == newPokeInfo.level then
 			-- We leveled up. Check caps again
 			self.countAdjustedHeals()
-			if RoguemonOptions["Show reminders over cap"] and MiscData.HealingItems[itemId] and adjustedHPVal > hpCap and not needToBuy then
+			if RoguemonOptions["Show reminders over cap"] and adjustedHPVal > hpCap and not needToBuy then
 				self.displayNotification("An HP healing item must be used or trashed", "healing-pocket.png", function()
 					self.countAdjustedHeals()
 					return adjustedHPVal <= hpCap
 				end)
 			end
-			if RoguemonOptions["Show reminders over cap"] and MiscData.StatusItems[itemId] and currentStatusVal > statusCap and not needToBuy then
+			if RoguemonOptions["Show reminders over cap"] and currentStatusVal > statusCap and not needToBuy then
 				self.displayNotification("A status healing item must be used or trashed", "status-cap.png", function()
 					return self.countStatusHeals() <= statusCap
 				end)
