@@ -224,10 +224,12 @@ local function RoguemonTracker()
 	}
 
 	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
-	local ROM_CURSE_NONE        = 0
-	local ROM_CURSE_TIKTOK      = 1
-	local ROM_CURSE_TOXIC_FUMES = 2
-	local ROM_CURSE_MOODY       = 4
+	local ROM_CURSE_NONE           = 0
+	local ROM_CURSE_TIKTOK         = 1 << 0
+	local ROM_CURSE_TOXIC_FUMES    = 1 << 1
+	local ROM_CURSE_MOODY          = 1 << 2
+	local ROM_CURSE_DAVID_VS       = 1 << 3
+	local ROM_CURSE_MEDIOCRITIZE   = 1 << 4
 
 	local FIRERED_11_SHA1SUM = "dd5945db9b930750cb39d00c84da8571feebf417"
 	local FIRERED_11_SIZE = 16777216
