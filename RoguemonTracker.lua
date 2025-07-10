@@ -239,6 +239,11 @@ local function RoguemonTracker()
 	-- what is the ROM, and throw an error if it doesn't match.
 	local trackerCompatVersion = 0x04
 
+	-- This is the version of the ROM patch which has been bundled with the
+	-- Tracker. If the ROM is older than this, we prompt the user to patch.
+	-- This should be updated whenever `roguemon.bps` is updated.
+	local bundledRomPatchVersion = "0.3.4-beta"
+
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
 
@@ -5416,6 +5421,8 @@ local function RoguemonTracker()
 
 		self.overrideCoreTrackerFunctions()
 		self.updateGameSettings()
+		self.checkPatchVersion()
+
 		local romCompatVersion = self.getROMCompatVersion()
 		if romCompatVersion ~= trackerCompatVersion then
 			self.errorLog("This tracker does not support this ROM. " ..
@@ -5847,6 +5854,21 @@ local function RoguemonTracker()
 		end, 105, 25)
 	end
 
+	function self.pleasePatchPrompt()
+		local form = ExternalUI.BizForms.createForm("New RogueMon Patch", 320, 100, 100, 20)
+
+		local x = 15
+		local iy = 10
+		form:createLabel("There is a new RogueMon ROM patch.", x, iy)
+		iy = iy + 22
+		form:createLabel("Please open Vanilla FireRed 1.1 to patch your ROM.", x, iy)
+		iy = iy + 28
+
+		form.Controls.close = form:createButton("Dismiss", 108, iy, function()
+			form:destroy()
+		end, 105, 25)
+	end
+
 	function self.editWinsForm()
 		local complete = false
 		local _failSafe = function()
@@ -6207,6 +6229,39 @@ local function RoguemonTracker()
 
 		return result
 	end
+
+	-- Returns the string for `roguemonVersionStr` in the ROM header.
+	function self.getROMRoguemonVersion()
+		local romVersionAddr = GameSettings.roguemon.romUid+6 & 0xFFFFFF
+		local versionBytes = memory.read_bytes_as_array(romVersionAddr, 12, "ROM")
+
+		local versionStr = ""
+
+		for _, b in ipairs(versionBytes) do
+			if b >= 32 and b < 127 then
+				versionStr = versionStr .. string.char(b)
+			end
+		end
+
+		return versionStr
+	end
+
+	-- Checks if the ROM's patch version matches the patch we were bundled
+	-- with. If the ROM's version is older, prompt the user to re-open
+	-- Vanilla FireRed.
+	function self.checkPatchVersion()
+		local romVersion = self.getROMRoguemonVersion()
+
+		-- check if the romVersion looks like a semver
+		if not romVersion:find("^(%d+)%.(%d+)%.(%d+)(%-?[%w%-%.]*)(%+?[%w%.%-]*)") then
+			return
+		end
+
+		if RoguemonUtils.compare_semver(romVersion, bundledRomPatchVersion) == -1 then
+			self.pleasePatchPrompt()
+		end
+	end
+
 
 	function self.checkAwaitingRandomization()
 		return Utils.getbits(Memory.readbyte(GameSettings.sSpecialFlags), GameSettings.roguemon.flagAwaitingRandomization, 1) == 1
