@@ -316,7 +316,8 @@ local function RoguemonTracker()
 		{text = "Show reminders", default = true},
 		{text = "Show reminders over cap", default = false},
 		{text = "Alternate Curse theme", default = true},
-		{text = "Egg reminders", default = true}
+		{text = "Egg reminders", default = true},
+		{text = "Opt-in to Beta Release", default = false},
 	}
 	local populatedOptions = false
 
@@ -2790,10 +2791,10 @@ local function RoguemonTracker()
 	}
 
 	local OS_LEFT_X = 10
-	local OS_TOP_Y = 12
+	local OS_TOP_Y = 10
 	local OS_BOX_SIZE = 10
 	local OS_BOX_TEXT_GAP = 10
-	local OS_BOX_VERTICAL_GAP = 5
+	local OS_BOX_VERTICAL_GAP = 4
 
 	function self.RoguemonOptionsScreen.drawScreen()
 		local canvas = {
@@ -6045,13 +6046,38 @@ local function RoguemonTracker()
 		end
 	end
 
+	-- Tracker function to setup checks for new updates and download of those updates.
+	-- Note that the tag logic is _only_ used by the tracker to determine
+	-- if a new release does exist or not. When it actually downloads the
+	-- release, it completely ignores the tag and just grabs `main`.
 	function self.checkForUpdates()
-		local versionResponsePattern = '"tag_name":%s+"%w+(%d+%.%d+%.%d[%d%w%-%+]*)"' -- matches "1.0.1-label+build" in "tag_name": "v1.0.1-label+build"
-		local versionCheckUrl = string.format("https://api.github.com/repos/%s/releases/latest", self.github or "")
-		local downloadUrl = string.format("%s/releases/latest", self.url or "")
+		local betaEnabled = RoguemonOptions["Opt-in to Beta Release"]
+		local betaBranch = "beta"
+		local versionCheckUrl = ""
+
+		local versionResponsePattern = ""
+		if betaEnabled then
+			-- sadly github api provides no way to fetch the latest
+			-- pre-release, so for the beta case we look for the
+			-- version set in the main Tracker file.
+			versionResponsePattern = '\n%s*self%.version%s+=%s+"%w*(%d+%.%d+%.%d+%-?[%w%-%.]*%+?[%w%.%-]*)"' -- matches "1.2.3-rc1+tower" in '"self.version" = "v1.2.3-rc1+tower"'
+			versionCheckUrl = string.format("https://raw.githubusercontent.com/%s/%s/RoguemonTracker.lua", self.github or "", betaBranch)
+
+			-- We provide an override func to fetch the beta branch
+			-- instead of the default (main).
+			self.downloadAndInstallUpdate = function()
+				return TrackerAPI.updateExtension("RoguemonTracker", nil, nil, betaBranch)
+			end
+		else
+			versionResponsePattern = '"tag_name":%s+"%w*(%d+%.%d+%.%d+%-?[%w%-%.]*%+?[%w%.%-]*)"' -- matches "1.2.3-rc1+tower" in '"tag_name": "v1.2.3-rc1+tower"
+			versionCheckUrl = string.format("https://api.github.com/repos/%s/releases/latest", self.github or "")
+			self.downloadAndInstallUpdate = nil
+		end
+
+		local releaseNotesUrl = string.format("%s/releases/%s", self.url or "", betaEnabled and "" or "latest")
 		local compareFunc = function(a, b) return a ~= b and RoguemonUtils.compare_semver(a, b) == -1 end -- if current version is *older* than online version
 		local isUpdateAvailable = Utils.checkForVersionUpdate(versionCheckUrl, self.version, versionResponsePattern, compareFunc)
-		return isUpdateAvailable, downloadUrl
+		return isUpdateAvailable, releaseNotesUrl
 	end
 
 	-- Helper function for accessing roguemon data from the console
