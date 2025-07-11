@@ -7,7 +7,18 @@ local utils = {}
 function utils.compare_semver(v1, v2)
     -- Parse versions
     local function parse_semver(version)
+        if not version or type(version) ~= "string" then
+            return nil
+        end
+
         local major, minor, patch, prerelease, build = version:match("^(%d+)%.(%d+)%.(%d+)(%-?[%w%-%.]*)(%+?[%w%.%-]*)")
+        if not major or not minor or not patch then
+            return nil
+        end
+
+        prerelease = prerelease or ""
+        build = build or ""
+
         if not prerelease:find("^%-") then
             prerelease = ""
         end
@@ -27,6 +38,12 @@ function utils.compare_semver(v1, v2)
 
     local v1_parts = parse_semver(v1)
     local v2_parts = parse_semver(v2)
+
+    -- Return 0 as a failsafe if either version is invalid
+    if not v1_parts or not v2_parts then
+        print(string.format("Invalid semvers provided. Cannot compare '%s' and '%s'.", v1, v2))
+        return 0
+    end
 
     -- Compare major, minor, patch
     if v1_parts.major ~= v2_parts.major then
