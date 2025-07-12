@@ -169,6 +169,7 @@ local function RoguemonTracker()
 	local ROM_CURSE_MOODY          = 1 << 2
 	local ROM_CURSE_DAVID_VS       = 1 << 3
 	local ROM_CURSE_MEDIOCRITIZE   = 1 << 4
+	local ROM_CURSE_DISTORTED_HEART = 1 << 6
 
 	local curseInfo = {
 		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight", segment = true, gym = false,
@@ -229,10 +230,10 @@ local function RoguemonTracker()
 		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight", segment = true, gym = false,
 							longDescription = "HP is randomized to 25%, 50%, 75%, or 100% after each fight"},
 		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false, romCurse = ROM_CURSE_DAVID_VS},
-		-- ["Distorted Heart"] = {description = "Your moves' typings are randomized each battle", segment = true, gym = false,
-		-- 						longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
+		["Distorted Heart"] = {description = "Your move types are randomized", segment = true, gym = false, romCurse = ROM_CURSE_DISTORTED_HEART,
+								longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
 		-- ["Distorted Soul"] = {description = "Your moves' powers are randomized each battle", segment = true, gym = false,
-		-- 						longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
+		--						longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
 	}
 
 	local FIRERED_11_SHA1SUM = "dd5945db9b930750cb39d00c84da8571feebf417"
@@ -1325,6 +1326,9 @@ local function RoguemonTracker()
 
 			-- these are offset from gRoguemonTrackerData
 			queuedMoveLearn           = 0xa,
+
+			-- offset from gBattleStruct
+			distortedSeed        = 0x11,
 		}
 
 		local roguemonSettingPointers = {
@@ -6318,6 +6322,33 @@ local function RoguemonTracker()
 		return self.readGameVar(GameSettings.roguemon.varAscension)
 	end
 
+	function self.getDistortedSeed()
+		local battleStructAddress = Memory.readdword(GameSettings.gBattleStructPtr)
+		return Memory.readbyte(battleStructAddress + GameSettings.roguemon.distortedSeed)
+	end
+
+	function self.getDistortedMovePower(moveId)
+		return 120
+	end
+
+	-- This function has to exactly mimic `GetDistortedHeartMoveType` from the ROM.
+	function self.getDistortedMoveType(moveId, sourcePokemon)
+		local distortedSeed = self.getDistortedSeed()
+		local pokemonTypes = sourcePokemon.types
+		local validTypes = {}
+		local validTypeCount = 0
+
+		for i, type in pairs(PokemonData.TypeIndexMap) do
+			if type ~= PokemonData.Types.UNKNOWN and type ~= pokemonTypes[1] and type ~= pokemonTypes[2] then
+				validTypes[validTypeCount] = type
+				validTypeCount = validTypeCount + 1
+			end
+		end
+
+		local randomIndex = (distortedSeed + moveId * 7) % validTypeCount
+		return validTypes[randomIndex]
+	end
+
 	-- Returns True if we're currently in the ascension tower, or if we've been sent there.
 	function self.isInAscensionTower()
 		local inTower = TrackerAPI.getMapId() >= 298 and TrackerAPI.getMapId() <= 300
@@ -6712,6 +6743,20 @@ local function RoguemonTracker()
 		return f, errMsg, errNo
 	end
 
+	-- Overrides MoveData.adjustVariableMoveValues. Behaviour is default
+	-- unless we have one of the Distorted curses.
+	function self.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
+		local viewingOwnInBattle = Battle.isViewingOwn and Battle.inBattle
+		local activeCurse = self.getActiveCurse()
+		if viewingOwnInBattle and activeCurse == "Distorted Heart" then
+			move.type = self.getDistortedMoveType(move.id, sourcePokemon)
+		elseif viewingOwnInBattle and activeCurse == "Distorted Soul" then
+			move.power = self.getDistortedMovePower(move.id)
+		else
+			originalCoreFunctions.MoveData.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
+		end
+	end
+
 	-- Overrides the given function from the given module with `newFunc`.
 	-- `moduleName` and `funcName` are used to track what was overridden so
 	-- we can restore it later.
@@ -6741,6 +6786,7 @@ local function RoguemonTracker()
 		event.onconsoleclose(self.restoreCoreTrackerFunctions, "restoreCoreTrackerFunctions")
 		overrideFunction(Main, "Main", "LoadNextRom", self.LoadNextRom)
 		overrideFunction(LogOverlay, "LogOverlay", "getLogFileAutodetected", self.getLogFileAutodetected)
+		overrideFunction(MoveData, "MoveData", "adjustVariableMoveValues", self.adjustVariableMoveValues)
 
 		if self.DEBUG_IO_OPEN_ERRORS then
 			overrideFunction(io, "io", "open", self.noisyIOOpen)
@@ -6754,6 +6800,7 @@ local function RoguemonTracker()
 		restoreFunctions(FileManager, "FileManager")
 		restoreFunctions(GameSettings, "GameSettings")
 		restoreFunctions(LogOverlay, "LogOverlay")
+		restoreFunctions(MoveData, "MoveData")
 		restoreFunctions(io, "io")
 	end
 
