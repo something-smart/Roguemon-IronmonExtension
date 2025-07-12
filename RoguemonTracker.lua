@@ -6374,7 +6374,7 @@ local function RoguemonTracker()
 
 	function self.getAttemptsFilePath(ascension, typeIndex)
 		local directory = FileManager.getPathOverride("Attempt Counts") or FileManager.dir
-		local fileName = string.format("%s%s", self.getAscensionString(ascension, typeIndex), FileManager.Extensions.ATTEMPTS)
+		local fileName = string.format("%s %s%s", self.getAscensionString(ascension, typeIndex), FileManager.PostFixes.ATTEMPTS_FILE, FileManager.Extensions.ATTEMPTS)
 		return directory .. fileName
 	end
 
