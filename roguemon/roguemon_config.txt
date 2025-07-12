@@ -19,6 +19,7 @@ Potion x2 & Antidote|potiontwoantidote.png
 HP Cap +50|healing-pocket.png
 Status Cap +1 & Potion & Any Status Heal|trifecta.png
 Fight first 5 wilds in Forest: Can't heal in between. Can run but counts as 1 of the 5.|exp-forest.png
+Potion & Fight wilds in Rts 1/2/22: Fight the first encounter on each. You may PC heal anytime, but must stop there.|potionandexp.png
 Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 Berry Juice|berry-juice.png

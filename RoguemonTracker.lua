@@ -750,7 +750,7 @@ local function RoguemonTracker()
 						if pokeInfo and newPokeInfo and newPokeInfo.curHP > pokeInfo.curHP then
 							local hVal = 0
 							if hInfo.type == MiscData.HealingType.Constant then
-								hVal = .2 * hInfo.amount
+								hVal = math.floor(.2 * hInfo.amount)
 							else
 								hVal = math.floor(.2 * hInfo.amount / 100 * newPokeInfo.stats.hp)
 							end
@@ -762,7 +762,7 @@ local function RoguemonTracker()
 						if pokeInfo and newPokeInfo and newPokeInfo.curHP <= pokeInfo.curHP then
 							local hVal = 0
 							if hInfo.type == MiscData.HealingType.Constant then
-								hVal = .3 * hInfo.amount
+								hVal = math.floor(.3 * hInfo.amount)
 							else
 								hVal = math.floor(.3 * hInfo.amount / 100 * newPokeInfo.stats.hp)
 							end
@@ -1591,7 +1591,7 @@ local function RoguemonTracker()
 			and not (specialRedeems.unlocks["Cooler Bag"] and item == "Berry Juice") then
 				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
 				self.NotificationScreen.itemInQuestion = item
-				if notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse == "Kaizo Curse") then
+				if notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse() == "Kaizo Curse") then
 					return (item .. " must be used, equipped, or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
 					return (item .. " must be equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
@@ -1635,7 +1635,14 @@ local function RoguemonTracker()
 						end
 					end
 					if shouldAdd then
+						local notif = {message = s, image = img, dismissFunction = dismissFunc}
+						if self.NotificationScreen.queuedAuxiliary then
+							notif.queuedAuxiliary = self.NotificationScreen.queuedAuxiliary
+							notif.itemInQuestion = self.NotificationScreen.itemInQuestion
+						end
 						suppressedNotifications[#suppressedNotifications + 1] = {message = s, image = img, dismissFunction = dismissFunc}
+						self.NotificationScreen.queuedAuxiliary = nil
+						self.NotificationScreen.itemInQuestion = nil
 					end
 				end
 			end
@@ -1904,7 +1911,7 @@ local function RoguemonTracker()
 				end
 				Theme.importThemeFromText(CURSE_THEME, true)
 			end
-			self.displayNotification("Curse: " .. curse .. " @ " .. self.getCurseDescription(curse), "Curse.png", nil)
+			local curseNotif = "Curse: " .. curse .. " @ " .. self.getCurseDescription(curse)
 			if curse == "High Pressure" then
 				local pkmn = self.readLeadPokemonData()
 				local pp1 = Utils.getbits(pkmn.attack3, 0, 8)
@@ -1916,6 +1923,9 @@ local function RoguemonTracker()
 				self.writeLeadPokemonData(pkmn)
 			end
 			if curse == "Debilitation" then
+				local iMon = Tracker.getPokemon(1)
+				local iAtk = iMon.stats['atk']
+				local iSpa = iMon.stats['spa']
 				local pkmn = self.readLeadPokemonData()
 				local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
 				savedIVs['atk'] = ivs['atk']
@@ -1926,7 +1936,10 @@ local function RoguemonTracker()
 					ivs['hp'] + Utils.bit_lshift(ivs['atk'], 5) + Utils.bit_lshift(ivs['def'], 10) + 
 					Utils.bit_lshift(ivs['spe'], 15) + Utils.bit_lshift(ivs['spa'], 20) + Utils.bit_lshift(ivs['spd'], 25)
 				self.writeLeadPokemonData(pkmn)
-				self.recalculateStats()
+				local newStats = self.recalculateStats()
+				local fAtk = newStats['atk']
+				local fSpa = newStats['spa']
+				curseNotif = curseNotif .. " @ ATK: " .. iAtk .. " -> " .. fAtk .. " @ " .. "SPA: " .. iSpa .. " -> " .. fSpa
 			end
 			if curse == "Time Warp" then
 				local pkmn = self.readLeadPokemonData()
@@ -1969,9 +1982,10 @@ local function RoguemonTracker()
 			if curse == "Toxic Fumes" then
 				self.romCurseOn(ROM_CURSE_TOXIC_FUMES)
 			end
-                        if curse == "Moody" then
-                                self.romCurseOn(ROM_CURSE_MOODY)
-                        end
+			if curse == "Moody" then
+					self.romCurseOn(ROM_CURSE_MOODY)
+			end
+			self.displayNotification(curseNotif, "Curse.png", nil)
 		end
 	end
 
@@ -2564,6 +2578,23 @@ local function RoguemonTracker()
 						self.returnToHomeScreen()
 					end
 				}
+			},
+			["EquipPickup"] = {
+				{
+					name = "Equip",
+					onClick = function()
+						local heldItem = Tracker.getPokemon(1, true).heldItem
+						self.removeItem(self.NotificationScreen.itemInQuestion)
+						if heldItem then
+							self.AddItemById(heldItem, 1)
+						end
+						local pkmn = self.readLeadPokemonData()
+						pkmn.growth1 = Utils.getbits(pkmn.growth1, 0, 16) + Utils.bit_lshift(self.getItemId(self.NotificationScreen.itemInQuestion), 16)
+						self.writeLeadPokemonData(pkmn)
+						self.returnToHomeScreen()
+					end
+				},
+				nil
 			}
 		}
 	}
@@ -2604,7 +2635,7 @@ local function RoguemonTracker()
 		end
 		self.NotificationScreen.activeAuxiliary = aux
 		if aux[1] then
-			self.NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 30, 143, 
+			self.NotificationScreen.Buttons.AuxiliaryButton1.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 20, 143, 
 			Utils.calcWordPixelLength(aux[1].name) + 5, 10} 
 		end
 		if aux[2] then
@@ -4208,6 +4239,8 @@ local function RoguemonTracker()
 		Memory.writedword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsMaxHpAtk, calculatedStats["hp"] + Utils.bit_lshift(calculatedStats["atk"], 16))
 		Memory.writedword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsDefSpe, calculatedStats["def"] + Utils.bit_lshift(calculatedStats["spe"], 16))
 		Memory.writedword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsSpaSpd, calculatedStats["spa"] + Utils.bit_lshift(calculatedStats["spd"], 16))
+
+		return calculatedStats
 	end
 
 	function self.getLastAttackDamage()
@@ -4374,8 +4407,9 @@ local function RoguemonTracker()
 		end
 		if curse == "Conversion" then
 			local types = {}
-			local enemyMon = Tracker.getPokemon(1, false)
-			local moves = {enemyMon.moves[1].id, enemyMon.moves[2].id, enemyMon.moves[3].id, enemyMon.moves[4].id}
+			local enemyMon = Battle.Combatants.LeftOther
+			local mon = Tracker.getPokemon(Battle.Combatants.LeftOther, false)
+			local moves = {mon.moves[1].id, mon.moves[2].id, mon.moves[3].id, mon.moves[4].id}
 			for val,type in pairs(PokemonData.TypeIndexMap) do
 				if type ~= PokemonData.Types.UNKNOWN then
 					for _,moveId in pairs(moves) do
@@ -4552,11 +4586,12 @@ local function RoguemonTracker()
 			backseatingMove = math.random(4)
 		end
 		if curse == "Conversion" then
-			local enemyMon = Tracker.getPokemon(Battle.Combatants.LeftOther, false)
+			local enemyMon = Battle.Combatants.LeftOther
 			if currentEnemyMon ~= enemyMon then
 				currentEnemyMon = enemyMon
+				local mon = Tracker.getPokemon(Battle.Combatants.LeftOther, false)
 				local types = {}
-				local moves = {enemyMon.moves[1].id, enemyMon.moves[2].id, enemyMon.moves[3].id, enemyMon.moves[4].id}
+				local moves = {mon.moves[1].id, mon.moves[2].id, mon.moves[3].id, mon.moves[4].id}
 				for val,type in pairs(PokemonData.TypeIndexMap) do
 					if type ~= PokemonData.Types.UNKNOWN then
 						for _,moveId in pairs(moves) do
@@ -5081,6 +5116,12 @@ local function RoguemonTracker()
 				                   "Please report to #bug-reporting on Roguemon Discord."
 				self.warningLog(warningMsg, t)
 				defeatedTrainerIds[t] = true
+				trainersDefeated = trainersDefeated + 1
+				for _,tr in pairs(segInfo["mandatory"]) do
+					if tr == t then
+						mandatoriesDefeated = mandatoriesDefeated + 1
+					end
+				end
 			end
 		end
 
@@ -5612,6 +5653,8 @@ local function RoguemonTracker()
 		if not committed and self.readGameVar(GameSettings.roguemon.varMilestone) >= 2 then
 			committed = true
 			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
+				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipPickup"]
+				self.NotificationScreen.itemInQuestion = "Lucky Egg"
 				self.displayNotification("Use the Egg, Luke!", "lucky-egg.png", function()
 					return Tracker.getPokemon(1, true).heldItem == 197
 				end)
@@ -5739,6 +5782,8 @@ local function RoguemonTracker()
 		if committed and lastMilestone == nil and Program.currentScreen == TrackerScreen then
 			if #suppressedNotifications > 0 then
 				local n = table.remove(suppressedNotifications, 1)
+				self.NotificationScreen.queuedAuxiliary = n.queuedAuxiliary
+				self.NotificationScreen.itemInQuestion = n.itemInQuestion
 				self.displayNotification(n.message, n.image, n.dismissFunction)
 			else
 				self.spinReward("Rival 1", false)
