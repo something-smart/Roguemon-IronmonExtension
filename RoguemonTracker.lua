@@ -170,6 +170,7 @@ local function RoguemonTracker()
 	local ROM_CURSE_DAVID_VS       = 1 << 3
 	local ROM_CURSE_MEDIOCRITIZE   = 1 << 4
 	local ROM_CURSE_DISTORTED_HEART = 1 << 6
+	local ROM_CURSE_DISTORTED_SOUL = 1 << 7
 
 	local curseInfo = {
 		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight", segment = true, gym = false,
@@ -232,8 +233,8 @@ local function RoguemonTracker()
 		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false, romCurse = ROM_CURSE_DAVID_VS},
 		["Distorted Heart"] = {description = "Your move types are randomized", segment = true, gym = false, romCurse = ROM_CURSE_DISTORTED_HEART,
 								longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
-		-- ["Distorted Soul"] = {description = "Your moves' powers are randomized each battle", segment = true, gym = false,
-		--						longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
+		["Distorted Soul"] = {description = "Your moves' powers are randomized", segment = true, gym = false, romCurse = ROM_CURSE_DISTORTED_SOUL,
+								longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
 	}
 
 	local FIRERED_11_SHA1SUM = "dd5945db9b930750cb39d00c84da8571feebf417"
@@ -6327,14 +6328,16 @@ local function RoguemonTracker()
 		return Memory.readbyte(battleStructAddress + GameSettings.roguemon.distortedSeed)
 	end
 
+	-- This function has to exactly mimic `GetDistortedSoulMovePower` from the ROM.
 	function self.getDistortedMovePower(moveId)
-		return 120
+		local distortedSeed = self.getDistortedSeed()
+		return ((distortedSeed + moveId * 7) % 60) + 30;
 	end
 
 	-- This function has to exactly mimic `GetDistortedHeartMoveType` from the ROM.
 	function self.getDistortedMoveType(moveId, sourcePokemon)
 		local distortedSeed = self.getDistortedSeed()
-		local pokemonTypes = sourcePokemon.types
+		local pokemonTypes = PokemonData.Pokemon[sourcePokemon.pokemonID].types
 		local validTypes = {}
 		local validTypeCount = 0
 
@@ -6743,6 +6746,19 @@ local function RoguemonTracker()
 		return f, errMsg, errNo
 	end
 
+	local distortedSoulIneligible = {
+		[MoveData.Values.FlailId]         = true,
+		[MoveData.Values.ReversalId]      = true,
+		[MoveData.Values.ReturnId]        = true,
+		[MoveData.Values.FrustrationId]   = true,
+		[MoveData.Values.HiddenPowerId]   = true,
+		[MoveData.Values.LowKickId]       = true,
+		[MoveData.Values.EruptionId]      = true,
+		[MoveData.Values.WaterSpoutId]    = true,
+		[217]                             = true, -- Present
+		[222]                             = true, -- Magnitude
+	}
+
 	-- Overrides MoveData.adjustVariableMoveValues. Behaviour is default
 	-- unless we have one of the Distorted curses.
 	function self.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
@@ -6750,7 +6766,7 @@ local function RoguemonTracker()
 		local activeCurse = self.getActiveCurse()
 		if viewingOwnInBattle and activeCurse == "Distorted Heart" then
 			move.type = self.getDistortedMoveType(move.id, sourcePokemon)
-		elseif viewingOwnInBattle and activeCurse == "Distorted Soul" then
+		elseif viewingOwnInBattle and activeCurse == "Distorted Soul" and not distortedSoulIneligible[move.id] then
 			move.power = self.getDistortedMovePower(move.id)
 		else
 			originalCoreFunctions.MoveData.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
