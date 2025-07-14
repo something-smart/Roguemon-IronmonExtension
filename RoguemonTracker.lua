@@ -169,6 +169,7 @@ local function RoguemonTracker()
 	local ROM_CURSE_MOODY          = 1 << 2
 	local ROM_CURSE_DAVID_VS       = 1 << 3
 	local ROM_CURSE_MEDIOCRITIZE   = 1 << 4
+	local ROM_CURSE_FREEFALL       = 1 << 5
 	local ROM_CURSE_DISTORTED_HEART = 1 << 6
 	local ROM_CURSE_DISTORTED_SOUL = 1 << 7
 
@@ -219,8 +220,8 @@ local function RoguemonTracker()
 		["Time Warp"] = {description = "Lose 25% of your EXP until the segment ends", segment = true, gym = true},
 		["TikTok"] = {description = "One move per fight is secretly Metronome", segment = true, gym = false, romCurse = ROM_CURSE_TIKTOK},
 		["Bloodborne"] = {description = "When you use an HP heal, lose 20% of its value from your cap", segment = true, gym = false},
-		-- ["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, 
-		-- 					longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
+		["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, romCurse = ROM_CURSE_FREEFALL,
+							longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
 		["Backseating"] = {description = "Don't use marked move: -1 to a random stat", segment = true, gym = false,
 							longDescription = "Each turn, 'chat' suggests one move; if you don't use that move on that turn, you get -1 to a random stat for the fight."},
 		["Malware"] = {description = "-1 in attack stat for lead's lower defense", segment = true, gym = false,
