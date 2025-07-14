@@ -48,7 +48,7 @@ local function RoguemonTracker()
 		["Duplicator"] = {consumable = true, image = "duplicator.png", description = "Gain a copy of one future HP/PP/status healing item found (immediate choice)."},
 		["Temporary TM Voucher"] = {consumable = true, image = "bluevoucher.png", description = "Teach one future TM found before the next badge (immediate choice)."},
 		["Potion Investment"] = {consumable = true, image = "diamond.png", description = "Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase. Value:"},
-		["Temporary Held Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 2 gym badges."},
+		["Temporary Found Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 2 gym badges."},
 		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Don't cleanse flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
 		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
@@ -72,7 +72,7 @@ local function RoguemonTracker()
 		["Smuggler's Pouch"] = {consumable = false, image = "smugglers-pouch.png", description = "May choose one item not to cleanse each Cleansing Phase."},
 		["Pocket Sand"] = {consumable = false, button = "Use", charges = 5, image = "pocket-sand.png", description = "5 times in the run, may reduce enemy's accuracy to -6."},
 		["Tera Orb"] = {consumable = false, button = "Use", charges = 5, image = "tera-orb.png", description = "Choose a type matching a move; 5 times, you may Terastalize to that type."},
-		-- ["Notetaker"] = {consumable = false, image = "safari.png", description = "Notes on enemy pokemon transfer to their evolution."},
+		["Notetaker"] = {consumable = false, image = "notetaker.png", description = "Notes on enemy pokemon transfer to their evolution."},
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash an HP heal, gain 30% of its value as HP cap."},
 	}
 
@@ -162,6 +162,14 @@ local function RoguemonTracker()
 		["Route 14 + 15"] = {["routes"] = {102, 103}, ["items"] = {1157, 1149, 0x180}},
 	}
 
+	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
+	local ROM_CURSE_NONE           = 0
+	local ROM_CURSE_TIKTOK         = 1 << 0
+	local ROM_CURSE_TOXIC_FUMES    = 1 << 1
+	local ROM_CURSE_MOODY          = 1 << 2
+	local ROM_CURSE_DAVID_VS       = 1 << 3
+	local ROM_CURSE_MEDIOCRITIZE   = 1 << 4
+
 	local curseInfo = {
 		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight", segment = true, gym = false,
 							longDescription = "After the first fight this segment, your bottom-most move is changed to a random move."},
@@ -179,7 +187,7 @@ local function RoguemonTracker()
 		["1000 Cuts"] = {description = "Permanent -5 HP Cap when hit by an attack", segment = true, gym = false},
 		["Acid Rain"] = {description = "Each fight has a random weather", segment = true, gym = false},
 		["Toxic Fumes"] = {description = "Take 1 damage every 8 steps (can't faint)", segment = true, gym = false,
-							longDescription = "Take 1 damage for every 8 steps walked. This can't bring you below 1 HP."},
+							longDescription = "Take 1 damage for every 8 steps walked. This can't bring you below 1 HP.", romCurse = ROM_CURSE_TOXIC_FUMES},
 		["Narcolepsy"] = {description = "30% to fall asleep after each fight", segment = true, gym = false},
 		["Clean Air"] = {description = "Enemies have Mist, Safeguard, and Ingrain", segment = true, gym = false},
 		["Clouded Instincts"] = {description = "First move in battle must be 1st slot", segment = true, gym = false},
@@ -195,41 +203,37 @@ local function RoguemonTracker()
 							longDescription = "If you start a fight with less than 75% of your max HP, 30% chance to lose a random HP heal from your bag."},
 		["Live Audience"] = {description = "When hit by a move, Encored for 2-3 turns", segment = true, gym = false,
 							longDescription = "When you are hit by a damaging move, you are forced to repeat the same move you used for 2-3 turns."},
-		["Moody"] = {description = "+1 and -1 to random stats each turn", segment = true, gym = true},
+		["Moody"] = {description = "+1 and -1 to random stats each turn", segment = true, gym = true, romCurse = ROM_CURSE_MOODY},
 		["Curse of Decay"] = {description = "When you use a move, -1 EV in its attacking stat", segment = true, gym = true},
 		["Poltergeist"] = {description = "No FC = cursed item effects on pickup", segment = true, gym = false,
-							longDescription = "If this segment isn't full cleared, all type-boosting items will apply a unique negative effect on pickup."},
+							longDescription = "If this segment isn't full cleared, all type-boosting items will apply a unique negative effect on pickup.",
+						extremelyLongDescription = {
+							"If this segment isn't full cleared, all type-boosting items will apply a unique negative effect on pickup.",
+							"Poison Barb: Poisoned @ Charcoal: Burned @ NeverMeltIce: Frozen @ TwistedSpoon: Put to sleep @ Magnet: Paralyzed @ Hard Stone: Lose 20 Speed EVs @ Spell Tag: Lose 2 PP on all moves",
+							"Silk Scarf: Start next fight confused @ Black Belt: Lose 20 EVs in highest attacking stat @ Dragon Fang: Reset to start of level @ BlackGlasses: Lose your smallest PP heal @ FairyFeather: -1 option on next prize spin",
+							"Mystic Water: Lose a random specific status heal @ SilverPowder: Lose your smallest HP heal @ Sharp Beak: Lose 1/8 of your max HP (can't faint) @ Metal Coat: -20 HP Cap @ Soft Sand: Lose 1 to all IVs @ Miracle Seed: Start next fight Leech Seeded"
+						}},
 		["Debilitation"] = {description = "Attacking IVs temporarily set to 0", segment = true, gym = false},
 		["Time Warp"] = {description = "Lose 25% of your EXP until the segment ends", segment = true, gym = true},
-		["TikTok"] = {description = "One move per fight is secretly Metronome", segment = true, gym = false},
+		["TikTok"] = {description = "One move per fight is secretly Metronome", segment = true, gym = false, romCurse = ROM_CURSE_TIKTOK},
 		["Bloodborne"] = {description = "When you use an HP heal, lose 20% of its value from your cap", segment = true, gym = false},
 		-- ["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, 
 		-- 					longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
 		["Backseating"] = {description = "Don't use marked move: -1 to a random stat", segment = true, gym = false,
 							longDescription = "Each turn, 'chat' suggests one move; if you don't use that move on that turn, you get -1 to a random stat for the fight."},
-		-- ["Children's Puzzle"] = {description = "Failed trash can = +1 random stat to one of Surge's mons", segment = false, gym = true,
-		-- 					longDescription = "Each time you fail to find the second switch, a random one of Surge's pokemon gets a random +1 stat boost"},
 		["Malware"] = {description = "-1 in attack stat for lead's lower defense", segment = true, gym = false,
 							longDescription = "-1 in attacking stat corresponding to lead's lower defense",},
 		["Conversion"] = {description = "Enemy pokemon become a type matching a move", segment = true, gym = true,
 							longDescription = "Enemy pokemon change to a type matching one of their moves"},
-		-- ["Mediocritize"] = {description = "Your BST is redistributed evenly for this segment", segment = true, gym = true},
+		["Perfectly Balanced"] = {description = "Your BST is redistributed evenly for this segment", segment = true, gym = true, romCurse = ROM_CURSE_MEDIOCRITIZE},
 		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight", segment = true, gym = false,
 							longDescription = "HP is randomized to 25%, 50%, 75%, or 100% after each fight"},
-		-- ["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false},
+		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false, romCurse = ROM_CURSE_DAVID_VS},
 		-- ["Distorted Heart"] = {description = "Your moves' typings are randomized each battle", segment = true, gym = false,
 		-- 						longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
 		-- ["Distorted Soul"] = {description = "Your moves' powers are randomized each battle", segment = true, gym = false,
 		-- 						longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
 	}
-
-	-- Curse flags which are coordinated with the ROM. See include/roguemon.h for complementary enum.
-	local ROM_CURSE_NONE           = 0
-	local ROM_CURSE_TIKTOK         = 1 << 0
-	local ROM_CURSE_TOXIC_FUMES    = 1 << 1
-	local ROM_CURSE_MOODY          = 1 << 2
-	local ROM_CURSE_DAVID_VS       = 1 << 3
-	local ROM_CURSE_MEDIOCRITIZE   = 1 << 4
 
 	local FIRERED_11_SHA1SUM = "dd5945db9b930750cb39d00c84da8571feebf417"
 	local FIRERED_11_SIZE = 16777216
@@ -315,6 +319,8 @@ local function RoguemonTracker()
 		{text = "Egg reminders", default = true}
 	}
 	local populatedOptions = false
+
+	local evolutionTable = {}
 
 	-- DYNAMIC, but does not need to be saved (because the player should not quit while these are relevant)
 
@@ -758,7 +764,7 @@ local function RoguemonTracker()
 							hpCapModifier = hpCapModifier - hVal
 						end
 					end
-					if hInfo and specialRedeems.unlocks["Midas Touch"] then
+					if hInfo and specialRedeems.unlocks["Midas Touch"] and not notifyOnPickup.consumables[item] then
 						if pokeInfo and newPokeInfo and newPokeInfo.curHP <= pokeInfo.curHP then
 							local hVal = 0
 							if hInfo.type == MiscData.HealingType.Constant then
@@ -768,6 +774,7 @@ local function RoguemonTracker()
 							end
 							hpCap = hpCap + hVal
 							hpCapModifier = hpCapModifier + hVal
+							specialRedeems.unlocks["Midas Touch"] = specialRedeems.unlocks["Midas Touch"] + hVal
 						end
 					end
 				end
@@ -1084,6 +1091,17 @@ local function RoguemonTracker()
 			end
 			for _,tid in pairs(segments[segName]["trainers"]) do
 				milestoneTrainers[tid] = {["name"] = milestoneName, ["count"] = trainerCount}
+			end
+		end
+	end
+
+	function self.loadEvolutionTable()
+		for i = 1,1235 do
+			for j = 0,7 do
+				local evoIndex = Memory.readword(0x0827d00c + 64*i + 4 + 8*j)
+				if evoIndex > 0 then
+					evolutionTable[evoIndex] = i
+				end
 			end
 		end
 	end
@@ -1761,14 +1779,8 @@ local function RoguemonTracker()
 				Memory.writedword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.getbits(lvCurHp, 0, 16) + Utils.bit_lshift(currentHP, 16))
 			end, 1)
 		end
-		if curse == "TikTok" then
-			self.romCurseOff(ROM_CURSE_TIKTOK)
-		end
-		if curse == "Toxic Fumes" then
-			self.romCurseOff(ROM_CURSE_TOXIC_FUMES)
-		end
-		if curse == "Moody" then
-			self.romCurseOff(ROM_CURSE_MOODY)
+		if curseInfo[curse].romCurse then
+			self.romCurseOff(curseInfo[curse].romCurse)
 		end
 	end
 
@@ -1841,6 +1853,7 @@ local function RoguemonTracker()
 		local curse = self.getActiveCurse()
 		if curse then
 			self.resetTheme()
+			self.undoCurse(curse)
 		end
 		if trainersDefeated < self.getSegmentTrainerCount(currentSegment) then
 			if curse == "Claustrophobia" then
@@ -1854,7 +1867,6 @@ local function RoguemonTracker()
 				haunted = {}
 			end
 		end
-		self.undoCurse(curse)
 
 		if enforceRules then
 			self.nullifyTrainers(currentSegment)
@@ -1976,14 +1988,18 @@ local function RoguemonTracker()
 					end
 				end, 1)
 			end
-			if curse == "TikTok" then
-				self.romCurseOn(ROM_CURSE_TIKTOK)
+			if curseInfo[curse].romCurse then
+				self.romCurseOn(curseInfo[curse].romCurse)
 			end
-			if curse == "Toxic Fumes" then
-				self.romCurseOn(ROM_CURSE_TOXIC_FUMES)
-			end
-			if curse == "Moody" then
-					self.romCurseOn(ROM_CURSE_MOODY)
+			if curse == "David vs Goliath" then
+				local tids = {}
+				for i,t in segments[segmentOrder[currentSegment]]["trainers"] do
+					tids[i] = t
+				end
+				for i = 0,2 do
+					local t = table.remove(tids, math.random(#tids))
+					Memory.writeword(0x0203c7e4 + (i*2), t)
+				end
 			end
 			self.displayNotification(curseNotif, "Curse.png", nil)
 		end
@@ -2417,6 +2433,8 @@ local function RoguemonTracker()
 				-- if we're displaying Potion Investment, grab the actual value of it
 				if specialRedeemToDescribe == "Potion Investment" then
 					toReturn = toReturn .. " " .. specialRedeems.consumable["Potion Investment"]
+				elseif specialRedeemToDescribe == "Midas Touch" then
+					toReturn = toReturn .. " (" .. specialRedeems.consumable["Midas Touch"] .. " gained)"
 				end
 				return  self.wrapPixelsInline(toReturn, SRS_DESC_WIDTH - SRS_WRAP_BUFFER)
 			end,
@@ -2595,6 +2613,47 @@ local function RoguemonTracker()
 					end
 				},
 				nil
+			},
+			["CurseList"] = {
+				{
+					name = "",
+					onClick = function()
+						self.NotificationScreen.queuedAuxiliary = nil
+						local curse = self.getActiveCurse()
+						if curse then
+							if curseInfo[curse].extremelyLongDescription then
+								local msgs = {}
+								for i,msg in pairs(curseInfo[curse].extremelyLongDescription) do
+									msgs[i] = msg
+								end
+								local msg1 = table.remove(msgs, 1)
+								self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["NextPage"]
+								self.NotificationScreen.auxiliaryButtonInfo["NextPage"][2].messages = msgs
+								self.displayNotification(msg1, "Curse.png", nil)
+							else
+								self.displayNotification(curseInfo[curse].longDescription or curseInfo[curse].description, "Curse.png", nil)
+							end
+						end
+					end,
+					isVisible = function()
+						return self.getActiveCurse()
+					end
+				},
+				nil
+			},
+			["NextPage"] = {
+				nil,
+				{
+					name = ">",
+					onClick = function(this)
+						local msg = table.remove(self.NotificationScreen.auxiliaryButtonInfo["NextPage"][2].messages, 1)
+						self.displayNotification(msg, nil, nil)
+					end,
+					isVisible = function()
+						return (#self.NotificationScreen.auxiliaryButtonInfo["NextPage"][2].messages > 0)
+					end,
+					messages = {}
+				}
 			}
 		}
 	}
@@ -2615,13 +2674,16 @@ local function RoguemonTracker()
 
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
+		local textY = 24
+
 		-- Image
 		if(self.NotificationScreen.image) then
 			Drawing.drawImage(self.NotificationScreen.image, canvas.x + 40, 15, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
+			textY = 64
 		end
 
 		-- Text
-		Drawing.drawText(canvas.x + 10, 64, self.wrapPixelsInline(self.NotificationScreen.message, canvas.w - 20), Theme.COLORS["Default text"])
+		Drawing.drawText(canvas.x + 10, textY, self.wrapPixelsInline(self.NotificationScreen.message, canvas.w - 20), Theme.COLORS["Default text"])
 
 		local aux = {}
 		if self.NotificationScreen.queuedAuxiliary then
@@ -3260,7 +3322,19 @@ local function RoguemonTracker()
 
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
-		self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 30, 5)
+		local bagToDisplay = {}
+		for _,btn in ipairs(self.ShopScreen.Buttons) do
+			local itm = btn.item
+			if bagToDisplay[itm] then
+				bagToDisplay[itm] = bagToDisplay[itm] + 1
+			else
+				bagToDisplay[itm] = 1
+			end
+		end
+		local ht, hp, hv = self.countHealsIn(bagToDisplay)
+		local sv = self.countStatusHealsIn(bagToDisplay)
+		local capsToDisplay = {hp = hv, status = sv}
+		self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 30, 5, capsToDisplay)
 		Drawing.drawText(canvas.x + 2, 30, "BAG:", Theme.COLORS["Default text"])
 		Drawing.drawText(canvas.x + 2, 108, "SHOP:", Theme.COLORS["Positive text"])
 
@@ -3414,7 +3488,7 @@ local function RoguemonTracker()
 
 	function self.displayNotification(message, image, dismissFunction)
 		self.NotificationScreen.message = message
-		self.NotificationScreen.image = self.Paths.IMAGES_DIRECTORY .. image
+		self.NotificationScreen.image = image and (self.Paths.IMAGES_DIRECTORY .. image) or nil
 		if Program.currentScreen == self.PrettyStatScreen or Program.currentScreen == self.OptionSelectionScreen then
 			self.readyScreen(self.NotificationScreen)
 		else
@@ -3539,7 +3613,7 @@ local function RoguemonTracker()
 				local add = true
 				local healingPrize = false
 				for _,part in pairs(choiceParts) do
-					if specialRedeems.unlocks[part] or specialRedeems.consumable[part] or specialRedeems.internal[part] or 
+					if specialRedeems.unlocks[part] or specialRedeems.consumable[part] or specialRedeems.internal[part] or specialRedeems.battle[part] or 
 						(part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"]) then
 						add = false
 					end
@@ -3558,7 +3632,7 @@ local function RoguemonTracker()
 						end
 					end
 					for _,itm in pairs(MiscData.HealingItems) do
-						if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name then
+						if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name and not (part == "Potion Investment") then
 							healingPrize = true
 						end
 					end
@@ -3631,11 +3705,11 @@ local function RoguemonTracker()
 			Program.redraw(true)
 		end
 
-		if phases[self.baseMilestone(lastMilestone)] then
-			if phases[self.baseMilestone(lastMilestone)].buy then
+		if phases[self.baseMilestone(milestoneName)] then
+			if phases[self.baseMilestone(milestoneName)].buy then
 				needToBuy = true
 			end
-			needToCleanse = phases[self.baseMilestone(lastMilestone)].cleansing and 1 or 2
+			needToCleanse = phases[self.baseMilestone(milestoneName)].cleansing and 1 or 2
 		end
 
 	end
@@ -3750,6 +3824,53 @@ local function RoguemonTracker()
 					additionalOptionsRemaining = 1
 					nextScreen = self.OptionSelectionScreen
 				end
+				if reward == "Artiste" then
+					-- learn sketch
+					self.triggerROMLearnMove(166)
+				end
+				if reward == "Starter Pack" then
+					local starterPackMoves = {
+						[PokemonData.Types.NORMAL] = 10, -- Scratch
+						[PokemonData.Types.FIGHTING] = 183, -- Mach Punch
+						[PokemonData.Types.FLYING] = 16, -- Gust
+						[PokemonData.Types.POISON] = 51, -- Acid
+						[PokemonData.Types.GROUND] = 91, -- Dig
+						[PokemonData.Types.ROCK] = 88, -- Rock Throw
+						[PokemonData.Types.BUG] = 318, -- Silver Wind
+						[PokemonData.Types.GHOST] = 310, -- Astonish
+						[PokemonData.Types.STEEL] = 232, -- Metal Claw
+						[PokemonData.Types.FIRE] = 52, -- Ember
+						[PokemonData.Types.WATER] = 55, -- Water Gun
+						[PokemonData.Types.GRASS] = 22, -- Vine Whip
+						[PokemonData.Types.ELECTRIC] = 84, -- Thunder Shock
+						[PokemonData.Types.PSYCHIC] = 93, -- Confusion
+						[PokemonData.Types.ICE] = 181, -- Powder Snow
+						[PokemonData.Types.DRAGON] = 239, -- Twister
+						[PokemonData.Types.DARK] = 228, -- Pursuit
+						["fairy"] = 358 -- Fairy Wind
+					}
+					local monTypes = PokemonData.Pokemon[Tracker.getPokemon(1).pokemonID].types
+					local validTypes = {}
+					for val,type in pairs(PokemonData.TypeIndexMap) do
+						if type ~= PokemonData.Types.UNKNOWN and type ~= monTypes[1] and type ~= monTypes[2] then
+							validTypes[#validTypes + 1] = type
+						end
+					end
+					self.triggerROMLearnMove(starterPackMoves[validTypes[math.random(#validTypes)]])
+				end
+				if reward == "Hyper Training" then
+					local pkmn = self.readLeadPokemonData()
+					local STATS_ORDERED = { "hp", "atk", "def", "spa", "spd", "spe"}
+					local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
+					for i,stat in pairs(STATS_ORDERED) do
+						local iv = ivs[stat]
+						additionalOptions[i] = string.upper(stat) .. " (" .. iv .. ")"
+					end
+					additionalOptions[7] = ""
+					additionalOptions[8] = ""
+					additionalOptionsRemaining = 1
+					nextScreen = self.OptionSelectionScreen
+				end
 				if string.sub(reward, 1, 3) == 'Any' then
 					-- This reward is a choice of items
 					for key,choices in pairs(prizeAdditionalOptions) do
@@ -3785,6 +3906,9 @@ local function RoguemonTracker()
 							wildBattleCounter = 3
 							wildBattlesStarted = false
 						end
+						if reward == "Temporary Found Item" then
+							specialRedeems.consumable[reward] = 2
+						end
 					elseif specialRedeemInfo[reward].button == "Use" then
 						-- Battle redeem
 						specialRedeems.battle[reward] = true
@@ -3795,6 +3919,12 @@ local function RoguemonTracker()
 					else
 						specialRedeems.unlocks[reward] = true
 						specialRedeems.unlocks[#specialRedeems.unlocks + 1] = reward
+						if reward == "Midas Touch" then
+							specialRedeems.unlocks["Midas Touch"] = 0
+						end
+						if reward == "Notetaker" then
+							self.loadEvolutionTable()
+						end
 					end
 				end
 			end
@@ -3901,6 +4031,21 @@ local function RoguemonTracker()
 			self.AddItemImproved("RogueStone", 1)
 			additionalOptionsRemaining = additionalOptionsRemaining - 1
 			special = true
+		end
+		local stats = {"HP", "ATK", "DEF", "SPA", "SPD", "SPE"}
+		for i,s in pairs(stats) do
+			if s == option then
+				local pkmn = self.readLeadPokemonData()
+				local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
+				ivs[string.lower(s)] = 31
+				pkmn.misc2 = Utils.bit_lshift(Utils.getbits(pkmn.misc2, 30, 2), 30) +
+					ivs['hp'] + Utils.bit_lshift(ivs['atk'], 5) + Utils.bit_lshift(ivs['def'], 10) + 
+					Utils.bit_lshift(ivs['spe'], 15) + Utils.bit_lshift(ivs['spa'], 20) + Utils.bit_lshift(ivs['spd'], 25)
+				self.writeLeadPokemonData(pkmn)
+				self.recalculateStats()
+				additionalOptionsRemaining = additionalOptionsRemaining - 1
+				special = true
+			end
 		end
 		if specialRedeems.battle["Tera Orb"] and not specialRedeems.internal["Tera Type"] then
 			for tp,name in pairs(PokemonData.Types) do
@@ -4638,43 +4783,58 @@ local function RoguemonTracker()
 		Tracker.TrackAbility(id, ability)
 	end
 
-	function self.checkInBattleEffects()
-		if Battle.Combatants.LeftOther and not Battle.isWildEncounter and Tracker.getPokemon(Battle.Combatants.LeftOther, false) then
-			local id = Tracker.getPokemon(Battle.Combatants.LeftOther, false).pokemonID
-			local pokemon = PokemonData.Pokemon[id]
-			if pokemon then
-				if specialRedeems.unlocks["Secret Dex"] and not (Tracker.getOrCreateTrackedPokemon(id) and 
-				Tracker.getOrCreateTrackedPokemon(id).sm and Tracker.getOrCreateTrackedPokemon(id).sm['hp'] and 
-				Tracker.getOrCreateTrackedPokemon(id).sm['hp'] > 0 and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] > 0) then
-					self.applySecretDex(id)
-				end
-				if specialRedeems.unlocks["Special Insight"] and not (Tracker.getOrCreateTrackedPokemon(pokemonID) 
-				and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities[1]) then
-					self.applySpecialInsight(id)
-				end
-				if specialRedeems.unlocks["Spidey Sense"] then
-					local pkmn = Battle.getViewedPokemon(false)
-					for _,mv in pairs(pkmn.moves) do
-						if mv.id == 194 or mv.id == 243 or mv.id == 68 then
-							Tracker.TrackMove(pkmn.pokemonID, mv.id, pkmn.level)
-						end
+	function self.checkInBattleEffectsAgainstMon(index)
+		local id = Tracker.getPokemon(index, false).pokemonID
+		local pokemon = PokemonData.Pokemon[id]
+		if pokemon then
+			if specialRedeems.unlocks["Secret Dex"] and not (Tracker.getOrCreateTrackedPokemon(id) and 
+			Tracker.getOrCreateTrackedPokemon(id).sm and Tracker.getOrCreateTrackedPokemon(id).sm['hp'] and 
+			Tracker.getOrCreateTrackedPokemon(id).sm['hp'] > 0 and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] > 0) then
+				self.applySecretDex(id)
+			end
+			if specialRedeems.unlocks["Special Insight"] and not (Tracker.getOrCreateTrackedPokemon(pokemonID) 
+			and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities[1]) then
+				self.applySpecialInsight(id)
+			end
+			if specialRedeems.unlocks["Spidey Sense"] then
+				local pkmn = Battle.getViewedPokemon(false)
+				for _,mv in pairs(pkmn.moves) do
+					if mv.id == 194 or mv.id == 243 or mv.id == 68 then
+						Tracker.TrackMove(pkmn.pokemonID, mv.id, pkmn.level)
 					end
 				end
 			end
-			if Battle.numBattlers == 4 and Battle.Combatants.RightOther then
-				id = Tracker.getPokemon(Battle.Combatants.RightOther, false).pokemonID
-				pokemon = PokemonData.Pokemon[id]
-				if pokemon then
-					if specialRedeems.unlocks["Secret Dex"] and not (Tracker.getOrCreateTrackedPokemon(id) and 
-					Tracker.getOrCreateTrackedPokemon(id).sm and Tracker.getOrCreateTrackedPokemon(id).sm['hp'] and 
-					Tracker.getOrCreateTrackedPokemon(id).sm['hp'] > 0 and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] and Tracker.getOrCreateTrackedPokemon(id).sm['atk'] > 0) then
-						self.applySecretDex(id)
+			if specialRedeems.unlocks["Notetaker"] then
+				local preEvo = evolutionTable[id]
+				while preEvo ~= null do
+					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).sm then
+						for stat,marking in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).sm) do
+							if marking > 0 then
+								Tracker.TrackStatMarking(id, stat, marking)
+							end
+						end
 					end
-					if specialRedeems.unlocks["Special Insight"] and not (Tracker.getOrCreateTrackedPokemon(pokemonID) 
-					and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities and Tracker.getOrCreateTrackedPokemon(pokemonID).abilities[1]) then
-						self.applySpecialInsight(id)
+					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).abilities then
+						for id, abil in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).abilities) do
+							if abil > 0 then
+								Tracker.TrackAbility(id, abil)
+							end
+						end
 					end
+					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).note then
+						Tracker.TrackNote(id, Tracker.getOrCreateTrackedPokemon(preEvo).note)
+					end
+					preEvo = evolutionTable[preEvo]
 				end
+			end
+		end
+	end
+
+	function self.checkInBattleEffects()
+		if Battle.Combatants.LeftOther and not Battle.isWildEncounter and Tracker.getPokemon(Battle.Combatants.LeftOther, false) then
+			self.checkInBattleEffectsAgainstMon(Battle.Combatants.LeftOther)
+			if Battle.numBattlers == 4 and Battle.Combatants.RightOther then
+				self.checkInBattleEffectsAgainstMon(Battle.Combatants.RightOther)
 			end
 			if haunted and haunted["Leech Seed"] then
 				haunted["Leech Seed"] = nil
@@ -4799,13 +4959,15 @@ local function RoguemonTracker()
 			end
 		end
 	end
-	
-	-- Count status heals, taking Berry Pouch into account.
-	function self.countStatusHeals()
+
+	function self.countStatusHealsIn(itemList)
 		local statusBerries = {133, 134, 135, 136, 137, 140, 141}
 		local statusHealsInBagCount = 0
-		for id,ct in pairs(Program.GameData.Items.StatusHeals) do
-			if(ct <= 999) then
+		for id,ct in pairs(itemList) do
+			if type(id) == "string" then
+				id = self.getItemId(id)
+			end
+			if(MiscData.StatusItems[id] and ct <= 999) then
 				if not (specialRedeems.unlocks["Berry Pouch"] and self.contains(statusBerries, id)) then
 					statusHealsInBagCount = statusHealsInBagCount + ct
 				end
@@ -4813,21 +4975,24 @@ local function RoguemonTracker()
 		end
 		return statusHealsInBagCount
 	end
+	
+	-- Count status heals, taking Berry Pouch into account.
+	function self.countStatusHeals()
+		return self.countStatusHealsIn(Program.GameData.Items.StatusHeals)
+	end
 
-	-- Count heals, applying any modifiers
-	function self.countAdjustedHeals()
-		Program.updateBagItems()
+	function self.countHealsIn(itemList)
 		local leadPokemon = Tracker.getPokemon(1)
 		local maxHP = leadPokemon and leadPokemon.stats and leadPokemon.stats.hp or 0
-		if maxHP == 0 then
-			return
-		end
-	
+
 		local healingTotal = 0
 		local healingPercentage = 0
 		local healingValue = 0
-	
-		for itemID, quantity in pairs(Program.GameData.Items.HPHeals or {}) do
+
+		for itemID, quantity in pairs(itemList) do
+			if type(itemID) == "string" then
+				itemID = self.getItemId(itemID)
+			end
 			-- An arbitrary max value to prevent erroneous game data reads
 			if quantity >= 0 and quantity <= 999 then
 				local healItemData = MiscData.HealingItems[itemID] or {}
@@ -4845,30 +5010,52 @@ local function RoguemonTracker()
 				end
 			end
 		end
+		return healingTotal, healingPercentage, healingValue
+	end
+
+	-- Count heals, applying any modifiers
+	function self.countAdjustedHeals()
+		Program.updateBagItems()
+	
+		local healingTotal = 0
+		local healingPercentage = 0
+		local healingValue = 0
+
+		healingTotal, healingPercentage, healingValue = self.countHealsIn(Program.GameData.Items.HPHeals or {})
 
 		adjustedHPVal = healingValue
 		return healingTotal, healingPercentage, healingValue
 	end
 
 	-- Draw caps at a particular x,y
-	function self.drawCapsAt(data, x, y)
+	function self.drawCapsAt(data, x, y, caps)
 		local shadowcolor = Utils.calcShadowColor(Theme.COLORS["Upper box background"])
 		-- these don't count as status heals if Berry Pouch is active
 		local statusHealsInBagCount = self.countStatusHeals()
 		self.countAdjustedHeals()
-
-		local healsTextColor = adjustedHPVal > hpCap and Theme.COLORS["Negative text"] or Theme.COLORS["Default text"]
 		
+		local healVal = Options["Show heals as whole number"] and adjustedHPVal or data.x.healperc
+		if caps then
+			healVal = caps.hp
+		end
+
+		local healsTextColor = healVal > hpCap and Theme.COLORS["Negative text"] or Theme.COLORS["Default text"]
+
 		local healsValueText
 		if Options["Show heals as whole number"] then
-			healsValueText = string.format("%.0f/%.0f %s (%s)", adjustedHPVal, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+			healsValueText = string.format("%.0f/%.0f %s (%s)", healVal, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
 		else
-			healsValueText = string.format("%.0f%%/%.0f %s (%s)", data.x.healperc, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+			healsValueText = string.format("%.0f%%/%.0f %s (%s)", healVal, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
 		end
 		Drawing.drawText(x, y, healsValueText, healsTextColor, shadowcolor)
 
-		local statusHealsTextColor = statusHealsInBagCount > statusCap and Theme.COLORS["Negative text"] or Theme.COLORS["Default text"]
-		local statusHealsValueText = string.format("%.0f/%.0f %s", statusHealsInBagCount, statusCap, "Status")
+		local statusVal = statusHealsInBagCount
+		if caps then
+			statusVal = caps.status
+		end
+
+		local statusHealsTextColor = statusVal > statusCap and Theme.COLORS["Negative text"] or Theme.COLORS["Default text"]
+		local statusHealsValueText = string.format("%.0f/%.0f %s", statusVal, statusCap, "Status")
 		Drawing.drawText(x, y + 11, statusHealsValueText, statusHealsTextColor, shadowcolor)
 		currentStatusVal = statusHealsInBagCount
 	end
@@ -5038,6 +5225,10 @@ local function RoguemonTracker()
 		end
 
 		centersUsed = Utils.getGameStat(Constants.GAME_STATS.USED_POKECENTER)
+
+		if specialRedeems.unlocks["Notetaker"] then
+			self.loadEvolutionTable()
+		end
 	end
 
 	local rogueStoneThresholds = {
@@ -5139,6 +5330,12 @@ local function RoguemonTracker()
 			self.removeSpecialRedeem("Temporary TM Voucher")
 			local pv = specialRedeems.consumable["Potion Investment"]
 			if pv then specialRedeems.consumable["Potion Investment"] = pv * 2 end
+			if specialRedeems.consumable["Temporary Found Item"] then
+				specialRedeems.consumable["Temporary Found Item"] = specialRedeems.consumable["Temporary Found Item"] - 1
+				if specialRedeems.consumable["Temporary Found Item"] == 0 then
+					self.removeSpecialRedeem("Temporary Found Item")
+				end
+			end
 		end
 
 		-- Add 4 potions after rival 1
@@ -5226,8 +5423,13 @@ local function RoguemonTracker()
 			local gachaOn = Options["Show GachaMon stars on main Tracker Screen"]
 			-- Check if curse theme is in effect
 			local bgColor = Theme.COLORS["Lower box background"]
+			-- Set lower box color to purple if the next segment is cursed
 			if not segmentStarted and cursedSegments[segmentOrder[currentSegment]] and cursedSegments[currentSegment] ~= "Warded" and RoguemonOptions["Alternate Curse theme"] then
 				bgColor = 0xFF510080
+			end
+			-- Set lower box color to green if the current segment has a full clear prize
+			if segmentStarted and milestoneTrainers[segmentOrder[currentSegment]] then
+				bgColor = 0xFF63DB60
 			end
 			gui.drawRectangle(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 136, Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN), 19, Theme.COLORS["Lower box border"], bgColor)
 			if gachaOn then
@@ -5330,7 +5532,9 @@ local function RoguemonTracker()
 			type = self.CURSE_CAROUSEL_INDEX,
 			framesToShow = 240,
 			canShow = function(this)
-				return segmentStarted and self.getActiveCurse()
+				-- this disables the curse carousel. swap this return line to bring it back
+				return false
+				-- return segmentStarted and self.getActiveCurse()
 			end,
 			getContentList = function(this)
 				local curse = self.getActiveCurse()
@@ -5407,6 +5611,10 @@ local function RoguemonTracker()
 					if not (self.reachedSegment(seg) and not (segmentOrder[currentSegment] == seg) and not (cursedSegments[seg] == "Warded")) then
 						curseInfoText = curseInfoText .. seg .. (specialRedeems.internal["Clairvoyance"] and ": " .. cursedSegments[seg] or "") .. " @ "
 					end
+				end
+				if self.getActiveCurse() then
+					self.NotificationScreen.auxiliaryButtonInfo["CurseList"][1].name = "Curse: " .. self.getActiveCurse()
+					self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["CurseList"]
 				end
 				self.displayNotification(curseInfoText, "Curse.png", nil)
 			end,

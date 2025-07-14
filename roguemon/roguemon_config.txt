@@ -24,6 +24,8 @@ Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hol
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 Berry Juice|berry-juice.png
 Clairvoyance: Learn all future curses.|clairvoyance.png
+Starter Pack: Learn a random low-power non-STAB move.|starter-pack.png
+Notetaker: Notes on enemy pokemon transfer to their evolution.|notetaker.png
 
 *Brock Prize
 Potion x2 & Ether|twopotionether.png
@@ -111,6 +113,8 @@ Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|co
 Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Regenerator: Regain 3% of max HP after every fight.|leftovers.png
 Special Insight: Learn every pokemon's ability.|special-insight.png
+Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
+Artiste: Learn Sketch.|artiste.png
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and teach one (or none).|tm.png
@@ -154,6 +158,8 @@ Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
+Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
+Artiste: Learn Sketch.|artiste.png
 
 *Silph Co Prize
 Teach 1 currently held TM|tm.png
@@ -174,6 +180,7 @@ HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
 
 *Sabrina Prize
 Teach 1 currently held TM|tm.png
@@ -194,6 +201,7 @@ HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 Ether & Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
+Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
 
 *Blaine Prize
 Teach 1 currently held TM|tm.png
@@ -213,6 +221,7 @@ HP Cap +50 & Move Tutor: May use the move tutor in the Cinnabar Lab. Cannot pre-
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 Max Ether & Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
+Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
 
 *Giovanni Prize
 Teach 1 currently held TM|tm.png
@@ -232,6 +241,7 @@ Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in Viridian City. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
+Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
 
 *Victory Road Prize
 Full Restore|full-restore.png
