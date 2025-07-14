@@ -2862,7 +2862,8 @@ local function RoguemonTracker()
 				getText = function() return "Back" end,
 				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 8, 22, 10},
 				onClick = function()
-					self.returnToHomeScreen()
+					SingleExtensionScreen.setupScreenWithInfo("RoguemonTracker", CustomCode.ExtensionLibrary.RoguemonTracker)
+					Program.changeScreenView(SingleExtensionScreen)
 				end,
 				boxColors = {"Default text"}
 			}
