@@ -6552,7 +6552,7 @@ local function RoguemonTracker()
 
 	-- Returns the string for `roguemonVersionStr` in the ROM header.
 	function self.getROMRoguemonVersion()
-		local romVersionAddr = GameSettings.roguemon.romUid+6 & 0xFFFFFF
+		local romVersionAddr = GameSettings.roguemon.romUid+8 & 0xFFFFFF
 		local versionBytes = memory.read_bytes_as_array(romVersionAddr, 12, "ROM")
 
 		local versionStr = ""
