@@ -2006,7 +2006,7 @@ local function RoguemonTracker()
 				end
 				for i = 0,2 do
 					local t = table.remove(tids, math.random(#tids))
-					Memory.writeword(0x0203c7e4 + (i*2), t)
+					Memory.writeword(GameSettings.roguemon.gRoguemonTrackerData + (i*2), t)
 				end
 			end
 			self.displayNotification(curseNotif, "Curse.png", nil)
