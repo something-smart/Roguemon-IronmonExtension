@@ -5677,7 +5677,7 @@ local function RoguemonTracker()
 			end
 
 			print("> Waiting on NatDex Tracker Extension before starting Roguemon Tracker...")
-			Program.addFrameCounter(startupCounterLabel, 60, function () self.startup() end)
+			Program.addFrameCounter(startupCounterLabel, 10, function () self.startup() end)
 			return
 		end
 
