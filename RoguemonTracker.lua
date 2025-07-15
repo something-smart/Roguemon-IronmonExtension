@@ -2001,7 +2001,7 @@ local function RoguemonTracker()
 			end
 			if curse == "David vs Goliath" then
 				local tids = {}
-				for i,t in segments[segmentOrder[currentSegment]]["trainers"] do
+				for i,t in pairs(segments[segmentOrder[currentSegment]]["trainers"]) do
 					tids[i] = t
 				end
 				for i = 0,2 do
