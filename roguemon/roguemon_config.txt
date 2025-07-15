@@ -24,7 +24,7 @@ Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hol
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 Berry Juice|berry-juice.png
 Clairvoyance: Learn all future curses.|clairvoyance.png
-Starter Pack: Learn a random low-power non-STAB move.|starter-pack.png
+Starter Pack|starter-pack.png
 Notetaker: Notes on enemy pokemon transfer to their evolution.|notetaker.png
 
 *Brock Prize
