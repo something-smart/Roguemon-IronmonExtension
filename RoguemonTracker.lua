@@ -354,6 +354,7 @@ local function RoguemonTracker()
 	local suppressedNotifications = {}
 	local givenMoonStoneNotification = false
 	local natureMintUp = nil
+	local starterPackMove = nil
 	local hpHealsSetting = nil
 	local showedEggReminderAfterBrock = false
 	local centersUsed = 0
@@ -3635,6 +3636,7 @@ local function RoguemonTracker()
 				local choiceParts = Utils.split(choiceName, '&', true)
 				local add = true
 				local healingPrize = false
+				local prospectiveStarterPackMove = nil
 				for _,part in pairs(choiceParts) do
 					if specialRedeems.unlocks[part] or specialRedeems.consumable[part] or specialRedeems.internal[part] or specialRedeems.battle[part] or 
 						(part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"]) then
@@ -3653,6 +3655,37 @@ local function RoguemonTracker()
 						else
 							choice = choice .. ": Change ability to " .. otherAbil .. "."
 						end
+					end
+					if(part == "Starter Pack") then
+						local starterPackMoves = {
+							[PokemonData.Types.NORMAL] = 10, -- Scratch
+							[PokemonData.Types.FIGHTING] = 183, -- Mach Punch
+							[PokemonData.Types.FLYING] = 16, -- Gust
+							[PokemonData.Types.POISON] = 51, -- Acid
+							[PokemonData.Types.GROUND] = 91, -- Dig
+							[PokemonData.Types.ROCK] = 88, -- Rock Throw
+							[PokemonData.Types.BUG] = 318, -- Silver Wind
+							[PokemonData.Types.GHOST] = 310, -- Astonish
+							[PokemonData.Types.STEEL] = 232, -- Metal Claw
+							[PokemonData.Types.FIRE] = 52, -- Ember
+							[PokemonData.Types.WATER] = 55, -- Water Gun
+							[PokemonData.Types.GRASS] = 22, -- Vine Whip
+							[PokemonData.Types.ELECTRIC] = 84, -- Thunder Shock
+							[PokemonData.Types.PSYCHIC] = 93, -- Confusion
+							[PokemonData.Types.ICE] = 181, -- Powder Snow
+							[PokemonData.Types.DRAGON] = 239, -- Twister
+							[PokemonData.Types.DARK] = 228, -- Pursuit
+							["fairy"] = 358 -- Fairy Wind
+						}
+						local monTypes = PokemonData.Pokemon[Tracker.getPokemon(1).pokemonID].types
+						local validTypes = {}
+						for val,type in pairs(PokemonData.TypeIndexMap) do
+							if type ~= PokemonData.Types.UNKNOWN and type ~= monTypes[1] and type ~= monTypes[2] then
+								validTypes[#validTypes + 1] = type
+							end
+						end
+						prospectiveStarterPackMove = starterPackMoves[validTypes[math.random(#validTypes)]]
+						choice = choice .. ": Learn " .. MoveData.Moves[prospectiveStarterPackMove].name .. "."
 					end
 					for _,itm in pairs(MiscData.HealingItems) do
 						if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name and not (part == "Potion Investment") then
@@ -3688,7 +3721,7 @@ local function RoguemonTracker()
 					end
 				end
 				for _, v in pairs(choices) do
-					if v == choice then
+					if Utils.split(v, ":", true)[1] == Utils.split(choice, ":", true)[1] then
 						add = false
 					end
 				end
@@ -3698,6 +3731,9 @@ local function RoguemonTracker()
 						healingPrizes = healingPrizes + 1
 					else
 						nonHealingPrizes = nonHealingPrizes + 1
+					end
+					if prospectiveStarterPackMove then
+						starterPackMove = prospectiveStarterPackMove
 					end
 				end
 				loopCount = loopCount + 1
@@ -3852,34 +3888,8 @@ local function RoguemonTracker()
 					self.triggerROMLearnMove(166)
 				end
 				if reward == "Starter Pack" then
-					local starterPackMoves = {
-						[PokemonData.Types.NORMAL] = 10, -- Scratch
-						[PokemonData.Types.FIGHTING] = 183, -- Mach Punch
-						[PokemonData.Types.FLYING] = 16, -- Gust
-						[PokemonData.Types.POISON] = 51, -- Acid
-						[PokemonData.Types.GROUND] = 91, -- Dig
-						[PokemonData.Types.ROCK] = 88, -- Rock Throw
-						[PokemonData.Types.BUG] = 318, -- Silver Wind
-						[PokemonData.Types.GHOST] = 310, -- Astonish
-						[PokemonData.Types.STEEL] = 232, -- Metal Claw
-						[PokemonData.Types.FIRE] = 52, -- Ember
-						[PokemonData.Types.WATER] = 55, -- Water Gun
-						[PokemonData.Types.GRASS] = 22, -- Vine Whip
-						[PokemonData.Types.ELECTRIC] = 84, -- Thunder Shock
-						[PokemonData.Types.PSYCHIC] = 93, -- Confusion
-						[PokemonData.Types.ICE] = 181, -- Powder Snow
-						[PokemonData.Types.DRAGON] = 239, -- Twister
-						[PokemonData.Types.DARK] = 228, -- Pursuit
-						["fairy"] = 358 -- Fairy Wind
-					}
-					local monTypes = PokemonData.Pokemon[Tracker.getPokemon(1).pokemonID].types
-					local validTypes = {}
-					for val,type in pairs(PokemonData.TypeIndexMap) do
-						if type ~= PokemonData.Types.UNKNOWN and type ~= monTypes[1] and type ~= monTypes[2] then
-							validTypes[#validTypes + 1] = type
-						end
-					end
-					self.triggerROMLearnMove(starterPackMoves[validTypes[math.random(#validTypes)]])
+					self.triggerROMLearnMove(starterPackMove)
+					starterPackMove = nil
 				end
 				if reward == "Hyper Training" then
 					local pkmn = self.readLeadPokemonData()
