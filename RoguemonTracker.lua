@@ -4162,6 +4162,9 @@ local function RoguemonTracker()
 	end
 
 	function self.getActiveCurse()
+		if self.isInAscensionTower() then
+			return nil
+		end
 		if segmentStarted and not (cursedSegments[currentSegment] == "Warded") then
 			return cursedSegments[segmentOrder[currentSegment]]
 		end
@@ -6609,6 +6612,7 @@ local function RoguemonTracker()
 		-- ROM to ship the player to the ascension tower so they can
 		-- pick a new run.
 		if not randomizingROM then
+			self.resetTheme()
 			self.sendPlayerToTower()
 			Main.ExitSafely(false)
 			Main.Run()
