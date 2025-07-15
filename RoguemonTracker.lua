@@ -3217,17 +3217,27 @@ local function RoguemonTracker()
 		["Heal Powder"] = "heal-powder.png",
 	}
 
+	local untradeableShopItemImages = {
+		["Full Restore"] = "full-restore-small.png",
+		["Max Potion"] = "max-potion.png",
+		["Figy Berry"] = "Figy Berry.png",
+		["Iapapa Berry"] = "Iapapa Berry.png",
+		["Wiki Berry"] = "Wiki Berry.png",
+		["Aguav Berry"] = "Aguav Berry.png",
+		["Mago Berry"] = "Mago Berry.png",
+	}
+
 	function self.getShopButtonLocation(index)
 		return SHOP_BUTTON_X + ((index-1) % SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_WIDTH, SHOP_BUTTON_Y + math.floor((index-1) / SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_HEIGHT
 	end
 
-	function self.ShopScreen.addButton(item)
+	function self.ShopScreen.addButton(item, interactible)
 		local index = #self.ShopScreen.Buttons + 1
 		local x,y = self.getShopButtonLocation(index)
 		local b = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			box = {x, y, SHOP_BUTTON_WIDTH, SHOP_BUTTON_HEIGHT},
-			onClick = function(this)
+			onClick = interactible and (function(this)
 				if not self.ShopScreen.updates[this.item] then
 					self.ShopScreen.updates[this.item] = 0
 				end
@@ -3248,13 +3258,13 @@ local function RoguemonTracker()
 				end
 				self.ShopScreen.Buttons[#self.ShopScreen.Buttons] = nil
 				Program.redraw(true)
-			end,
-			boxColors = {"Default text"},
+			end) or nil,
+			boxColors = interactible and {"Default text"} or {"Default text", "Negative text"},
 			draw = function(this, shadowcolor)
 				local x, y, w, h = this.box[1], this.box[2], this.box[3], this.box[4]
 				Drawing.drawImage(this.image, x + 1, y + 1, w - 2, h - 2)
 			end,
-			image = self.Paths.IMAGES_DIRECTORY .. shopItemImages[item],
+			image = self.Paths.IMAGES_DIRECTORY .. (shopItemImages[item] or untradeableShopItemImages[item]),
 			item = item,
 			index = index
 		}
@@ -3273,7 +3283,7 @@ local function RoguemonTracker()
 				local name = TrackerAPI.getItemName(id)
 				if shopItemImages[name] then
 					for i = 1, ct do
-						self.ShopScreen.addButton(name)
+						self.ShopScreen.addButton(name, true)
 					end
 				end
 			end
@@ -3283,7 +3293,12 @@ local function RoguemonTracker()
 				local name = TrackerAPI.getItemName(id)
 				if shopItemImages[name] then
 					for i = 1, ct do
-						self.ShopScreen.addButton(name)
+						self.ShopScreen.addButton(name, true)
+					end
+				end
+				if untradeableShopItemImages[name] then
+					for i = 1, ct do
+						self.ShopScreen.addButton(name, false)
 					end
 				end
 			end
@@ -3333,7 +3348,7 @@ local function RoguemonTracker()
 		end
 		local ht, hp, hv = self.countHealsIn(bagToDisplay)
 		local sv = self.countStatusHealsIn(bagToDisplay)
-		local capsToDisplay = {hp = hv, status = sv}
+		local capsToDisplay = {hp = hv, status = sv, healnum = ht}
 		self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 30, 5, capsToDisplay)
 		Drawing.drawText(canvas.x + 2, 30, "BAG:", Theme.COLORS["Default text"])
 		Drawing.drawText(canvas.x + 2, 108, "SHOP:", Theme.COLORS["Positive text"])
@@ -4995,18 +5010,20 @@ local function RoguemonTracker()
 			end
 			-- An arbitrary max value to prevent erroneous game data reads
 			if quantity >= 0 and quantity <= 999 then
-				local healItemData = MiscData.HealingItems[itemID] or {}
-				local percentageAmt = 0
-				if healItemData.type == MiscData.HealingType.Constant then
-					-- Healing is in a percentage compared to the mon's max HP
-					percentageAmt = quantity * math.min(healItemData.amount / maxHP * 100, 100) -- max of 100
-				elseif healItemData.type == MiscData.HealingType.Percentage then
-					percentageAmt = quantity * healItemData.amount
-				end
-				if not (specialRedeems.unlocks["Cooler Bag"] and (itemID == 26 or itemID == 27 or itemID == 28 or itemID == 29 or itemID == 44)) then
+				local healItemData = MiscData.HealingItems[itemID]
+				if healItemData then
+					local percentageAmt = 0
+					if healItemData.type == MiscData.HealingType.Constant then
+						-- Healing is in a percentage compared to the mon's max HP
+						percentageAmt = quantity * math.min(healItemData.amount / maxHP * 100, 100) -- max of 100
+					elseif healItemData.type == MiscData.HealingType.Percentage then
+						percentageAmt = quantity * healItemData.amount
+					end
+					if not (specialRedeems.unlocks["Cooler Bag"] and (itemID == 26 or itemID == 27 or itemID == 28 or itemID == 29 or itemID == 44)) then
+						healingPercentage = healingPercentage + percentageAmt
+						healingValue = healingValue + math.floor(percentageAmt * maxHP / 100 + 0.5)
+					end
 					healingTotal = healingTotal + quantity
-					healingPercentage = healingPercentage + percentageAmt
-					healingValue = healingValue + math.floor(percentageAmt * maxHP / 100 + 0.5)
 				end
 			end
 		end
@@ -5041,11 +5058,13 @@ local function RoguemonTracker()
 
 		local healsTextColor = healVal > hpCap and Theme.COLORS["Negative text"] or Theme.COLORS["Default text"]
 
+		local healNum = caps and caps.healnum or data.x.healnum
+
 		local healsValueText
 		if Options["Show heals as whole number"] then
-			healsValueText = string.format("%.0f/%.0f %s (%s)", healVal, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+			healsValueText = string.format("%.0f/%.0f %s (%s)", healVal, hpCap, Resources.TrackerScreen.HPAbbreviation, healNum)
 		else
-			healsValueText = string.format("%.0f%%/%.0f %s (%s)", healVal, hpCap, Resources.TrackerScreen.HPAbbreviation, data.x.healnum)
+			healsValueText = string.format("%.0f%%/%.0f %s (%s)", healVal, hpCap, Resources.TrackerScreen.HPAbbreviation, healNum)
 		end
 		Drawing.drawText(x, y, healsValueText, healsTextColor, shadowcolor)
 
@@ -5373,12 +5392,12 @@ local function RoguemonTracker()
 			for _,t in pairs(segments[segmentOrder[currentSegment + 1]]["trainers"]) do
 				if t == trainerId then
 					self.nextSegment()
+					segInfo = segments[segmentOrder[currentSegment]]
 					break
 				end
 			end
 		end
 
-		-- Check if trainer was part of the current segment
 		for _,t in pairs(segInfo["mandatory"]) do
 			if t == trainerId then
 				if not (segInfo["pairs"] and defeatedTrainerIds[segInfo["pairs"][trainerId]]) then
@@ -5386,6 +5405,8 @@ local function RoguemonTracker()
 				end
 			end
 		end
+
+		-- Check if trainer was part of the current segment
 		for _,t in pairs(segInfo["trainers"]) do
 			if t == trainerId then
 				if not segmentStarted then
@@ -5877,12 +5898,12 @@ local function RoguemonTracker()
 		-- end
 		local centerCt = Utils.getGameStat(Constants.GAME_STATS.USED_POKECENTER)
 		if centerCt > centersUsed then
-			centersUsed = centerCt
 			if segmentStarted and mandatoriesDefeated >= self.getSegmentMandatoryCount(currentSegment) then
 				self.nextSegment()
 				self.saveData()
 			end
 		end
+		centersUsed = centerCt
 
 		local pokemon = TrackerAPI.getPlayerPokemon()
 
