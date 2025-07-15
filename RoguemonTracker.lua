@@ -6748,19 +6748,6 @@ local function RoguemonTracker()
 		return f, errMsg, errNo
 	end
 
-	local distortedSoulIneligible = {
-		[MoveData.Values.FlailId]         = true,
-		[MoveData.Values.ReversalId]      = true,
-		[MoveData.Values.ReturnId]        = true,
-		[MoveData.Values.FrustrationId]   = true,
-		[MoveData.Values.HiddenPowerId]   = true,
-		[MoveData.Values.LowKickId]       = true,
-		[MoveData.Values.EruptionId]      = true,
-		[MoveData.Values.WaterSpoutId]    = true,
-		[217]                             = true, -- Present
-		[222]                             = true, -- Magnitude
-	}
-
 	-- Overrides MoveData.adjustVariableMoveValues. Behaviour is default
 	-- unless we have one of the Distorted curses.
 	function self.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
@@ -6768,8 +6755,12 @@ local function RoguemonTracker()
 		local activeCurse = self.getActiveCurse()
 		if viewingOwnInBattle and activeCurse == "Distorted Heart" then
 			move.type = self.getDistortedMoveType(move.id, sourcePokemon)
-		elseif viewingOwnInBattle and activeCurse == "Distorted Soul" and not distortedSoulIneligible[move.id] then
-			move.power = self.getDistortedMovePower(move.id)
+		elseif viewingOwnInBattle and activeCurse == "Distorted Soul" then
+			-- only affects moves with non-zero base power.
+			local currentPower = tonumber(move.power)
+			if currentPower and currentPower > 0 then
+				move.power = self.getDistortedMovePower(move.id)
+			end
 		else
 			originalCoreFunctions.MoveData.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
 		end
