@@ -6364,10 +6364,14 @@ local function RoguemonTracker()
 			return true
 		end
 
-		local mask = 1 << GameSettings.roguemon.flagSentToTower
-		local sentToTower = Memory.readbyte(GameSettings.sSpecialFlags) & mask ~= 0
+		local specialFlags = Memory.readbyte(GameSettings.sSpecialFlags)
 
-		return sentToTower
+		if (specialFlags & (1 << GameSettings.roguemon.flagSentToTower)) ~= 0 or
+				(specialFlags & (1 << GameSettings.roguemon.flagBackToTower)) ~= 0 then
+			return true
+		end
+
+		return false
 	end
 
 	-- Synchronizes the tracker attempt counts with the ROM.
