@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.4.1-beta.2"
+	self.version = "1.4.3-alpha"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -169,6 +169,9 @@ local function RoguemonTracker()
 	local ROM_CURSE_MOODY          = 1 << 2
 	local ROM_CURSE_DAVID_VS       = 1 << 3
 	local ROM_CURSE_MEDIOCRITIZE   = 1 << 4
+	local ROM_CURSE_FREEFALL       = 1 << 5
+	local ROM_CURSE_DISTORTED_HEART = 1 << 6
+	local ROM_CURSE_DISTORTED_SOUL = 1 << 7
 
 	local curseInfo = {
 		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight", segment = true, gym = false,
@@ -217,8 +220,8 @@ local function RoguemonTracker()
 		["Time Warp"] = {description = "Lose 25% of your EXP until the segment ends", segment = true, gym = true},
 		["TikTok"] = {description = "One move per fight is secretly Metronome", segment = true, gym = false, romCurse = ROM_CURSE_TIKTOK},
 		["Bloodborne"] = {description = "When you use an HP heal, lose 20% of its value from your cap", segment = true, gym = false},
-		-- ["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, 
-		-- 					longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
+		["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, romCurse = ROM_CURSE_FREEFALL,
+							longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
 		["Backseating"] = {description = "Don't use marked move: -1 to a random stat", segment = true, gym = false,
 							longDescription = "Each turn, 'chat' suggests one move; if you don't use that move on that turn, you get -1 to a random stat for the fight."},
 		["Malware"] = {description = "-1 in attack stat for lead's lower defense", segment = true, gym = false,
@@ -229,10 +232,10 @@ local function RoguemonTracker()
 		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight", segment = true, gym = false,
 							longDescription = "HP is randomized to 25%, 50%, 75%, or 100% after each fight"},
 		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false, romCurse = ROM_CURSE_DAVID_VS},
-		-- ["Distorted Heart"] = {description = "Your moves' typings are randomized each battle", segment = true, gym = false,
-		-- 						longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
-		-- ["Distorted Soul"] = {description = "Your moves' powers are randomized each battle", segment = true, gym = false,
-		-- 						longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
+		["Distorted Heart"] = {description = "Your move types are randomized", segment = true, gym = false, romCurse = ROM_CURSE_DISTORTED_HEART,
+								longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
+		["Distorted Soul"] = {description = "Your moves' powers are randomized", segment = true, gym = false, romCurse = ROM_CURSE_DISTORTED_SOUL,
+								longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
 	}
 
 	local FIRERED_11_SHA1SUM = "dd5945db9b930750cb39d00c84da8571feebf417"
@@ -246,7 +249,7 @@ local function RoguemonTracker()
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.3.4-beta"
+	local bundledRomPatchVersion = "0.3.5-alpha"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
@@ -316,7 +319,8 @@ local function RoguemonTracker()
 		{text = "Show reminders", default = true},
 		{text = "Show reminders over cap", default = false},
 		{text = "Alternate Curse theme", default = true},
-		{text = "Egg reminders", default = true}
+		{text = "Egg reminders", default = true},
+		{text = "Opt-in to Beta Release", default = false},
 	}
 	local populatedOptions = false
 
@@ -1324,6 +1328,9 @@ local function RoguemonTracker()
 
 			-- these are offset from gRoguemonTrackerData
 			queuedMoveLearn           = 0xa,
+
+			-- offset from gBattleStruct
+			distortedSeed        = 0x11,
 		}
 
 		local roguemonSettingPointers = {
@@ -2790,10 +2797,10 @@ local function RoguemonTracker()
 	}
 
 	local OS_LEFT_X = 10
-	local OS_TOP_Y = 12
+	local OS_TOP_Y = 10
 	local OS_BOX_SIZE = 10
 	local OS_BOX_TEXT_GAP = 10
-	local OS_BOX_VERTICAL_GAP = 5
+	local OS_BOX_VERTICAL_GAP = 4
 
 	function self.RoguemonOptionsScreen.drawScreen()
 		local canvas = {
@@ -2855,7 +2862,8 @@ local function RoguemonTracker()
 				getText = function() return "Back" end,
 				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 8, 22, 10},
 				onClick = function()
-					self.returnToHomeScreen()
+					SingleExtensionScreen.setupScreenWithInfo("RoguemonTracker", CustomCode.ExtensionLibrary.RoguemonTracker)
+					Program.changeScreenView(SingleExtensionScreen)
 				end,
 				boxColors = {"Default text"}
 			}
@@ -4169,6 +4177,9 @@ local function RoguemonTracker()
 	end
 
 	function self.getActiveCurse()
+		if self.isInAscensionTower() then
+			return nil
+		end
 		if segmentStarted and not (cursedSegments[currentSegment] == "Warded") then
 			return cursedSegments[segmentOrder[currentSegment]]
 		end
@@ -5687,7 +5698,7 @@ local function RoguemonTracker()
 			end
 
 			print("> Waiting on NatDex Tracker Extension before starting Roguemon Tracker...")
-			Program.addFrameCounter(startupCounterLabel, 60, function () self.startup() end)
+			Program.addFrameCounter(startupCounterLabel, 10, function () self.startup() end)
 			return
 		end
 
@@ -6066,13 +6077,38 @@ local function RoguemonTracker()
 		end
 	end
 
+	-- Tracker function to setup checks for new updates and download of those updates.
+	-- Note that the tag logic is _only_ used by the tracker to determine
+	-- if a new release does exist or not. When it actually downloads the
+	-- release, it completely ignores the tag and just grabs `main`.
 	function self.checkForUpdates()
-		local versionResponsePattern = '"tag_name":%s+"%w+(%d+%.%d+%.%d[%d%w%-%+]*)"' -- matches "1.0.1-label+build" in "tag_name": "v1.0.1-label+build"
-		local versionCheckUrl = string.format("https://api.github.com/repos/%s/releases/latest", self.github or "")
-		local downloadUrl = string.format("%s/releases/latest", self.url or "")
+		local betaEnabled = RoguemonOptions["Opt-in to Beta Release"]
+		local betaBranch = "beta"
+		local versionCheckUrl = ""
+
+		local versionResponsePattern = ""
+		if betaEnabled then
+			-- sadly github api provides no way to fetch the latest
+			-- pre-release, so for the beta case we look for the
+			-- version set in the main Tracker file.
+			versionResponsePattern = '\n%s*self%.version%s+=%s+"%w*(%d+%.%d+%.%d+%-?[%w%-%.]*%+?[%w%.%-]*)"' -- matches "1.2.3-rc1+tower" in '"self.version" = "v1.2.3-rc1+tower"'
+			versionCheckUrl = string.format("https://raw.githubusercontent.com/%s/%s/RoguemonTracker.lua", self.github or "", betaBranch)
+
+			-- We provide an override func to fetch the beta branch
+			-- instead of the default (main).
+			self.downloadAndInstallUpdate = function()
+				return TrackerAPI.updateExtension("RoguemonTracker", nil, nil, betaBranch)
+			end
+		else
+			versionResponsePattern = '"tag_name":%s+"%w*(%d+%.%d+%.%d+%-?[%w%-%.]*%+?[%w%.%-]*)"' -- matches "1.2.3-rc1+tower" in '"tag_name": "v1.2.3-rc1+tower"
+			versionCheckUrl = string.format("https://api.github.com/repos/%s/releases/latest", self.github or "")
+			self.downloadAndInstallUpdate = nil
+		end
+
+		local releaseNotesUrl = string.format("%s/releases/%s", self.url or "", betaEnabled and "" or "latest")
 		local compareFunc = function(a, b) return a ~= b and RoguemonUtils.compare_semver(a, b) == -1 end -- if current version is *older* than online version
 		local isUpdateAvailable = Utils.checkForVersionUpdate(versionCheckUrl, self.version, versionResponsePattern, compareFunc)
-		return isUpdateAvailable, downloadUrl
+		return isUpdateAvailable, releaseNotesUrl
 	end
 
 	-- Helper function for accessing roguemon data from the console
@@ -6313,6 +6349,35 @@ local function RoguemonTracker()
 		return self.readGameVar(GameSettings.roguemon.varAscension)
 	end
 
+	function self.getDistortedSeed()
+		local battleStructAddress = Memory.readdword(GameSettings.gBattleStructPtr)
+		return Memory.readbyte(battleStructAddress + GameSettings.roguemon.distortedSeed)
+	end
+
+	-- This function has to exactly mimic `GetDistortedSoulMovePower` from the ROM.
+	function self.getDistortedMovePower(moveId)
+		local distortedSeed = self.getDistortedSeed()
+		return ((distortedSeed + moveId * 7) % 60) + 30;
+	end
+
+	-- This function has to exactly mimic `GetDistortedHeartMoveType` from the ROM.
+	function self.getDistortedMoveType(moveId, sourcePokemon)
+		local distortedSeed = self.getDistortedSeed()
+		local pokemonTypes = PokemonData.Pokemon[sourcePokemon.pokemonID].types
+		local validTypes = {}
+		local validTypeCount = 0
+
+		for i, type in pairs(PokemonData.TypeIndexMap) do
+			if type ~= PokemonData.Types.UNKNOWN and type ~= pokemonTypes[1] and type ~= pokemonTypes[2] then
+				validTypes[validTypeCount] = type
+				validTypeCount = validTypeCount + 1
+			end
+		end
+
+		local randomIndex = (distortedSeed + moveId * 7) % validTypeCount
+		return validTypes[randomIndex]
+	end
+
 	-- Returns True if we're currently in the ascension tower, or if we've been sent there.
 	function self.isInAscensionTower()
 		local inTower = TrackerAPI.getMapId() >= 298 and TrackerAPI.getMapId() <= 300
@@ -6320,10 +6385,14 @@ local function RoguemonTracker()
 			return true
 		end
 
-		local mask = 1 << GameSettings.roguemon.flagSentToTower
-		local sentToTower = Memory.readbyte(GameSettings.sSpecialFlags) & mask ~= 0
+		local specialFlags = Memory.readbyte(GameSettings.sSpecialFlags)
 
-		return sentToTower
+		if (specialFlags & (1 << GameSettings.roguemon.flagSentToTower)) ~= 0 or
+				(specialFlags & (1 << GameSettings.roguemon.flagBackToTower)) ~= 0 then
+			return true
+		end
+
+		return false
 	end
 
 	-- Synchronizes the tracker attempt counts with the ROM.
@@ -6369,7 +6438,7 @@ local function RoguemonTracker()
 
 	function self.getAttemptsFilePath(ascension, typeIndex)
 		local directory = FileManager.getPathOverride("Attempt Counts") or FileManager.dir
-		local fileName = string.format("%s%s", self.getAscensionString(ascension, typeIndex), FileManager.Extensions.ATTEMPTS)
+		local fileName = string.format("%s %s%s", self.getAscensionString(ascension, typeIndex), FileManager.PostFixes.ATTEMPTS_FILE, FileManager.Extensions.ATTEMPTS)
 		return directory .. fileName
 	end
 
@@ -6511,7 +6580,7 @@ local function RoguemonTracker()
 
 	-- Returns the string for `roguemonVersionStr` in the ROM header.
 	function self.getROMRoguemonVersion()
-		local romVersionAddr = GameSettings.roguemon.romUid+6 & 0xFFFFFF
+		local romVersionAddr = GameSettings.roguemon.romUid+8 & 0xFFFFFF
 		local versionBytes = memory.read_bytes_as_array(romVersionAddr, 12, "ROM")
 
 		local versionStr = ""
@@ -6568,6 +6637,7 @@ local function RoguemonTracker()
 		-- ROM to ship the player to the ascension tower so they can
 		-- pick a new run.
 		if not randomizingROM then
+			self.resetTheme()
 			self.sendPlayerToTower()
 			Main.ExitSafely(false)
 			Main.Run()
@@ -6707,6 +6777,24 @@ local function RoguemonTracker()
 		return f, errMsg, errNo
 	end
 
+	-- Overrides MoveData.adjustVariableMoveValues. Behaviour is default
+	-- unless we have one of the Distorted curses.
+	function self.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
+		local viewingOwnInBattle = Battle.isViewingOwn and Battle.inBattle
+		local activeCurse = self.getActiveCurse()
+		if viewingOwnInBattle and activeCurse == "Distorted Heart" then
+			move.type = self.getDistortedMoveType(move.id, sourcePokemon)
+		elseif viewingOwnInBattle and activeCurse == "Distorted Soul" then
+			-- only affects moves with non-zero base power.
+			local currentPower = tonumber(move.power)
+			if currentPower and currentPower > 0 then
+				move.power = self.getDistortedMovePower(move.id)
+			end
+		else
+			originalCoreFunctions.MoveData.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
+		end
+	end
+
 	-- Overrides the given function from the given module with `newFunc`.
 	-- `moduleName` and `funcName` are used to track what was overridden so
 	-- we can restore it later.
@@ -6736,6 +6824,7 @@ local function RoguemonTracker()
 		event.onconsoleclose(self.restoreCoreTrackerFunctions, "restoreCoreTrackerFunctions")
 		overrideFunction(Main, "Main", "LoadNextRom", self.LoadNextRom)
 		overrideFunction(LogOverlay, "LogOverlay", "getLogFileAutodetected", self.getLogFileAutodetected)
+		overrideFunction(MoveData, "MoveData", "adjustVariableMoveValues", self.adjustVariableMoveValues)
 
 		if self.DEBUG_IO_OPEN_ERRORS then
 			overrideFunction(io, "io", "open", self.noisyIOOpen)
@@ -6749,6 +6838,7 @@ local function RoguemonTracker()
 		restoreFunctions(FileManager, "FileManager")
 		restoreFunctions(GameSettings, "GameSettings")
 		restoreFunctions(LogOverlay, "LogOverlay")
+		restoreFunctions(MoveData, "MoveData")
 		restoreFunctions(io, "io")
 	end
 
