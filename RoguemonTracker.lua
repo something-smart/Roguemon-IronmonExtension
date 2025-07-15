@@ -2798,7 +2798,7 @@ local function RoguemonTracker()
 	}
 
 	local OS_LEFT_X = 10
-	local OS_TOP_Y = 10
+	local OS_TOP_Y = 0
 	local OS_BOX_SIZE = 10
 	local OS_BOX_TEXT_GAP = 10
 	local OS_BOX_VERTICAL_GAP = 4
@@ -2858,16 +2858,11 @@ local function RoguemonTracker()
 					}
 				end
 			end
-			self.RoguemonOptionsScreen.Buttons.BackButton = {
-				type = Constants.ButtonTypes.FULL_BORDER,
-				getText = function() return "Back" end,
-				box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 8, 22, 10},
-				onClick = function()
-					SingleExtensionScreen.setupScreenWithInfo("RoguemonTracker", CustomCode.ExtensionLibrary.RoguemonTracker)
-					Program.changeScreenView(SingleExtensionScreen)
-				end,
-				boxColors = {"Default text"}
-			}
+
+			self.RoguemonOptionsScreen.Buttons.BackButton = Drawing.createUIElementBackButton(function()
+				Program.changeScreenView(self.RoguemonOptionsScreen.previousScreen or TrackerScreen)
+				self.RoguemonOptionsScreen.previousScreen = nil
+			end)
 
 			self.RoguemonOptionsScreen.Buttons.EditWins = {
 				type = Constants.ButtonTypes.FULL_BORDER,
@@ -5456,6 +5451,7 @@ local function RoguemonTracker()
 	end
 	
 	self.configureOptions = function()
+		self.RoguemonOptionsScreen.previousScreen = Program.currentScreen
 		Program.changeScreenView(self.RoguemonOptionsScreen)
 	end
 	
