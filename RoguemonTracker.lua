@@ -78,6 +78,14 @@ local function RoguemonTracker()
 		["Clairvoyance"] = {consumable = true, image = "clairvoyance.png", description = "Learn all future curses, and can make one swap."},
 	}
 
+	local ROM_REDEEMS = {
+		["Cooler Bag"]  = 1 << 0,
+		["Berry Pouch"] = 1 << 1,
+		["Candy Jar"]   = 1 << 2,
+		["Revive"]      = 1 << 3,
+		["Max Revive"]  = 1 << 4,
+	}
+
 	local gymLeaders = {[414] = true, [415] = true, [416] = true, [417] = true, [418] = true, [420] = true, [419] = true, [350] = true}
 
 	-- Trainer IDs for milestones. "count" indicates how many trainers must be defeated for the milestone to count.
@@ -1325,6 +1333,7 @@ local function RoguemonTracker()
 			romUid                    = 0x08000175,
 
 			-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
+			varRedeems                = 0x58,
 			varType                   = 0x5c,
 			varAscension              = 0x5e,
 			varCurse                  = 0x7e,
@@ -1397,6 +1406,24 @@ local function RoguemonTracker()
 
 	function self.writeROMWins(ascension, typeIndex, wins)
 		return Memory.writedword(self.getWinsAddr(ascension, typeIndex), wins)
+	end
+
+	function self.setROMRedeem(redeem)
+		local flag = ROM_REDEEMS[redeem]
+
+		if flag then
+			local currentRedeems = self.readGameVar(GameSettings.roguemon.varRedeems)
+			self.writeGameVar(GameSettings.roguemon.varRedeems, currentRedeems | flag)
+		end
+	end
+
+	function self.unsetROMRedeem(redeem)
+		local flag = ROM_REDEEMS[redeem]
+
+		if flag then
+			local currentRedeems = self.readGameVar(GameSettings.roguemon.varRedeems)
+			self.writeGameVar(GameSettings.roguemon.varRedeems, currentRedeems & ~flag)
+		end
 	end
 
 	-- Read rules enforcement state from the ROM. Set in game options menu.
@@ -1730,6 +1757,7 @@ local function RoguemonTracker()
 
 	function self.removeSpecialRedeem(redeem)
 		if specialRedeems.consumable[redeem] then
+			self.unsetROMRedeem(redeem)
 			specialRedeems.consumable[redeem] = nil
 			local id = nil
 			for i,r in pairs(specialRedeems.consumable) do
@@ -4061,6 +4089,7 @@ local function RoguemonTracker()
 					end
 				end
 				if specialRedeemInfo[reward] then
+					self.setROMRedeem(reward)
 					-- This reward is a special redeem
 					if specialRedeemInfo[reward].consumable then 
 						specialRedeems.consumable[reward] = true
