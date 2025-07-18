@@ -355,6 +355,7 @@ local function RoguemonTracker()
 	local givenMoonStoneNotification = false
 	local natureMintUp = nil
 	local starterPackMove = nil
+	local wardOfferedYet = false
 	local hpHealsSetting = nil
 	local showedEggReminderAfterBrock = false
 	local centersUsed = 0
@@ -448,6 +449,9 @@ local function RoguemonTracker()
 
 	-- exp temporarily lost to Time Warp
 	local timeWarpedExp = 0
+
+	-- trainers affected by David vs Goliath
+	local davidGoliathTrainers = {}
 
 	-- previous theme, to be stored while the curse theme is active
 	local previousTheme = nil
@@ -788,8 +792,8 @@ local function RoguemonTracker()
 		itemsPocket = newItemsPocket
 		berryPocket = newBerryPocket
 
-		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.level + 1 == newPokeInfo.level then
-			-- We leveled up. Check caps again
+		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.level + 1 == newPokeInfo.level and (not Battle.inBattle) then
+			-- We leveled up. Check caps again, but only out of battle 
 			self.countAdjustedHeals()
 			if RoguemonOptions["Show reminders over cap"] and adjustedHPVal > hpCap and not needToBuy then
 				self.displayNotification("An HP healing item must be used or trashed", "healing-pocket.png", function()
@@ -1787,6 +1791,9 @@ local function RoguemonTracker()
 				Memory.writedword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp, Utils.getbits(lvCurHp, 0, 16) + Utils.bit_lshift(currentHP, 16))
 			end, 1)
 		end
+		if curse == "David vs Goliath" then
+			davidGoliathTrainers = {}
+		end
 		if curseInfo[curse].romCurse then
 			self.romCurseOff(curseInfo[curse].romCurse)
 		end
@@ -1917,6 +1924,7 @@ local function RoguemonTracker()
 
 	function self.startSegment()
 		segmentStarted = true
+		wardOfferedYet = false
 		local curse = self.getActiveCurse()
 		if curse then
 			runSummary[#runSummary + 1] = {
@@ -2007,6 +2015,7 @@ local function RoguemonTracker()
 				for i = 0,2 do
 					local t = table.remove(tids, math.random(#tids))
 					Memory.writeword(GameSettings.roguemon.gRoguemonTrackerData + (i*2), t)
+					davidGoliathTrainers[#davidGoliathTrainers + 1] = t
 				end
 			end
 			self.displayNotification(curseNotif, "Curse.png", nil)
@@ -2560,18 +2569,18 @@ local function RoguemonTracker()
 					end
 				}
 			},
-			["Curse:"] = {
-				nil,
-				{
-					name = "Ward",
-					onClick = function()
-						self.wardCurse()
-					end,
-					isVisible = function()
-						return specialRedeems.consumable["Warding Charm"]
-					end
-				}
-			},
+			-- ["Curse:"] = {
+			-- 	nil,
+			-- 	{
+			-- 		name = "Ward",
+			-- 		onClick = function()
+			-- 			self.wardCurse()
+			-- 		end,
+			-- 		isVisible = function()
+			-- 			return specialRedeems.consumable["Warding Charm"]
+			-- 		end
+			-- 	}
+			-- },
 			["EquipTrashPickup"] = {
 				{
 					name = "Equip",
@@ -3235,7 +3244,7 @@ local function RoguemonTracker()
 		return SHOP_BUTTON_X + ((index-1) % SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_WIDTH, SHOP_BUTTON_Y + math.floor((index-1) / SHOP_BUTTON_HOR_COUNT) * SHOP_BUTTON_HEIGHT
 	end
 
-	function self.ShopScreen.addButton(item, interactible)
+	function self.ShopScreen.addButton(item, interactible, newlyAdded)
 		local index = #self.ShopScreen.Buttons + 1
 		local x,y = self.getShopButtonLocation(index)
 		local b = {
@@ -3263,7 +3272,7 @@ local function RoguemonTracker()
 				self.ShopScreen.Buttons[#self.ShopScreen.Buttons] = nil
 				Program.redraw(true)
 			end) or nil,
-			boxColors = interactible and {"Default text"} or {"Default text", "Negative text"},
+			boxColors = interactible and (newlyAdded and {"Default text", "Positive text"} or {"Default text"}) or {"Default text", "Negative text"},
 			draw = function(this, shadowcolor)
 				local x, y, w, h = this.box[1], this.box[2], this.box[3], this.box[4]
 				Drawing.drawImage(this.image, x + 1, y + 1, w - 2, h - 2)
@@ -3287,7 +3296,7 @@ local function RoguemonTracker()
 				local name = TrackerAPI.getItemName(id)
 				if shopItemImages[name] then
 					for i = 1, ct do
-						self.ShopScreen.addButton(name, true)
+						self.ShopScreen.addButton(name, true, false)
 					end
 				end
 			end
@@ -3297,12 +3306,12 @@ local function RoguemonTracker()
 				local name = TrackerAPI.getItemName(id)
 				if shopItemImages[name] then
 					for i = 1, ct do
-						self.ShopScreen.addButton(name, true)
+						self.ShopScreen.addButton(name, true, false)
 					end
 				end
 				if untradeableShopItemImages[name] then
 					for i = 1, ct do
-						self.ShopScreen.addButton(name, false)
+						self.ShopScreen.addButton(name, false, false)
 					end
 				end
 			end
@@ -3463,7 +3472,7 @@ local function RoguemonTracker()
 					itemInfo = MiscData.StatusItems[itemId]
 					self.ShopScreen.status = self.ShopScreen.status - (itemInfo.type == MiscData.StatusType.All and 3 or 1)
 				end
-				self.ShopScreen.addButton(item)
+				self.ShopScreen.addButton(item, true, true)
 				Program.redraw(true)
 			end,
 			boxColors = {"Positive text"},
@@ -3658,7 +3667,7 @@ local function RoguemonTracker()
 							[PokemonData.Types.FLYING] = 16, -- Gust
 							[PokemonData.Types.POISON] = 51, -- Acid
 							[PokemonData.Types.GROUND] = 91, -- Dig
-							[PokemonData.Types.ROCK] = 88, -- Rock Throw
+							[PokemonData.Types.ROCK] = 317, -- Rock Tomb
 							[PokemonData.Types.BUG] = 318, -- Silver Wind
 							[PokemonData.Types.GHOST] = 310, -- Astonish
 							[PokemonData.Types.STEEL] = 232, -- Metal Claw
@@ -3680,7 +3689,7 @@ local function RoguemonTracker()
 							end
 						end
 						prospectiveStarterPackMove = starterPackMoves[validTypes[math.random(#validTypes)]]
-						choice = choice .. ": Learn " .. MoveData.Moves[prospectiveStarterPackMove].name .. "."
+						choice = choice .. ": Learn a weak move (" .. MoveData.Moves[prospectiveStarterPackMove].name .. ")."
 					end
 					for _,itm in pairs(MiscData.HealingItems) do
 						if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name and not (part == "Potion Investment") then
@@ -4083,6 +4092,9 @@ local function RoguemonTracker()
 					special = true
 				end
 			end
+		end
+		if option == "Ward" then
+
 		end
 		-- Regular item option
 		if not special and option ~= "" and additionalOptionsRemaining > 0 then
@@ -5190,6 +5202,7 @@ local function RoguemonTracker()
 			['savedIVs'] = savedIVs,
 			['timeWarpedExp'] = timeWarpedExp,
 			['runSummary'] = runSummary,
+			['davidGoliathTrainers'] = davidGoliathTrainers,
 		}
 
 		if not DEBUG_MODE then
@@ -5229,6 +5242,7 @@ local function RoguemonTracker()
 			savedIVs = saveData['savedIVs'] or savedIVs
 			timeWarpedExp = saveData['timeWarpedExp'] or timeWarpedExp
 			runSummary = saveData['runSummary'] or runSummary
+			davidGoliathTrainers = saveData['davidGoliathTrainers'] or davidGoliathTrainers
 		end
 		if rivalCombined then
 			for _,tid in pairs(segments[segmentOrder[currentSegment-1]]["trainers"]) do
@@ -5241,6 +5255,9 @@ local function RoguemonTracker()
 				segments[segmentOrder[currentSegment]]["routes"][#segments[segmentOrder[currentSegment]]["routes"] + 1] = rid
 			end
 			segments[segmentOrder[currentSegment]]["rival"] = true
+		end
+		for i,t in pairs(davidGoliathTrainers) do
+			Memory.writeword(GameSettings.roguemon.gRoguemonTrackerData + (i*2 - 2), t)
 		end
 		if seedNumber == -1 then
 			seedNumber = self.generateSeed()
@@ -5467,7 +5484,7 @@ local function RoguemonTracker()
 			end
 			-- Set lower box color to green if the current segment has a full clear prize
 			if segmentStarted and milestoneTrainers[segmentOrder[currentSegment]] then
-				bgColor = 0xFF63DB60
+				bgColor = 0xFF008F00
 			end
 			gui.drawRectangle(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 136, Constants.SCREEN.RIGHT_GAP - (2 * Constants.SCREEN.MARGIN), 19, Theme.COLORS["Lower box border"], bgColor)
 			if gachaOn then
@@ -5819,7 +5836,7 @@ local function RoguemonTracker()
 			local nextBtn = Options.CONTROLS["Next page"] or ""
 			if joypad[nextBtn] then
 				for _,a in pairs(additionalOptions) do
-					if a == "Skip" or a == "Wait" then
+					if a == "Skip" or a == "Wait" or a == "Don't" then
 						self.returnToHomeScreen()
 						currentRoguemonScreen = self.RunSummaryScreen
 					end
@@ -5998,6 +6015,11 @@ local function RoguemonTracker()
 					end
 				end
 			end
+		end
+
+		if not wardOfferedYet and specialRedeems.consumable["Warding Charm"] and getActiveCurse() and Program.currentScreen == TrackerScreen then
+			self.offerBinaryOption("Ward", "Don't")
+			wardOfferedYet = true
 		end
 
 		-- Check if the notification should be dismissed
