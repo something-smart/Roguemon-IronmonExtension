@@ -253,4 +253,4 @@ Revive: Gain a Revive which may be used. Keep your HM friend with you; send it o
 Full Heal x2 & Elixir x2|twofulltwoelixir.png
 Fight Route X: Treat the routes together as a segment.|exp-charm.png
 Moomoo Milk & Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
-Tera Orb: Choose a type matching a move; 5 times, you may Terastalize to that type.|tera-orb.png
+Tera Orb: Choose a type matching a move; 5 times, you may change to that type.|tera-orb.png

@@ -71,7 +71,7 @@ local function RoguemonTracker()
 		["Temporary Item Pass"] = {consumable = true, image = "tempvoucher.png", description = "All legal items are unlocked for the next two gyms."},
 		["Smuggler's Pouch"] = {consumable = false, image = "smugglers-pouch.png", description = "May choose one item not to cleanse each Cleansing Phase."},
 		["Pocket Sand"] = {consumable = false, button = "Use", charges = 5, image = "pocket-sand.png", description = "5 times in the run, may reduce enemy's accuracy to -6."},
-		["Tera Orb"] = {consumable = false, button = "Use", charges = 5, image = "tera-orb.png", description = "Choose a type matching a move; 5 times, you may Terastalize to that type."},
+		["Tera Orb"] = {consumable = false, button = "Use", charges = 5, image = "tera-orb.png", description = "Choose a type matching a move; 5 times, you may change to that type."},
 		["Notetaker"] = {consumable = false, image = "notetaker.png", description = "Notes on enemy pokemon transfer to their evolution."},
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash an HP heal, gain 30% of its value as HP cap."},
 	}
@@ -505,33 +505,32 @@ local function RoguemonTracker()
 	-- Get data for the back pocket that a particular item would be placed in
 	function self.getBagPocketData(id)
 		-- Returns: Offset for bag pocket, capacity of bag pocket, whether to limit quantity to 1
-		local gameNumber = GameSettings.game
 		local itemsOffset = GameSettings.bagPocket_Items_offset
-		local keyItemsOffset = {0x5B0, 0x5D8, 0x03b8}
-		local pokeballsOffset = {0x600, 0x650, 0x0430}
-		local TMHMOffset = {0x640, 0x690, 0x0464}
+		local keyItemsOffset = GameSettings.bagPocket_KeyItems_offset
+		local pokeballsOffset = GameSettings.bagPocket_Balls_offset
+		local TMHMOffset = GameSettings.bagPocket_TmHm_offset
 		local berriesOffset = GameSettings.bagPocket_Berries_offset
 	
 		local itemsCapacity = GameSettings.bagPocket_Items_Size
-		local keyItemsCapacity = {20, 30, 30}
-		local pokeballsCapacity = {16, 16, 13}
-		local TMHMCapacity = {64, 64, 58}
+		local keyItemsCapacity = GameSettings.bagPocket_KeyItems_Size
+		local pokeballsCapacity = GameSettings.bagPocket_Balls_Size
+		local TMHMCapacity = GameSettings.bagPocket_TmHm_Size
 		local berriesCapacity = GameSettings.bagPocket_Berries_Size
 	
 		if id < 1 then
 			return nil
 		elseif id <= 12--[[Premier Ball]] then
-			return pokeballsOffset[gameNumber], pokeballsCapacity[gameNumber], false
+			return pokeballsOffset, pokeballsCapacity, false
 		elseif id <= 132--[[Retro Mail]] or (id >= 179--[[Bright Powder]] and id <= 258--[[Yellow Scarf]]) then
 			return itemsOffset, itemsCapacity, false
 		elseif id <= 175--[[Enigma Berry]] then
 			return berriesOffset, berriesCapacity, false
 		elseif id <= 288--[[Devon Scope]] or (id >= 349--[[Oak's Parcel]] and id <= 376--[[Old Sea Map]]) then
-			return keyItemsOffset[gameNumber], keyItemsCapacity[gameNumber], true
+			return keyItemsOffset, keyItemsCapacity, true
 		elseif id <= 338--[[TM50]] then
-			return TMHMOffset[gameNumber], TMHMCapacity[gameNumber], false
+			return TMHMOffset, TMHMCapacity, false
 		elseif id <= 346--[[HM08]] then
-			return TMHMOffset[gameNumber], TMHMCapacity[gameNumber], true
+			return TMHMOffset, TMHMCapacity, true
 		end
 		return nil
 	end
@@ -5995,7 +5994,8 @@ local function RoguemonTracker()
 		-- Check if we have an Item Voucher and are currently holding an illegal item
 		if pokemon then
 			local heldItem = TrackerAPI.getItemName(pokemon.heldItem, true)
-			if not Battle.inBattle and heldItem and not allowedHeldItems[heldItem] and not unlockedHeldItems[heldItem] then
+			if not Battle.inBattle and heldItem and not allowedHeldItems[heldItem] and not unlockedHeldItems[heldItem] and 
+				not (specialRedeems.unlocks["Luck Incense"] and MiscData.HealingItems[pokemon.heldItem]) then
 				if heldItem == "Leftovers" then
 					self.displayNotification("Reminder that Leftovers is banned in all ascensions.", "supernerd.png", nil)
 				else
