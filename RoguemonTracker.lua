@@ -5420,7 +5420,7 @@ local function RoguemonTracker()
 			end
 		end
 
-		if segmentOrder[currentSegment + 1] then
+		if segmentOrder[currentSegment + 1] and segmentStarted then
 			for _,t in pairs(segments[segmentOrder[currentSegment + 1]]["trainers"]) do
 				if t == trainerId then
 					self.nextSegment()
