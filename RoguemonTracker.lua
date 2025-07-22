@@ -5534,7 +5534,10 @@ local function RoguemonTracker()
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN, 136, 129, 18 },
 			isVisible = function() return TrackerScreen.carouselIndex == self.CURSE_CAROUSEL_INDEX end,
 			onClick = function(this)
-				-- Optional code if you want, for when the main area of this carousel button is clicked
+				local curse = self.getActiveCurse()
+				if curse then
+					self.displayNotification(curseInfo[curse].longDescription or curseInfo[curse].description, "Curse.png", nil)
+				end
 			end,
 			draw = function(this, shadowcolor)
 				_drawRogueCarouselBottom(this, shadowcolor)
@@ -5586,13 +5589,11 @@ local function RoguemonTracker()
 			type = self.CURSE_CAROUSEL_INDEX,
 			framesToShow = 240,
 			canShow = function(this)
-				-- this disables the curse carousel. swap this return line to bring it back
-				return false
-				-- return segmentStarted and self.getActiveCurse()
+				return segmentStarted and self.getActiveCurse()
 			end,
 			getContentList = function(this)
 				local curse = self.getActiveCurse()
-				local text = "> " .. curse .. ": " .. curseInfo[curse].description
+				local text = "Curse: " .. curse
 				if curse == "Acid Rain" and weatherApplied then
 					text = text .. " (" .. weatherApplied .. ")"
 				end
@@ -5613,7 +5614,6 @@ local function RoguemonTracker()
 
 		-- I set the border to use a different color. Search Tracker code code for examples of how pixel images can use an icon color set
 		-- For now, no border is drawn as no color for it is defined (intentional)
-		-- Also, no reason to have defined this as a core tracker "Constants", just store it in your extension (change applied below)
 		self.SKULL_ICON = {
 			{2,2,2,2,2,2,2,2,2},
 			{2,0,0,0,0,0,0,0,2},
@@ -5996,7 +5996,7 @@ local function RoguemonTracker()
 			local heldItem = TrackerAPI.getItemName(pokemon.heldItem, true)
 			if not Battle.inBattle and heldItem and not allowedHeldItems[heldItem] and not unlockedHeldItems[heldItem] and 
 				not (specialRedeems.unlocks["Luck Incense"] and MiscData.HealingItems[pokemon.heldItem]) then
-				if heldItem == "Leftovers" then
+				if heldItem == "Leftovers" and committed then
 					self.displayNotification("Reminder that Leftovers is banned in all ascensions.", "supernerd.png", nil)
 				else
 					local hadV = false
