@@ -10,6 +10,7 @@ local function RoguemonTracker()
 	EXTENSION_DIRECTORY = FileManager.getCustomFolderPath() .. "roguemon" .. FileManager.slash
 
 	local RoguemonUtils = dofile(EXTENSION_DIRECTORY .. "utils.lua")
+	local RoguemonRevo = dofile(EXTENSION_DIRECTORY .. "RoguemonRevo.lua")
 
 	-- turn this on to have the reward screen accessible at any time
 	local DEBUG_MODE = false
@@ -344,6 +345,7 @@ local function RoguemonTracker()
 	local specialRedeemToDescribe = nil
 
 	local patchedChangedEvos = false
+	local updatedRevoData = false
 	local randomizingROM = false
 	local syncedAttempts = false
 	local committed = false
@@ -5947,6 +5949,10 @@ local function RoguemonTracker()
 		if not patchedChangedEvos and PokemonData.Pokemon[412] ~= nil then
 			self.patchChangedEvos()
 			self.updateFriendshipValues()
+		end
+
+		if not updatedRevoData then
+			updatedRevoData = RoguemonRevo.overrideRevoData()
 		end
 
 		if not syncedAttempts then
