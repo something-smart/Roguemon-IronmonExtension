@@ -6816,13 +6816,15 @@ local function RoguemonTracker()
 	function self.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
 		local viewingOwnInBattle = Battle.isViewingOwn and Battle.inBattle
 		local activeCurse = self.getActiveCurse()
-		if viewingOwnInBattle and activeCurse == "Distorted Heart" then
+		local distortedSeedSet = self.getDistortedSeed() > 0
+		if distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Heart" then
 			move.type = self.getDistortedMoveType(move.id, sourcePokemon)
-		elseif viewingOwnInBattle and activeCurse == "Distorted Soul" then
+		elseif distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Soul" then
 			-- only affects moves with non-zero base power.
 			local currentPower = tonumber(move.power)
 			if currentPower and currentPower > 0 then
-				move.power = self.getDistortedMovePower(move.id)
+				local distortedPower = self.getDistortedMovePower(move.id)
+				move.power = distortedPower
 			end
 		else
 			originalCoreFunctions.MoveData.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
