@@ -2452,7 +2452,7 @@ local function RoguemonTracker()
 				if specialRedeemToDescribe == "Potion Investment" then
 					toReturn = toReturn .. " " .. specialRedeems.consumable["Potion Investment"]
 				elseif specialRedeemToDescribe == "Midas Touch" then
-					toReturn = toReturn .. " (" .. specialRedeems.consumable["Midas Touch"] .. " gained)"
+					toReturn = toReturn .. " (" .. specialRedeems.unlocks["Midas Touch"] .. " gained)"
 				end
 				return  self.wrapPixelsInline(toReturn, SRS_DESC_WIDTH - SRS_WRAP_BUFFER)
 			end,
