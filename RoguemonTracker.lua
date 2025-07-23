@@ -6391,7 +6391,12 @@ local function RoguemonTracker()
 	-- This function has to exactly mimic `GetDistortedSoulMovePower` from the ROM.
 	function self.getDistortedMovePower(moveId)
 		local distortedSeed = self.getDistortedSeed()
-		return ((distortedSeed + moveId * 7) % 60) + 30;
+		local hash = distortedSeed
+		hash = hash ~ (moveId << 3)
+		hash = hash ~ (moveId >> 2)
+		hash = hash + (moveId * 37)
+		hash = hash ~ (hash >> 8)
+		return (hash % 60) + 30;
 	end
 
 	-- This function has to exactly mimic `GetDistortedHeartMoveType` from the ROM.
@@ -6408,7 +6413,13 @@ local function RoguemonTracker()
 			end
 		end
 
-		local randomIndex = (distortedSeed + moveId * 7) % validTypeCount
+                -- Select from valid types using deterministic random
+		local hash = distortedSeed
+		hash = hash ~ (moveId << 3)
+		hash = hash ~ (moveId >> 2)
+		hash = hash + (moveId * 37)
+		hash = hash ~ (hash >> 8)
+		local randomIndex = hash % validTypeCount
 		return validTypes[randomIndex]
 	end
 
