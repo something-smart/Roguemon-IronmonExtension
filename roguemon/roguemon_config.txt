@@ -51,7 +51,7 @@ PP Up & Ether|ppupether.png
 Choose 2: Choose 2 prizes at the next gym milestone.|choose-2.png
 Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
-Midas Touch: If you trash an HP heal, gain 30% of its value as HP cap.|midas-touch.png
+Midas Touch: If you trash a non-consumable HP heal, gain 30% of its value as HP cap.|midas-touch.png
 
 *Mt. Moon Prize
 Super Potion|super-potion.png
@@ -88,7 +88,7 @@ Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
 Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 Special Insight: Learn every enemy pokemon's ability.|special-insight.png
-Midas Touch: If you trash an HP heal, gain 30% of its value as HP cap.|midas-touch.png
+Midas Touch: If you trash a non-consumable HP heal, gain 30% of its value as HP cap.|midas-touch.png
 
 *Surge Prize
 TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
