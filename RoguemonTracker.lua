@@ -6830,6 +6830,9 @@ local function RoguemonTracker()
 		local distortedSeedSet = self.getDistortedSeed() > 0
 		if distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Heart" then
 			move.type = self.getDistortedMoveType(move.id, sourcePokemon)
+			if move.category == MoveData.Categories.SPECIAL or move.category == MoveData.Categories.PHYSICAL then
+				move.category = MoveData.TypeToCategory[move.type]
+			end
 		elseif distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Soul" then
 			-- only affects moves with non-zero base power.
 			local currentPower = tonumber(move.power)
