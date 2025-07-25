@@ -3685,13 +3685,19 @@ local function RoguemonTracker()
 							["fairy"] = 358 -- Fairy Wind
 						}
 						local monTypes = PokemonData.Pokemon[Tracker.getPokemon(1).pokemonID].types
-						local validTypes = {}
+						local pkmn = self.readLeadPokemonData()
+						local currentMoves = {[Utils.getbits(pkmn.attack1, 0, 16)] = true, 
+										[Utils.getbits(pkmn.attack1, 16, 16)] = true, 
+										[Utils.getbits(pkmn.attack2, 0, 16)] = true, 
+										[Utils.getbits(pkmn.attack2, 16, 16)] = true}
+						local validMoves = {}
 						for val,type in pairs(PokemonData.TypeIndexMap) do
-							if type ~= PokemonData.Types.UNKNOWN and type ~= monTypes[1] and type ~= monTypes[2] then
-								validTypes[#validTypes + 1] = type
+							local move = starterPackMoves[type]
+							if type ~= PokemonData.Types.UNKNOWN and type ~= monTypes[1] and type ~= monTypes[2] and not currentMoves[move]
+								validMoves[#validMoves + 1] = starterPackMoves[type]
 							end
 						end
-						prospectiveStarterPackMove = starterPackMoves[validTypes[math.random(#validTypes)]]
+						prospectiveStarterPackMove = validMoves[math.random(#validMoves)]
 						choice = choice .. ": Learn a weak move (" .. MoveData.Moves[prospectiveStarterPackMove].name .. ")."
 					end
 					for _,itm in pairs(MiscData.HealingItems) do
