@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.4.3-beta.1"
+	self.version = "1.4.3-beta.2"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -6023,7 +6023,7 @@ local function RoguemonTracker()
 			end
 		end
 
-		if not wardOfferedYet and specialRedeems.consumable["Warding Charm"] and getActiveCurse() and Program.currentScreen == TrackerScreen then
+		if not wardOfferedYet and specialRedeems.consumable["Warding Charm"] and self.getActiveCurse() and Program.currentScreen == TrackerScreen then
 			self.offerBinaryOption("Ward", "Don't")
 			wardOfferedYet = true
 		end
