@@ -778,9 +778,9 @@ local function RoguemonTracker()
 						if pokeInfo and newPokeInfo and newPokeInfo.curHP <= pokeInfo.curHP then
 							local hVal = 0
 							if hInfo.type == MiscData.HealingType.Constant then
-								hVal = math.floor(.3 * hInfo.amount)
+								hVal = math.floor(.3 * hInfo.amount) * (-1 * q)
 							else
-								hVal = math.floor(.3 * hInfo.amount / 100 * newPokeInfo.stats.hp)
+								hVal = math.floor(.3 * hInfo.amount / 100 * newPokeInfo.stats.hp) * (-1 * q)
 							end
 							hpCap = hpCap + hVal
 							hpCapModifier = hpCapModifier + hVal
@@ -1622,11 +1622,13 @@ local function RoguemonTracker()
 			and not (specialRedeems.unlocks["Cooler Bag"] and item == "Berry Juice") then
 				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
 				self.NotificationScreen.itemInQuestion = item
-				if notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse() == "Kaizo Curse") then
-					return (item .. " must be used, equipped, or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
-				else
-					return (item .. " must be equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
+				local equipMessage = item .. (notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse() == "Kaizo Curse")) and 
+					" must be used, equipped, or trashed" or " must be equipped or trashed"
+				local heldItem = Tracker.getPokemon(1, true).heldItem
+				if heldItem > 0 then
+					equipMessage = equipMessage .. " (Current item: " .. TrackerAPI.getItemName(heldItem) .. ")"
 				end
+				return equipMessage, item .. ".png", function() return self.itemNotPresent(itemId) end
 			elseif notifyOnPickup.vitamins[item] then
 				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["TrashPickup"]
 				self.NotificationScreen.itemInQuestion = item
