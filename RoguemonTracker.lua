@@ -6069,6 +6069,20 @@ local function RoguemonTracker()
 		if not caughtSomethingYet and #Program.GameData.PlayerTeam > 1 then
 			caughtSomethingYet = true
 		end
+
+		-- Display suppressed notifications from before the player has committed	
+		if committed and lastMilestone == nil and Program.currentScreen == TrackerScreen then
+			if #suppressedNotifications > 0 then
+				local n = table.remove(suppressedNotifications, 1)
+				self.NotificationScreen.queuedAuxiliary = n.queuedAuxiliary
+				self.NotificationScreen.itemInQuestion = n.itemInQuestion
+				self.displayNotification(n.message, n.image, n.dismissFunction)
+			else
+				self.spinReward("Rival 1", false)
+			end
+		end
+
+		-- Check if the player has just committed to their mon by using the scientist in the forest
 		if not committed and self.readGameVar(GameSettings.roguemon.varMilestone) >= 2 then
 			committed = true
 			if RoguemonOptions["Egg reminders"] and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem ~= 197 and not self.itemNotPresent(197) then
@@ -6206,18 +6220,6 @@ local function RoguemonTracker()
 			GameOverScreen.refreshButtons()
 			GameOverScreen.Buttons.SaveGameFiles:reset()
 			self.displayNotification("The game is not over! Use your Revive!", "revive.png", function() return self.itemNotPresent(self.getItemId("Revive")) end)
-		end
-
-		-- Display suppressed notifications from before the player has committed
-		if committed and lastMilestone == nil and Program.currentScreen == TrackerScreen then
-			if #suppressedNotifications > 0 then
-				local n = table.remove(suppressedNotifications, 1)
-				self.NotificationScreen.queuedAuxiliary = n.queuedAuxiliary
-				self.NotificationScreen.itemInQuestion = n.itemInQuestion
-				self.displayNotification(n.message, n.image, n.dismissFunction)
-			else
-				self.spinReward("Rival 1", false)
-			end
 		end
 
 		-- if we haven't yet chosen the curses for this seed, choose them now
