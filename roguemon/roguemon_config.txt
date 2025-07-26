@@ -84,7 +84,7 @@ Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandrerol
 PP Up & Max Ether|ppupmaxether.png
 Any Vitamin x2 & Super Potion|2vitsuper.png
 Any Vitamin x3|3vit.png
-Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
+Potion & Clairvoyance: Learn all future curses, and can make one swap.|clairvoyance.png
 Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 Special Insight: Learn every enemy pokemon's ability.|special-insight.png
