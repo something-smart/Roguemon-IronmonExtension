@@ -5819,7 +5819,7 @@ local function RoguemonTracker()
 					Program.changeScreenView(self.ClairvoyanceCurseScreen)
 				else
 					local curseInfoText = ""
-					for _,seg in self.getLiveCurses() do
+					for _,seg in pairs(self.getLiveCurses()) do
 						curseInfoText = curseInfoText .. seg .. " @ "
 					end
 					if self.getActiveCurse() then
