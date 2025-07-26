@@ -23,7 +23,7 @@ Potion & Fight wilds in Rts 1/2/22: Fight the first encounter on each. You may P
 Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 Berry Juice|berry-juice.png
-Clairvoyance: Learn all future curses.|clairvoyance.png
+Clairvoyance: Learn all future curses, and can make one swap.|clairvoyance.png
 Starter Pack|starter-pack.png
 Notetaker: Notes on enemy pokemon transfer to their evolution.|notetaker.png
 
@@ -49,7 +49,7 @@ Any Vitamin x2 & Potion|2vitpot.png
 Any Vitamin & Potion x2|2potvit.png
 PP Up & Ether|ppupether.png
 Choose 2: Choose 2 prizes at the next gym milestone.|choose-2.png
-Potion & Clairvoyance: Learn all future curses.|clairvoyance.png
+Potion & Clairvoyance: Learn all future curses, and can make one swap.|clairvoyance.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
 Midas Touch: If you trash a non-consumable HP heal, gain 30% of its value as HP cap.|midas-touch.png
 
