@@ -145,7 +145,7 @@ local function RoguemonTracker()
 		["Game Corner"] = {["routes"] = {27, 128, 129, 130, 131}, ["mandatory"] = {357, 368, 366, 367, 348}, ["cursable"] = true, ["items"] = {1011, 0x16C, 0x16D, 0x16F, 0x171, 0x170, 0x16E, 1012, 0x1D2, 0x172, 0x173, 1013, 1134, 0x176, 0x175, 0x174}},
 		["Pokemon Tower"] = {["routes"] = {161, 163, 164, 165, 166, 167}, ["mandatory"] = {447, 453, 452, 369, 370, 371}, ["cursable"] = true, ["items"] = {0x177, 0x179, 0x178, 0x17A, 1014, 0x1D0, 0x17B, 0x17C, 0x17D}},
 		["Cycling Rd/Rt 18/19"] = {["routes"] = {104, 105, 106, 107}, ["trainers"] = {199, 201, 202, 249, 250, 251, 203, 204, 205, 206, 252, 253, 254, 255, 256, 470, 307, 308, 309, 235, 236}, ["cursable"] = true,
-			["items"] = {1018, 1021, 1020, 1019, 1017}},
+			["items"] = {1018, 1021, 1020, 1019, 1017}, ["endMap"] = 85},
 		["Koga"] = {["routes"] = {20}, ["allMandatory"] = true, ["gymCursable"] = true},
 		["Safari Zone"] = {["routes"] = {147, 148, 149, 150}, ["items"] = {1022, 0x181, 0x183, 0x185, 0x182, 0x184, 0x186, 0x1D3, 0x187, 1023, 0x189, 0x18A, 0x18B, 0x188}},
 		["Silph Co"] = {["routes"] = {132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142}, ["mandatory"] = {432, 433, 434, 391, 349}, ["rival"] = true, ["cursable"] = true, ["bannedCurses"] = {["1000 Cuts"] = true, ["Toxic Fumes"] = true},
@@ -156,7 +156,7 @@ local function RoguemonTracker()
 		["Giovanni"] = {["routes"] = {37}, ["allMandatory"] = true, ["gymCursable"] = true},
 		["Rival 7"] = {["routes"] = {110}, ["trainers"] = {435, 436, 437}, ["allMandatory"] = true, ["rival"] = true},
 		["Victory Road"] = {["routes"] = {125, 126, 127}, ["cursable"] = true, ["bannedCurses"] = {["Forgetfulness"] = true, ["Downsizing"] = true, ["Poltergeist"] = true},
-			["itemsBefore"] = {1147, 1034, 1148, 1036, 1146, 1035}, ["items"] = {1038, 1037, 0x1A9, 0x1AA, 0x1AD, 0x1AB, 0x1AC, 0x1AE, 0x1AF, 0x1B0, 1145, 1155}},
+			["itemsBefore"] = {1147, 1034, 1148, 1036, 1146, 1035}, ["items"] = {1038, 1037, 0x1A9, 0x1AA, 0x1AD, 0x1AB, 0x1AC, 0x1AE, 0x1AF, 0x1B0, 1145, 1155}, ["endMap"] = 87},
 		["Pokemon League"] = {["routes"] = {212, 213, 214, 215, 216, 217}, ["allMandatory"] = true, ["rival"] = true},
 		["Congratulations!"] = {["routes"] = {}},
 		["Route 12 + 13"] = {["routes"] = {100, 101}, ["items"] = {1042, 1130, 0x17F, 0x17E, 1015}},
@@ -369,6 +369,7 @@ local function RoguemonTracker()
 	local pokeInfo = nil
 	local itemsFromPrize = {}
 	local previousMap = nil
+	local lastVisitedMap = nil
 
 	local wildBattleCounter = 0
 	local wildBattlesStarted = false
@@ -5941,7 +5942,8 @@ local function RoguemonTracker()
 		-- end
 		local centerCt = Utils.getGameStat(Constants.GAME_STATS.USED_POKECENTER)
 		if centerCt > centersUsed then
-			if segmentStarted and mandatoriesDefeated >= self.getSegmentMandatoryCount(currentSegment) then
+			if segmentStarted and mandatoriesDefeated >= self.getSegmentMandatoryCount(currentSegment) and 
+			not (segments[segmentOrder[currentSegment]]["endMap"] and segments[segmentOrder[currentSegment]]["endMap"] ~= lastVisitedMap) then
 				self.nextSegment()
 				self.saveData()
 			end
@@ -6088,14 +6090,6 @@ local function RoguemonTracker()
 			end
 		end
 
-		-- if defeatedTrainerIds[414] and not needToBuy and not (needToCleanse > 0) and Program.currentScreen == TrackerScreen and not showedEggReminderAfterBrock 
-		-- and RoguemonOptions["Egg reminders"] and (previousMap == 10) and Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem == 197 then
-		-- 	showedEggReminderAfterBrock = true
-		-- 	self.displayNotification("Your free Egg trial has expired", "lucky-egg.png", function()
-		-- 		return (Tracker.getPokemon(1, true).heldItem ~= 197 and self.itemNotPresent(197))
-		-- 	end)
-		-- end
-
 		if defeatedTrainerIds[414] and not showedEggReminderAfterBrock and RoguemonOptions["Egg reminders"] and 
 		Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem == 197 then
 			showedEggReminderAfterBrock = true
@@ -6111,6 +6105,7 @@ local function RoguemonTracker()
 				self.nextSegment()
 				self.saveData()
 			end
+			lastVisitedMap = previousMap
 			previousMap = mapId
 		end
 
