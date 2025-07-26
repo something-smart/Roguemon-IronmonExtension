@@ -3599,7 +3599,7 @@ local function RoguemonTracker()
 				end
 			end,
 			isVisible = function()
-				return (i <= #self.getLiveCurses()) and (specialRedeems.consumable["Clairvoyance"]) 
+				return (i <= #self.getLiveCurses()) and (specialRedeems.consumable["Clairvoyance"] and not (i == 1 and self.getActiveCurse())) 
 			end,
 			boxColors = {"Default text"}
 		}
