@@ -178,41 +178,41 @@ local function RoguemonTracker()
 	}
 
 	local curseInfo = {
-		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight", segment = true, gym = false,
+		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight.", segment = true, gym = false,
 							longDescription = "After the first fight this segment, your bottom-most move is changed to a random move."},
-		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap", segment = true, gym = false,
+		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap.", segment = true, gym = false,
 							longDescription = "If this segment is not full cleared, lose 50 HP Cap."},
-		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently", segment = true, gym = false,
+		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently.", segment = true, gym = false,
 							longDescription = "If this segment is not full cleared, all future prize spins will have only 2 options."},
-		["Tormented Soul"] = {description = "Cannot use the same move twice in a row", segment = true, gym = true},
-		["Kaizo Curse"] = {description = "Cannot use healing items outside of battle", segment = true, gym = true},
-		["Headwind"] = {description = "Start fights at -1 or -2 Speed", segment = true, gym = true},
-		["Sharp Rocks"] = {description = "All enemies have +2 crit rate", segment = true, gym = true},
-		["High Pressure"] = {description = "Start missing 50% PP on all moves", segment = true, gym = true},
-		["Heavy Fog"] = {description = "All combatants have -1 Accuracy", segment = true, gym = true},
-		["Unstable Ground"] = {description = "75% to flinch on first turn of a fight", segment = true, gym = true},
-		["1000 Cuts"] = {description = "Permanent -5 HP Cap when hit by an attack", segment = true, gym = false},
-		["Acid Rain"] = {description = "Each fight has a random weather", segment = true, gym = false},
-		["Toxic Fumes"] = {description = "Take 1 damage every 8 steps (can't faint)", segment = true, gym = false,
+		["Tormented Soul"] = {description = "Cannot use the same move twice in a row.", segment = true, gym = true},
+		["Kaizo Curse"] = {description = "Cannot use healing items outside of battle.", segment = true, gym = true},
+		["Headwind"] = {description = "Start fights at -1 or -2 Speed.", segment = true, gym = true},
+		["Sharp Rocks"] = {description = "All enemies have +2 crit rate.", segment = true, gym = true},
+		["High Pressure"] = {description = "Start missing 50% PP on all moves.", segment = true, gym = true},
+		["Heavy Fog"] = {description = "All combatants have -1 Accuracy.", segment = true, gym = true},
+		["Unstable Ground"] = {description = "75% to flinch on first turn of a fight.", segment = true, gym = true},
+		["1000 Cuts"] = {description = "Permanent -5 HP Cap when hit by an attack.", segment = true, gym = false},
+		["Acid Rain"] = {description = "Each fight has a random weather.", segment = true, gym = false},
+		["Toxic Fumes"] = {description = "Take 1 damage every 8 steps (can't faint).", segment = true, gym = false,
 							longDescription = "Take 1 damage for every 8 steps walked. This can't bring you below 1 HP.", romCurse = ROM_CURSES["TOXIC_FUMES"]},
-		["Narcolepsy"] = {description = "30% to fall asleep after each fight", segment = true, gym = false},
-		["Clean Air"] = {description = "Enemies have Mist, Safeguard, and Ingrain", segment = true, gym = false},
-		["Clouded Instincts"] = {description = "First move in battle must be 1st slot", segment = true, gym = false},
-		["Unruly Spirit"] = {description = "10% to flinch on every turn", segment = true, gym = true},
-		["Chameleon"] = {description = "Typing is randomized each battle", segment = true, gym = true,
+		["Narcolepsy"] = {description = "30% to fall asleep after each fight.", segment = true, gym = false},
+		["Clean Air"] = {description = "Enemies have Mist, Safeguard, and Ingrain.", segment = true, gym = false},
+		["Clouded Instincts"] = {description = "First move in battle must be 1st slot.", segment = true, gym = false},
+		["Unruly Spirit"] = {description = "10% to flinch on every turn.", segment = true, gym = true},
+		["Chameleon"] = {description = "Typing is randomized each battle.", segment = true, gym = true,
 							longDescription = "Your typing is randomized for each battle. This cannot give you STAB on your attacks."},
-		["No Cover"] = {description = "Enemies cannot miss you", segment = true, gym = true},
-		["Relay Race"] = {description = "Enemy stat stages carry over, with +1 Speed", segment = true, gym = true,
+		["No Cover"] = {description = "Enemies cannot miss you.", segment = true, gym = true},
+		["Relay Race"] = {description = "Enemy stat stages carry over, with +1 Speed.", segment = true, gym = true,
 							longDescription = "All enemy pokemon start with +1 Speed, plus any stat changes that the previous pokemon in the fight had."},
-		["Resourceful"] = {description = "Lose PP after fights; moves at 0 change", segment = true, gym = false,
+		["Resourceful"] = {description = "Lose 0-2 PP on last used move after fights; moves at 0 change.", segment = true, gym = false,
 							longDescription = "After each battle, lose 0-2 PP on your last used move. Then, if any moves are at 0 PP, they are changed to a random move."},
-		["Safety Zone"] = {description = "If fighting, <75% HP, 30% to lose a heal", segment = true, gym = false,
+		["Safety Zone"] = {description = "If fighting at <75% HP, 30% to lose a healing item.", segment = true, gym = false,
 							longDescription = "If you start a fight with less than 75% of your max HP, 30% chance to lose a random HP heal from your bag."},
-		["Live Audience"] = {description = "When hit by a move, Encored for 2-3 turns", segment = true, gym = false,
+		["Live Audience"] = {description = "When hit by a move, Encored for 2-3 turns.", segment = true, gym = false,
 							longDescription = "When you are hit by a damaging move, you are forced to repeat the same move you used for 2-3 turns."},
-		["Moody"] = {description = "+1 and -1 to random stats each turn", segment = true, gym = true, romCurse = ROM_CURSES["MOODY"]},
-		["Curse of Decay"] = {description = "When you use a move, -1 EV in its attacking stat", segment = true, gym = true},
-		["Poltergeist"] = {description = "No FC = cursed item effects on pickup", segment = true, gym = false,
+		["Moody"] = {description = "+1 and -1 to random stats each turn.", segment = true, gym = true, romCurse = ROM_CURSES["MOODY"]},
+		["Curse of Decay"] = {description = "When you use a move, -1 EV in its attacking stat.", segment = true, gym = true},
+		["Poltergeist"] = {description = "No FC = cursed item effects on pickup.", segment = true, gym = false,
 							longDescription = "If this segment isn't full cleared, all type-boosting items will apply a unique negative effect on pickup.",
 						extremelyLongDescription = {
 							"If this segment isn't full cleared, all type-boosting items will apply a unique negative effect on pickup.",
@@ -220,25 +220,25 @@ local function RoguemonTracker()
 							"Silk Scarf: Start next fight confused @ Black Belt: Lose 20 EVs in highest attacking stat @ Dragon Fang: Reset to start of level @ BlackGlasses: Lose your smallest PP heal @ FairyFeather: -1 option on next prize spin",
 							"Mystic Water: Lose a random specific status heal @ SilverPowder: Lose your smallest HP heal @ Sharp Beak: Lose 1/8 of your max HP (can't faint) @ Metal Coat: -20 HP Cap @ Soft Sand: Lose 1 to all IVs @ Miracle Seed: Start next fight Leech Seeded"
 						}},
-		["Debilitation"] = {description = "Attacking IVs temporarily set to 0", segment = true, gym = false},
-		["Time Warp"] = {description = "Lose 25% of your EXP until the segment ends", segment = true, gym = true},
-		["TikTok"] = {description = "One move per fight is secretly Metronome", segment = true, gym = false, romCurse = ROM_CURSES["TIKTOK"]},
-		["Bloodborne"] = {description = "When you use an HP heal, lose 20% of its value from your cap", segment = true, gym = false},
-		["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6 ", segment = true, gym = true, romCurse = ROM_CURSES["FREEFALL"],
+		["Debilitation"] = {description = "Attacking IVs temporarily set to 0.", segment = true, gym = false},
+		["Time Warp"] = {description = "Lose 25% of your EXP until the segment ends.", segment = true, gym = true},
+		["TikTok"] = {description = "One move per fight is secretly Metronome.", segment = true, gym = false, romCurse = ROM_CURSES["TIKTOK"]},
+		["Bloodborne"] = {description = "When you use an HP heal, lose 20% of its value from your cap.", segment = true, gym = false},
+		["Freefall"] = {description = "+1 Speed per turn, take 1/8 damage at +6.", segment = true, gym = true, romCurse = ROM_CURSES["FREEFALL"],
 							longDescription = "Gain +1 Speed at the end of every turn. When ending a turn with +6 speed, take damage equal to 1/8 of your maximum HP."},
-		["Backseating"] = {description = "Don't use marked move: -1 to a random stat", segment = true, gym = false,
-							longDescription = "Each turn, 'chat' suggests one move; if you don't use that move on that turn, you get -1 to a random stat for the fight."},
-		["Malware"] = {description = "-1 in attack stat for lead's lower defense", segment = true, gym = false,
+		["Backseating"] = {description = "Don't use marked move: -1 to a random stat.", segment = true, gym = false,
+							longDescription = "Each turn, 'chat' suggests one random move; if you don't use it that turn, you get -1 to a random stat for the fight."},
+		["Malware"] = {description = "-1 in attack stat for lead's lower defense.", segment = true, gym = false,
 							longDescription = "-1 in attacking stat corresponding to lead's lower defense",},
-		["Conversion"] = {description = "Enemy pokemon become a type matching a move", segment = true, gym = true,
+		["Conversion"] = {description = "Enemy pokemon become a type matching a move.", segment = true, gym = true,
 							longDescription = "Enemy pokemon change to a type matching one of their moves"},
-		["Perfectly Balanced"] = {description = "Your BST is redistributed evenly for this segment", segment = true, gym = true, romCurse = ROM_CURSES["MEDIOCRITIZE"]},
-		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight", segment = true, gym = false,
+		["Perfectly Balanced"] = {description = "Your BST is redistributed evenly for this segment.", segment = true, gym = true, romCurse = ROM_CURSES["MEDIOCRITIZE"]},
+		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight.", segment = true, gym = false,
 							longDescription = "HP is randomized to 25%, 50%, 75%, or 100% after each fight"},
-		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP", segment = true, gym = false, romCurse = ROM_CURSES["DAVID_VS"]},
-		["Distorted Heart"] = {description = "Your move types are randomized", segment = true, gym = false, romCurse = ROM_CURSES["DISTORTED_HEART"],
+		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP.", segment = true, gym = false, romCurse = ROM_CURSES["DAVID_VS"]},
+		["Distorted Heart"] = {description = "Your moves' types are randomized.", segment = true, gym = false, romCurse = ROM_CURSES["DISTORTED_HEART"],
 								longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
-		["Distorted Soul"] = {description = "Your moves' powers are randomized", segment = true, gym = false, romCurse = ROM_CURSES["DISTORTED_SOUL"],
+		["Distorted Soul"] = {description = "Your moves' powers are randomized.", segment = true, gym = false, romCurse = ROM_CURSES["DISTORTED_SOUL"],
 								longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
 	}
 
@@ -386,20 +386,20 @@ local function RoguemonTracker()
 
 	-- curse related values
 	local curseData = {
-		curseAppliedThisFight = false
-		curseAppliedThisSegment = false
-		inBattleTurnCount = 0
-		lastAttackDamage = 0
-		shouldFlinchFirstTurn = false
-		flinchCheckFirstTurn = false
-		weatherApplied = nil
-		thisFightFaintCount = 0
-		relayRaceStats = {atk = 0, def = 0, spa = 0, spd = 0, spe = 0, acc = 0, eva = 0}
-		faintToProcess = false
-		lastUsedMove = nil
-		ppValues = {0, 0, 0, 0}
-		curseCooldown = 0
-		backseatingMove = nil
+		curseAppliedThisFight = false,
+		curseAppliedThisSegment = false,
+		inBattleTurnCount = 0,
+		lastAttackDamage = 0,
+		shouldFlinchFirstTurn = false,
+		flinchCheckFirstTurn = false,
+		weatherApplied = nil,
+		thisFightFaintCount = 0,
+		relayRaceStats = {atk = 0, def = 0, spa = 0, spd = 0, spe = 0, acc = 0, eva = 0},
+		faintToProcess = false,
+		lastUsedMove = nil,
+		ppValues = {0, 0, 0, 0},
+		curseCooldown = 0,
+		backseatingMove = nil,
 		currentEnemyMon = nil
 	}
 
@@ -3505,16 +3505,17 @@ local function RoguemonTracker()
 
 	-- Screen for displaying curse information with Clairvoyance
 	-- Layout constants
-	local CCS_TOP_LEFT_X = 6
-	local CCS_TEXT_WIDTH = 115
-	local CCS_TOP_Y = 22
+	local CCS_TOP_LEFT_X = 12
+	local CCS_TEXT_WIDTH = 109
+	local CCS_TOP_Y = 7
 	local CCS_WRAP_BUFFER = 7
 	local CCS_HORIZONTAL_GAP = 6
 	local CCS_BUTTON_WIDTH = 15
 	local CCS_BUTTON_HEIGHT = 10
-	local CCS_LINE_HEIGHT = 20
-	local CCS_LINE_COUNT = 8
-	local CCS_DESC_WIDTH = 105
+	local CCS_LINE_HEIGHT = 18
+	local CCS_LINE_COUNT = 7
+	local CCS_DESC_X = 4
+	local CCS_DESC_WIDTH = 133
 
 	self.ClairvoyanceCurseScreen = {}
 
@@ -3534,14 +3535,12 @@ local function RoguemonTracker()
 
 		gui.drawRectangle(canvas.x, canvas.y, canvas.w, canvas.h, canvas.border, canvas.fill)
 
-		-- Header text
-		Drawing.drawText(Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 10, 10, "Curses", Theme.COLORS["Default text"])
-
-		for i = 1,CCS_LINE_COUNT do
+		for i = 1,#self.getLiveCurses() do
 			local button = self.ClairvoyanceCurseScreen.Buttons["S" .. i]
-			button.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_TOP_LEFT_X + CCS_TEXT_WIDTH, CCS_TOP_Y + ((i-1)*(CCS_LINE_HEIGHT)), 
+			button.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_TOP_LEFT_X + CCS_TEXT_WIDTH + 1, CCS_TOP_Y + ((i-1)*(CCS_LINE_HEIGHT)), 
 			CCS_BUTTON_WIDTH, CCS_BUTTON_HEIGHT }
 		end
+		self.ClairvoyanceCurseScreen.Buttons.DescriptionText.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_DESC_X, CCS_TOP_Y + #self.getLiveCurses()*CCS_LINE_HEIGHT, CCS_DESC_WIDTH, 70}
 
 		for _, button in pairs(self.ClairvoyanceCurseScreen.Buttons or {}) do
 			Drawing.drawButton(button)
@@ -3552,8 +3551,8 @@ local function RoguemonTracker()
 		-- Back to main screen button
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return "Back" end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 100, 8, 22, 10},
+			getText = function() return "<" end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 3, 7, 9, 10},
 			onClick = function()
 				self.returnToHomeScreen()
 			end,
@@ -3564,9 +3563,9 @@ local function RoguemonTracker()
 			type = Constants.ButtonTypes.NO_BORDER,
 			getText = function()
 				local toReturn = curseToDescribe and curseInfo[curseToDescribe].description or ""
-				return  self.wrapPixelsInline(toReturn, CCS_DESC_WIDTH - CCS_WRAP_BUFFER)
+				return self.wrapPixelsInline(toReturn, CCS_DESC_WIDTH - CCS_WRAP_BUFFER)
 			end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_TOP_LEFT_X, CCS_TOP_Y + CCS_LINE_COUNT*CCS_LINE_HEIGHT, CCS_DESC_WIDTH, 70}
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_DESC_X, CCS_TOP_Y + CCS_LINE_COUNT*CCS_LINE_HEIGHT, CCS_DESC_WIDTH, 70}
 		}
 	}
 
@@ -3608,22 +3607,22 @@ local function RoguemonTracker()
 		-- Curse name button (it's a button because clicking on it brings up the description)
 		self.ClairvoyanceCurseScreen.Buttons["Text" .. i] = {
 			type = Constants.ButtonTypes.NO_BORDER,
-			getText = function()
+			getText = function(this)
 				local curseSegment = self.getLiveCurses()[i]
-				local curseName = cursedSegments[curseSegment]
-				if not curseName then
+				this.curse = cursedSegments[curseSegment]
+				if not this.curse then
 					return ""
 				end
-				return self.wrapPixelsInline(curseSegment .. ": " .. curseName, CCS_TOP_LEFT_X + CCS_TEXT_WIDTH - CCS_WRAP_BUFFER)
+				return self.wrapPixelsInline(curseSegment .. ": " .. this.curse, CCS_TOP_LEFT_X + CCS_TEXT_WIDTH - CCS_WRAP_BUFFER)
 			end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_TOP_LEFT_X, CCS_TOP_Y + (i-1)*CCS_LINE_HEIGHT, CCS_TEXT_WIDTH, CCS_LINE_HEIGHT },
 			onClick = function(this)
-				local curse = Utils.split(this.getText(), ":", true)[1]
-				if curse ~= "" then 
-					curseToDescribe = curse
+				if this.curse then 
+					curseToDescribe = this.curse
 					Program.redraw(true)
 				end
-			end
+			end,
+			curse = nil
 		}
 	end
 
@@ -4586,7 +4585,7 @@ local function RoguemonTracker()
 		return calculatedStats
 	end
 
-	function self.getcurseData.lastAttackDamage()
+	function self.getLastAttackDamage()
 		-- attackerValue = 0 or 2 for player mons and 1 or 3 for enemy mons (2,3 are doubles partners)
 		self.attacker = Memory.readbyte(GameSettings.gBattlerAttacker)
 	
@@ -4678,7 +4677,7 @@ local function RoguemonTracker()
 			end
 		end
 		if curse == "1000 Cuts" or curse == "Live Audience" then
-			Program.addFrameCounter("Last Attack Damage", 10, self.getcurseData.lastAttackDamage)
+			Program.addFrameCounter("Last Attack Damage", 10, self.getLastAttackDamage)
 		end
 		if curse == "Clouded Instincts" then
 			local pkmn = self.readLeadPokemonData()
