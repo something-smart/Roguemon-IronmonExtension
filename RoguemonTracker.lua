@@ -2580,18 +2580,6 @@ local function RoguemonTracker()
 					end
 				}
 			},
-			-- ["Curse:"] = {
-			-- 	nil,
-			-- 	{
-			-- 		name = "Ward",
-			-- 		onClick = function()
-			-- 			self.wardCurse()
-			-- 		end,
-			-- 		isVisible = function()
-			-- 			return specialRedeems.consumable["Warding Charm"]
-			-- 		end
-			-- 	}
-			-- },
 			["EquipTrashPickup"] = {
 				{
 					name = "Equip",
@@ -3076,7 +3064,7 @@ local function RoguemonTracker()
 		elseif summaryItem.type == "Curse" then
 			-- Image
 			local imgName = "Curse.png"
-			if summaryItem.title and #summaryItem.title > 8 and string.sub(summaryItem.title, #summaryItem.title - 8, #summaryItem.title) == "(Warded)" then
+			if summaryItem.title and #summaryItem.title > 8 and string.sub(summaryItem.title, #summaryItem.title - 7, #summaryItem.title) == "(Warded)" then
 				imgName = "warding-charm.png"
 			end
 			Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. imgName, canvas.x + 40, 20, IMAGE_WIDTH*2, IMAGE_WIDTH*2)
@@ -4238,7 +4226,9 @@ local function RoguemonTracker()
 			end
 		end
 		if option == "Ward" then
-
+			self.wardCurse()
+			additionalOptionsRemaining = additionalOptionsRemaining - 1
+			special = true
 		end
 		-- Regular item option
 		if not special and option ~= "" and additionalOptionsRemaining > 0 then
