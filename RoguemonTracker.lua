@@ -1630,11 +1630,11 @@ local function RoguemonTracker()
 			and not (specialRedeems.unlocks["Cooler Bag"] and item == "Berry Juice") then
 				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
 				self.NotificationScreen.itemInQuestion = item
-				local equipMessage = item .. (notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse() == "Kaizo Curse")) and 
-					" must be used, equipped, or trashed" or " must be equipped or trashed"
+				local equipMessage = item .. ((notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse() == "Kaizo Curse")) and 
+					" must be used, equipped, or trashed" or " must be equipped or trashed")
 				local heldItem = Tracker.getPokemon(1, true).heldItem
 				if heldItem > 0 then
-					equipMessage = equipMessage .. " (Current item: " .. TrackerAPI.getItemName(heldItem) .. ")"
+					equipMessage = equipMessage .. " @ (Current item: " .. TrackerAPI.getItemName(heldItem) .. ")"
 				end
 				return equipMessage, item .. ".png", function() return self.itemNotPresent(itemId) end
 			elseif notifyOnPickup.vitamins[item] then
