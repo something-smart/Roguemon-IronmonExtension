@@ -1002,10 +1002,11 @@ local function RoguemonTracker()
 		Utils.printDebug("> RogueMon Warning: " .. msg, ...)
 	end
 
-	-- writes a message in a single line to the debug log file.
-	function self.debugLog(msg)
+	-- writes a single log line to a debug file
+	function self.debugLog(msg, ...)
 		local file = io.open(self.Paths.DEBUG_LOG, "a")
-		file:write(msg .. "\n")
+		local timestamp = os.date("%Y-%m-%d %H:%M:%S   ")
+		file:write(string.format(timestamp .. msg, ...) .. "\n")
 		file:close()
 	end
 
@@ -1850,6 +1851,7 @@ local function RoguemonTracker()
 	-- Marks all of the trainers for the given segment as defeated in the ROM, such that
 	-- players don't accidentally fight trainers from past segments when backtracking.
 	function self.nullifyTrainers(segment)
+		self.debugLog("nullifyTrainers running. segment: %s", segment)
 		local segInfo = segments[segmentOrder[segment]]
 		local flagBytes = {}
 
@@ -1876,6 +1878,7 @@ local function RoguemonTracker()
 
 	-- Move to the next segment.
 	function self.nextSegment()
+		self.debugLog("nextSegment running. currentSegment: %s", currentSegment)
 		local curse = self.getActiveCurse()
 		if curse then
 			self.resetTheme()
@@ -6092,6 +6095,7 @@ local function RoguemonTracker()
 		-- end
 		local centerCt = Utils.getGameStat(Constants.GAME_STATS.USED_POKECENTER)
 		if centerCt > centersUsed then
+			self.debugLog("centerCt: %d, centersUsed: %d", centerCt, centersUsed)
 			if segmentStarted and mandatoriesDefeated >= self.getSegmentMandatoryCount(currentSegment) and 
 			not (segments[segmentOrder[currentSegment]]["endMap"] and segments[segmentOrder[currentSegment]]["endMap"] ~= lastVisitedMap) then
 				self.nextSegment()
@@ -6836,6 +6840,7 @@ local function RoguemonTracker()
 		if Main.IsOnBizhawk() then
 			Drawing.clearImageCache()
 			Utils.printDebug("--------Randomizing--------")
+			self.debugLog("--------Randomizing--------")
 		else
 			MGBA.clearConsole()
 		end
