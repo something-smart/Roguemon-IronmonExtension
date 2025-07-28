@@ -1633,7 +1633,7 @@ local function RoguemonTracker()
 				self.NotificationScreen.itemInQuestion = item
 				local equipMessage = item .. ((notifyOnPickup.consumables[item] == 2 and not (self.getActiveCurse() == "Kaizo Curse")) and 
 					" must be used, equipped, or trashed" or " must be equipped or trashed")
-				local heldItem = Tracker.getPokemon(1, true).heldItem
+				local heldItem = Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem or 0
 				if heldItem > 0 then
 					equipMessage = equipMessage .. " @ (Current item: " .. TrackerAPI.getItemName(heldItem) .. ")"
 				end
@@ -3554,7 +3554,7 @@ local function RoguemonTracker()
 			type = Constants.ButtonTypes.NO_BORDER,
 			getText = function()
 				local toReturn = curseToDescribe and curseInfo[curseToDescribe].description or ""
-				return self.wrapPixelsInline(toReturn, CCS_DESC_WIDTH - CCS_WRAP_BUFFER)
+				return self.wrapPixelsInline(toReturn, CCS_DESC_WIDTH)
 			end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_DESC_X, CCS_TOP_Y + CCS_LINE_COUNT*CCS_LINE_HEIGHT, CCS_DESC_WIDTH, 70}
 		}
