@@ -6968,18 +6968,24 @@ local function RoguemonTracker()
 		local viewingOwnInBattle = Battle.isViewingOwn and Battle.inBattle
 		local activeCurse = self.getActiveCurse()
 		local distortedSeedSet = self.getDistortedSeed() > 0
-		if distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Heart" then
+
+		local distortedHeartEligible = move.id ~= 237 and move.id ~= 311 -- Hidden Power and Weather Ball
+
+		-- Ironmon-Tracker's `variablepower` happens to almost perfectly match the set of moves
+		-- with 'power: 1' in the ROM (and thereby be ineligible for Distorted Soul).
+		-- The three cases `variablepower` is True on moves having power > 1 are Eruption,
+		-- Water Spout, and Spit Up. We explicitly carve those moves out in ShouldApplyDistortedSoul.
+		local currentPower = tonumber(move.power)
+		local distortedSoulEligible = not move.variablepower and currentPower and currentPower > 0
+
+		if distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Heart" and distortedHeartEligible then
 			move.type = self.getDistortedMoveType(move.id, sourcePokemon)
 			if move.category == MoveData.Categories.SPECIAL or move.category == MoveData.Categories.PHYSICAL then
 				move.category = MoveData.TypeToCategory[move.type]
 			end
-		elseif distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Soul" then
-			-- only affects moves with non-zero base power.
-			local currentPower = tonumber(move.power)
-			if currentPower and currentPower > 0 then
-				local distortedPower = self.getDistortedMovePower(move.id)
-				move.power = distortedPower
-			end
+		elseif distortedSeedSet and viewingOwnInBattle and activeCurse == "Distorted Soul" and distortedSoulEligible then
+			local distortedPower = self.getDistortedMovePower(move.id)
+			move.power = distortedPower
 		else
 			originalCoreFunctions.MoveData.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
 		end
