@@ -6535,7 +6535,7 @@ local function RoguemonTracker()
 		hash = hash ~ (moveId >> 2)
 		hash = hash + (moveId * 37)
 		hash = hash ~ (hash >> 8)
-		return (hash % 60) + 30;
+		return (hash % 61) + 30;
 	end
 
 	-- This function has to exactly mimic `GetDistortedHeartMoveType` from the ROM.
