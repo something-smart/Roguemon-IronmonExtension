@@ -141,8 +141,8 @@ local function RoguemonTracker()
 		["Rock Tunnel/Rt 10 S"] = {["routes"] = {154, 155}, ["trainers"] = {192, 193, 194, 168, 476, 475, 474, 158, 159, 189, 190, 191, 164, 165, 166, 157, 163, 187, 188}, ["mandatory"] = {168, 166, 159, 158, 189, 474}, ["choicePairs"] = {{191, 190}, {192, 193}}, ["cursable"] = true,
 			["items"] = {0x1C5, 0x1C4, 0x1C3, 0x1C7, 0x1C6, 1151}},
 		["Rival 5"] = {["routes"] = {161, 162}, ["trainers"] = {429, 430, 431}, ["allMandatory"] = true, ["rival"] = true},
-		["Route 8"] = {["routes"] = {96}, ["choicePairs"] = {{131, 264}}, ["cursable"] = true, ["items"] = {1129, 1128, 1127}},
-		["Erika"] = {["routes"] = {15}, ["allMandatory"] = true, ["gymCursable"] = true, ["itemsBefore"] = {1152, 1047, 0x1D1}},
+		["Route 8"] = {["routes"] = {96}, ["choicePairs"] = {{131, 264}}, ["cursable"] = true, ["items"] = {1129, 1128, 1127, 1152, 1047, 0x1D1}},
+		["Erika"] = {["routes"] = {15}, ["allMandatory"] = true, ["gymCursable"] = true},
 		["Game Corner"] = {["routes"] = {27, 128, 129, 130, 131}, ["mandatory"] = {357, 368, 366, 367, 348}, ["cursable"] = true, ["items"] = {1011, 0x16C, 0x16D, 0x16F, 0x171, 0x170, 0x16E, 1012, 0x1D2, 0x172, 0x173, 1013, 1134, 0x176, 0x175, 0x174}},
 		["Pokemon Tower"] = {["routes"] = {161, 163, 164, 165, 166, 167}, ["mandatory"] = {447, 453, 452, 369, 370, 371}, ["cursable"] = true, ["items"] = {0x177, 0x179, 0x178, 0x17A, 1014, 0x1D0, 0x17B, 0x17C, 0x17D}},
 		["Cycling Rd/Rt 18/19"] = {["routes"] = {104, 105, 106, 107}, ["trainers"] = {199, 201, 202, 249, 250, 251, 203, 204, 205, 206, 252, 253, 254, 255, 256, 470, 307, 308, 309, 235, 236}, ["cursable"] = true,
@@ -3531,8 +3531,7 @@ local function RoguemonTracker()
 			button.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_TOP_LEFT_X + CCS_TEXT_WIDTH + 1, CCS_TOP_Y + ((i-1)*(CCS_LINE_HEIGHT)), 
 			CCS_BUTTON_WIDTH, CCS_BUTTON_HEIGHT }
 		end
-		self.ClairvoyanceCurseScreen.Buttons.DescriptionText.box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + CCS_DESC_X, CCS_TOP_Y + #self.getLiveCurses()*CCS_LINE_HEIGHT, CCS_DESC_WIDTH, 70}
-
+		
 		for _, button in pairs(self.ClairvoyanceCurseScreen.Buttons or {}) do
 			Drawing.drawButton(button)
 		end
@@ -5006,8 +5005,9 @@ local function RoguemonTracker()
 					end
 					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).abilities then
 						for id, abil in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).abilities) do
-							if abil > 0 then
-								Tracker.TrackAbility(id, abil)
+							local abilId = abil.id or 0
+							if abilId > 0 then
+								Tracker.TrackAbility(id, abilId)
 							end
 						end
 					end
