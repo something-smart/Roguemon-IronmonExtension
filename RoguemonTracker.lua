@@ -4503,15 +4503,7 @@ local function RoguemonTracker()
 						[Utils.getbits(pkmn.attack1, 16, 16)] = true, 
 						[Utils.getbits(pkmn.attack2, 0, 16)] = true, 
 						[Utils.getbits(pkmn.attack2, 16, 16)] = true,
-					[165] = true, -- Struggle
-					[15] = true, -- HMs
-					[19] = true,
-					[57] = true,
-					[70] = true,
-					[127] = true,
-					[148] = true,
-					[249] = true,
-					[291] = true
+					[165] = true -- Struggle
 				} 
 		local moveNo = math.random(360)
 		while barredMoves[moveNo] do
