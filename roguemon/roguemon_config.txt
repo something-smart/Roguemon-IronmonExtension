@@ -119,7 +119,7 @@ Artiste: Learn Sketch.|artiste.png
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and teach one (or none).|tm.png
 Hyper Potion & Move Tutor 3F: May teach the Move Tutor's move on the 3rd floor of Dept Store. Cannot pre-scout.|hyperrelearner.png
-Hyper Potion & Any Vitamin|hypervitamin.png
+Hyper Potion & White Herb|hyper-potion.png
 Full Heal x2 & Super Potion|twofull-heal-super.png
 Super Potion x2 & Full Heal|twosuperandfull.png
 Any Battle Item x2|twoxitems.png
