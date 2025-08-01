@@ -1636,6 +1636,8 @@ local function RoguemonTracker()
 				local heldItem = Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem or 0
 				if heldItem > 0 then
 					equipMessage = equipMessage .. " @ (Current item: " .. TrackerAPI.getItemName(heldItem) .. ")"
+				else
+					equipMessage = equipMessage .. " @ (Current item: None)"
 				end
 				return equipMessage, item .. ".png", function() return self.itemNotPresent(itemId) end
 			elseif notifyOnPickup.vitamins[item] then
