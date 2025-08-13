@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.4.3-beta.8"
+	self.version = "1.4.3-beta.9"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -256,12 +256,12 @@ local function RoguemonTracker()
 	-- This is incremented whenever we make a change in the ROM that
 	-- requires a change in the tracker, or vice versa. We check it against
 	-- what is the ROM, and throw an error if it doesn't match.
-	local trackerCompatVersion = 0x04
+	local trackerCompatVersion = 0x05
 
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.3.6-beta"
+	local bundledRomPatchVersion = "0.3.7-beta"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
