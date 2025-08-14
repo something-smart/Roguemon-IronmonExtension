@@ -6139,6 +6139,7 @@ local function RoguemonTracker()
 		end
 
 		if not updatedRevoData then
+			PokemonRevoData.tryLoadData()
 			updatedRevoData = RoguemonRevo.overrideRevoData()
 		end
 
