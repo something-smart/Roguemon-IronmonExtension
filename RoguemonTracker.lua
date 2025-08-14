@@ -244,7 +244,7 @@ local function RoguemonTracker()
 		["Perfectly Balanced"] = {description = "Your BST is redistributed evenly for this segment.", segment = true, gym = true, romCurse = ROM_CURSES["MEDIOCRITIZE"]},
 		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight.", segment = true, gym = false,
 							longDescription = "HP is randomized to 25%, 50%, 75%, or 100% after each fight"},
-		["David vs Goliath"] = {description = "3 random enemy pokemon have +150% HP.", segment = true, gym = false, romCurse = ROM_CURSES["DAVID_VS"]},
+		["David vs Goliath"] = {description = "3 random enemy pokemon have 2.5x their usual HP.", segment = true, gym = false, romCurse = ROM_CURSES["DAVID_VS"]},
 		["Distorted Heart"] = {description = "Your moves' types are randomized.", segment = true, gym = false, romCurse = ROM_CURSES["DISTORTED_HEART"],
 								longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
 		["Distorted Soul"] = {description = "Your moves' powers are randomized.", segment = true, gym = false, romCurse = ROM_CURSES["DISTORTED_SOUL"],
