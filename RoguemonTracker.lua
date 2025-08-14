@@ -810,20 +810,26 @@ local function RoguemonTracker()
 		itemsPocket = newItemsPocket
 		berryPocket = newBerryPocket
 
-		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.level + 1 == newPokeInfo.level and (not Battle.inBattle) then
+		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.level + 1 == newPokeInfo.level then
 			-- We leveled up. Check caps again, but only out of battle 
-			self.countAdjustedHeals()
-			if RoguemonOptions["Show reminders over cap"] and adjustedHPVal > hpCap and not needToBuy then
-				self.displayNotification("An HP healing item must be used or trashed", "healing-pocket.png", function()
+			self.addUpdateCounter("Check for reminder over cap after battle", 1, 
+			function() 
+				if (not Battle.inBattle)  then
 					self.countAdjustedHeals()
-					return adjustedHPVal <= hpCap
-				end)
-			end
-			if RoguemonOptions["Show reminders over cap"] and currentStatusVal > statusCap and not needToBuy then
-				self.displayNotification("A status healing item must be used or trashed", "status-cap.png", function()
-					return self.countStatusHeals() <= statusCap
-				end)
-			end
+					if RoguemonOptions["Show reminders over cap"] and adjustedHPVal > hpCap and not needToBuy then
+						self.displayNotification("An HP healing item must be used or trashed", "healing-pocket.png", function()
+							self.countAdjustedHeals()
+							return adjustedHPVal <= hpCap
+						end)
+					end
+					if RoguemonOptions["Show reminders over cap"] and currentStatusVal > statusCap and not needToBuy then
+						self.displayNotification("A status healing item must be used or trashed", "status-cap.png", function()
+							return self.countStatusHeals() <= statusCap
+						end)
+					end
+					self.removeUpdateCounter("Check for reminder over cap after battle")
+				end
+			end)
 		end
 		if pokeInfo and newPokeInfo and pokeInfo.personality == newPokeInfo.personality and pokeInfo.pokemonID ~= newPokeInfo.pokemonID then
 			-- We evolved :D
