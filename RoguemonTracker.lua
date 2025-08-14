@@ -563,6 +563,7 @@ local function RoguemonTracker()
 	end
 
 	function self.AddItemById(itemID, quantity)
+		self.debugLog("AddItemById: %s %s", itemID, quantity)
 		local bagPocketOffset, bagPocketCapacity, limitQuantity = self.getBagPocketData(itemID)
 		if bagPocketOffset == nil then return false end
 	
@@ -5509,6 +5510,7 @@ local function RoguemonTracker()
 		if not loadedExtension then
 			return
 		end
+		self.debugLog("afterBattleEnds lastFoughtTrainerId: %s", lastFoughtTrainerId)
 		if TrackerAPI.getBattleOutcome() == 2 then
 			-- We lost :(
 			return
