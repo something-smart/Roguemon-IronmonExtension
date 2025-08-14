@@ -33,6 +33,7 @@ local function RoguemonTracker()
 		VANILLA_ROM         = EXTENSION_DIRECTORY .. "vanilla.gba",
 		DEBUG_LOG           = EXTENSION_DIRECTORY .. "roguemon_debug_log.txt",
 		RANDOMIZING_STATE   = EXTENSION_DIRECTORY .. "randomizing.State",
+		CURSE_OUTPUT_FILE   = EXTENSION_DIRECTORY .. "curse-description.txt",
 	}
 
 	local CURSE_THEME = "FFFFFF FFFFFF B0FFB0 FF00B0 FFFF00 FFFFFF 33103B 510080 33103B 510080 000000 1 0"
@@ -1839,6 +1840,10 @@ local function RoguemonTracker()
 		if curseInfo[curse].romCurse then
 			self.romCurseOff(curseInfo[curse].romCurse)
 		end
+		local cf = io.open(self.Paths.CURSE_OUTPUT_FILE, "w")
+		io.output(cf)
+		io.write("")
+		io.close(cf)
 	end
 
 	function self.getItemsInCurrentSegment()
@@ -1971,6 +1976,10 @@ local function RoguemonTracker()
 		wardOfferedYet = false
 		local curse = self.getActiveCurse()
 		if curse then
+			local cf = io.open(self.Paths.CURSE_OUTPUT_FILE, "w")
+			io.output(cf)
+			io.write(curse .. ": " .. self.getCurseDescription(curse))
+			io.close(cf)
 			runSummary[#runSummary + 1] = {
 				type = "Curse",
 				curse = curse,
@@ -4365,7 +4374,7 @@ local function RoguemonTracker()
 			return nil
 		end
 		if segmentStarted and not (cursedSegments[currentSegment] == "Warded") then
-			return cursedSegments[segmentOrder[currentSegment]]
+		return cursedSegments[segmentOrder[currentSegment]]
 		end
 	end
 
