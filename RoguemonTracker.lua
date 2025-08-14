@@ -3589,6 +3589,7 @@ local function RoguemonTracker()
 			getText = function() return "<" end,
 			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 3, 7, 9, 10},
 			onClick = function()
+				curseToDescribe = nil
 				self.returnToHomeScreen()
 			end,
 			boxColors = {"Default text"}
