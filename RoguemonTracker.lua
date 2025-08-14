@@ -3551,7 +3551,7 @@ local function RoguemonTracker()
 	local CCS_LINE_HEIGHT = 18
 	local CCS_LINE_COUNT = 7
 	local CCS_DESC_X = 4
-	local CCS_DESC_WIDTH = 133
+	local CCS_DESC_WIDTH = 130
 
 	self.ClairvoyanceCurseScreen = {}
 
