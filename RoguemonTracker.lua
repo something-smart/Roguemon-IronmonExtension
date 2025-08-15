@@ -1564,7 +1564,7 @@ local function RoguemonTracker()
 				end
 			end
 			if smallestHeal then
-				local itemLost = TrackerAPI.getItemName(smallestHeal)
+				local itemLost = TrackerAPI.getItemName(smallestHeal, true)
 				self.removeItem(itemLost, 1)
 				return "The Poltergeist has stolen a " .. itemLost
 			end
@@ -1582,7 +1582,7 @@ local function RoguemonTracker()
 				end
 			end
 			if #possibleToRemove > 0 then
-				local itemLost = TrackerAPI.getItemName(possibleToRemove[math.random(#possibleToRemove)])
+				local itemLost = TrackerAPI.getItemName(possibleToRemove[math.random(#possibleToRemove)], true)
 				self.removeItem(itemLost, 1)
 				return "The Poltergeist has stolen a " .. itemLost
 			end
@@ -1596,7 +1596,7 @@ local function RoguemonTracker()
 				end
 			end
 			if smallestHeal then
-				local itemLost = TrackerAPI.getItemName(smallestHeal)
+				local itemLost = TrackerAPI.getItemName(smallestHeal, true)
 				self.removeItem(itemLost, 1)
 				return "The Poltergeist has stolen a " .. itemLost
 			end
@@ -1670,7 +1670,7 @@ local function RoguemonTracker()
 					" must be used, equipped, or trashed" or " must be equipped or trashed")
 				local heldItem = Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem or 0
 				if heldItem > 0 then
-					equipMessage = equipMessage .. " @ (Current item: " .. TrackerAPI.getItemName(heldItem) .. ")"
+					equipMessage = equipMessage .. " @ (Current item: " .. TrackerAPI.getItemName(heldItem, true) .. ")"
 				else
 					equipMessage = equipMessage .. " @ (Current item: None)"
 				end
@@ -3341,7 +3341,7 @@ local function RoguemonTracker()
 		end
 		for id,ct in pairs(Program.GameData.Items.StatusHeals) do
 			if(ct <= 999) then
-				local name = TrackerAPI.getItemName(id)
+				local name = TrackerAPI.getItemName(id, true)
 				if shopItemImages[name] then
 					for i = 1, ct do
 						self.ShopScreen.addButton(name, true, false)
@@ -3351,7 +3351,7 @@ local function RoguemonTracker()
 		end
 		for id,ct in pairs(Program.GameData.Items.HPHeals) do
 			if(ct <= 999) then
-				local name = TrackerAPI.getItemName(id)
+				local name = TrackerAPI.getItemName(id, true)
 				if shopItemImages[name] then
 					for i = 1, ct do
 						self.ShopScreen.addButton(name, true, false)
@@ -4764,7 +4764,7 @@ local function RoguemonTracker()
 				end
 				if #itemOptions > 0 then
 					local toDelete = itemOptions[math.random(#itemOptions)]
-					self.removeItem(TrackerAPI.getItemName(toDelete), 1)
+					self.removeItem(TrackerAPI.getItemName(toDelete, true), 1)
 				end
 			end
 		end
