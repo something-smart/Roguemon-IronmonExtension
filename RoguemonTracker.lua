@@ -5507,7 +5507,7 @@ local function RoguemonTracker()
 	-- EXTENSION FUNCTIONS --
 
 	function self.afterBattleEnds()
-		if not loadedExtension then
+		if not loadedExtension or self.isInAscensionTower() then
 			return
 		end
 		self.debugLog("afterBattleEnds lastFoughtTrainerId: %s", lastFoughtTrainerId)
