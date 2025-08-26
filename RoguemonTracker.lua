@@ -72,7 +72,7 @@ local function RoguemonTracker()
 		["Spidey Sense"] = {consumable = false, image = "spidey-sense.png", description = "Learn if enemies have Counter, Mirror Coat, or Destiny Bond."},
 		["Temporary Item Pass"] = {consumable = true, image = "tempvoucher.png", description = "All legal items are unlocked for the next two gyms."},
 		["Smuggler's Pouch"] = {consumable = false, image = "smugglers-pouch.png", description = "May choose one item not to cleanse each Cleansing Phase."},
-		["Pocket Sand"] = {consumable = false, button = "Use", charges = 5, image = "pocket-sand.png", description = "5 times in the run, may reduce enemy's accuracy to -6."},
+		["Pocket Sand"] = {consumable = false, button = "Use", charges = -1, image = "pocket-sand.png", description = "Once per segment, may reduce enemy's accuracy to -6."},
 		["Tera Orb"] = {consumable = false, button = "Use", charges = 5, image = "tera-orb.png", description = "Choose a type matching a move; 5 times, you may change to that type."},
 		["Notetaker"] = {consumable = false, image = "notetaker.png", description = "Notes on enemy pokemon transfer to their evolution."},
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash a non-consumable HP heal, gain 30% of its value as HP cap."},
@@ -187,8 +187,8 @@ local function RoguemonTracker()
 	}
 
 	local curseInfo = {
-		["Forgetfulness"] = {description = "4th move is changed randomly after 1st fight.", segment = true, gym = false,
-							longDescription = "After the first fight this segment, your bottom-most move is changed to a random move."},
+		["Forgetfulness"] = {description = "4th move is permanently changed randomly after 1st fight.", segment = true, gym = false,
+							longDescription = "After the first fight this segment, your bottom-most move is permanently changed to a random move."},
 		["Claustrophobia"] = {description = "If not full cleared, -50 HP Cap.", segment = true, gym = false,
 							longDescription = "If this segment is not full cleared, lose 50 HP Cap."},
 		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently.", segment = true, gym = false,
@@ -3872,6 +3872,13 @@ local function RoguemonTracker()
 						prospectiveStarterPackMove = validMoves[math.random(#validMoves)]
 						choice = choice .. ": Learn a weak move (" .. MoveData.Moves[prospectiveStarterPackMove].name .. ")."
 					end
+					if part == "Hyper Training" then
+						if specialRedeems.internal["Hyper Training"] then
+							choice = choice .. ": See your IVs and choose one to maximize."
+						else
+							choice = choice .. ": See your IVs and choose one to increase by 10."
+						end
+					end
 					for _,itm in pairs(MiscData.HealingItems) do
 						if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name and not (part == "Potion Investment") then
 							healingPrize = true
@@ -4256,7 +4263,12 @@ local function RoguemonTracker()
 			if s == option then
 				local pkmn = self.readLeadPokemonData()
 				local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
-				ivs[string.lower(s)] = 31
+				if(specialRedeems.internal["Hyper Training"]) then
+					ivs[string.lower(s)] = 31
+				else
+					ivs[string.lower(s)] = math.min(ivs[string.lower(s)] + 10, 31)
+					specialRedeems.internal["Hyper Training"] = true
+				end
 				pkmn.misc2 = Utils.bit_lshift(Utils.getbits(pkmn.misc2, 30, 2), 30) +
 					ivs['hp'] + Utils.bit_lshift(ivs['atk'], 5) + Utils.bit_lshift(ivs['def'], 10) + 
 					Utils.bit_lshift(ivs['spe'], 15) + Utils.bit_lshift(ivs['spa'], 20) + Utils.bit_lshift(ivs['spd'], 25)
