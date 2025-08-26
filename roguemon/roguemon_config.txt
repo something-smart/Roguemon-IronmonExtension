@@ -157,8 +157,8 @@ HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
-Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
-Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
+Pocket Sand: Once per segment, may reduce enemy's accuracy to -6.|pocket-sand.png
+Hyper Training|hyper-training.png
 Artiste: Learn Sketch.|artiste.png
 
 *Silph Co Prize
@@ -180,7 +180,7 @@ HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
-Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
+Hyper Training|hyper-training.png
 
 *Sabrina Prize
 Teach 1 currently held TM|tm.png
@@ -200,8 +200,8 @@ HP Cap +50 & Move Tutor & Poke Doll: May use the Copycat move tutor. Cannot pre-
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
-Ether & Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
-Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
+Ether & Pocket Sand: Once per segment, may reduce enemy's accuracy to -6.|pocket-sand.png
+Hyper Training|hyper-training.png
 
 *Blaine Prize
 Teach 1 currently held TM|tm.png
@@ -220,8 +220,8 @@ Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in the Cinnabar Lab. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
-Max Ether & Pocket Sand: 5 times in the run, may reduce enemy's accuracy to -6.|pocket-sand.png
-Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
+Max Ether & Pocket Sand: Once per segment, may reduce enemy's accuracy to -6.|pocket-sand.png
+Hyper Training|hyper-training.png
 
 *Giovanni Prize
 Teach 1 currently held TM|tm.png
@@ -241,7 +241,7 @@ Fight Route X: Treat the routes together as a segment.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in Viridian City. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
-Hyper Training: See your IVs and choose one to maximize.|hyper-training.png
+Hyper Training|hyper-training.png
 
 *Victory Road Prize
 Full Restore|full-restore.png
