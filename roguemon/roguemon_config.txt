@@ -73,7 +73,7 @@ Super Potion & Any Status Heal & Ether|superstatusether.png
 Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
 Temporary Item Voucher: Permanently unlock one future non-revive item found before next gym (immediate decision).|tempvoucher.png
 Teach 1 currently held TM|tm.png
-Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
+Candy Jar: You may save PP Ups, PP Maxes, Rare Candies, and herbs to use at any time.|candy-jar.png
 Potion Investment: Starts at 20; x2 value each badge. Redeem once for a heal up to its value in Buy Phase.|diamond.png
 Nature Mint: Change your nature to one of your choice.|mint.png
 HP Cap +50 & Ability Capsule|hp50capsule.png
@@ -102,7 +102,7 @@ Status Cap +1 & Any Status Heal & Potion|trifecta.png
 Flutist & Super Potion: You may use flutes in battle (including Poke Flute). Don't cleanse flutes.|flutesuper.png
 Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
 Temporary Item Voucher: Permanently unlock one future non-revive item found before next gym (immediate decision).|tempvoucher.png
-Candy Jar: You may save PP Ups, PP Maxes, and Rare Candies to use at any time.|candy-jar.png
+Candy Jar: You may save PP Ups, PP Maxes, Rare Candies, and herbs to use at any time.|candy-jar.png
 Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 X Speed & Super Potion|xspesuper.png
 X Defend & Super Potion x2|xdef2super.png

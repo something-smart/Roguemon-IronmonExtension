@@ -53,7 +53,7 @@ local function RoguemonTracker()
 		["Temporary Found Item"] = {consumable = true, image = "grounditem.png", description = "Temporarily unlock an item in your bag for 2 gym badges."},
 		["Flutist"] = {consumable = false, image = "flute.png", description = "You may use flutes in battle (including Poke Flute). Don't cleanse flutes."},
 		["Berry Pouch"] = {consumable = false, image = "berry-pouch.png", description = "HP Berries may be saved instead of equipped; status berries don't count against cap."},
-		["Candy Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, and Rare Candies to use at any time."},
+		["Goody Jar"] = {consumable = false, image = "candy-jar.png", description = "You may save PP Ups, PP Maxes, Rare Candies, and herbs to use at any time."},
 		["Temporary Item Voucher"] = {consumable = true, image = "tempvoucher.png", description = "Permanently unlock one future non-revive item found before next gym (immediate decision)."},
 		["X Factor"] = {consumable = false, image = "XFACTOR.png", description = "You may keep and use Battle Items freely."},
 		["Item Voucher"] = {consumable = true, image = "voucher.png", description = "Permanently unlock one non-revive item found in the future (immediate decision)."},
@@ -82,7 +82,7 @@ local function RoguemonTracker()
 	local ROM_REDEEMS = {
 		["Cooler Bag"]  = 1 << 0,
 		["Berry Pouch"] = 1 << 1,
-		["Candy Jar"]   = 1 << 2,
+		["Goody Jar"]   = 1 << 2,
 		["Revive"]      = 1 << 3,
 		["Max Revive"]  = 1 << 4,
 	}
@@ -238,9 +238,8 @@ local function RoguemonTracker()
 		["Backseating"] = {description = "Don't use marked move: -1 to a random stat.", segment = true, gym = false,
 							longDescription = "Each turn, 'chat' suggests one random move; if you don't use it that turn, you get -1 to a random stat for the fight."},
 		["Malware"] = {description = "-1 in attack stat for lead's lower defense.", segment = true, gym = false,
-							longDescription = "-1 in attacking stat corresponding to lead's lower defense",},
-		["Conversion"] = {description = "Enemy pokemon become a type matching a move.", segment = true, gym = true,
-							longDescription = "Enemy pokemon change to a type matching one of their moves"},
+							longDescription = "-1 in attacking stat corresponding to lead's lower defense"},
+		["Conversion"] = {description = "Enemy pokemon become a type matching their strongest move.", segment = true, gym = true},
 		["Perfectly Balanced"] = {description = "Your BST is redistributed evenly for this segment.", segment = true, gym = true, romCurse = ROM_CURSES["MEDIOCRITIZE"]},
 		["Slot Machine"] = {description = "HP set to 25%, 50%, 75%, or 100% after fight.", segment = true, gym = false,
 							longDescription = "HP is randomized to 25%, 50%, 75%, or 100% after each fight"},
@@ -276,9 +275,7 @@ local function RoguemonTracker()
 			["Wiki Berry"] = 1,
 			["Aguav Berry"] = 1,
 			["Mago Berry"] = 1,
-			["Berry Juice"] = 2,
-			["White Herb"] = 1,
-			["Mental Herb"] = 1
+			["Berry Juice"] = 2
 		},
 		vitamins = {
 			["Protein"] = 1,
@@ -291,7 +288,9 @@ local function RoguemonTracker()
 		candies = {
 			["PP Up"] = 1,
 			["PP Max"] = 1,
-			["Rare Candy"] = 1
+			["Rare Candy"] = 1,
+			["White Herb"] = 1,
+			["Mental Herb"] = 1
 		}
 	}
 
@@ -1679,7 +1678,7 @@ local function RoguemonTracker()
 				self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["TrashPickup"]
 				self.NotificationScreen.itemInQuestion = item
 				return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
-			elseif notifyOnPickup.candies[item] and not specialRedeems.unlocks["Candy Jar"] then
+			elseif notifyOnPickup.candies[item] and not specialRedeems.unlocks["Goody Jar"] then
 				if item == "PP Max" and gymMapIds[TrackerAPI.getMapId()] then
 					return ("Tutor first, then PP Max!"), "supernerd.png", function() return self.itemNotPresent(itemId) end
 				else
@@ -4796,16 +4795,16 @@ local function RoguemonTracker()
 			local enemyMon = Battle.Combatants.LeftOther
 			local mon = Tracker.getPokemon(Battle.Combatants.LeftOther, false)
 			local moves = {mon.moves[1].id, mon.moves[2].id, mon.moves[3].id, mon.moves[4].id}
-			for val,type in pairs(PokemonData.TypeIndexMap) do
-				if type ~= PokemonData.Types.UNKNOWN then
-					for _,moveId in pairs(moves) do
-						if MoveData.Moves[moveId].type == type then
-							types[#types + 1] = val
-						end
-					end
+
+			local strongestMove = moves[1]
+			for _,moveId in pairs(moves) do
+				if tonumber(MoveData.Moves[moveId].power) > tonumber(MoveData.Moves[strongestMove].power) then
+					strongestMove = moveId
 				end
 			end
-			local type = types[math.random(#types)]
+
+			local type = MoveData.Moves[strongestMove].type
+
 			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon, type)
 			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon + 1, type)
 			curseData.currentEnemyMon = enemyMon
@@ -4978,16 +4977,16 @@ local function RoguemonTracker()
 				local mon = Tracker.getPokemon(Battle.Combatants.LeftOther, false)
 				local types = {}
 				local moves = {mon.moves[1].id, mon.moves[2].id, mon.moves[3].id, mon.moves[4].id}
-				for val,type in pairs(PokemonData.TypeIndexMap) do
-					if type ~= PokemonData.Types.UNKNOWN then
-						for _,moveId in pairs(moves) do
-							if MoveData.Moves[moveId].type == type then
-								types[#types + 1] = val
-							end
-						end
+				local strongestMove = moves[1]
+
+				for _,moveId in pairs(moves) do
+					if tonumber(MoveData.Moves[moveId].power) > tonumber(MoveData.Moves[strongestMove].power) then
+						strongestMove = moveId
 					end
 				end
-				local type = types[math.random(#types)]
+
+				local type = MoveData.Moves[strongestMove].type
+
 				Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon, type)
 				Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon + 1, type)
 			end
@@ -5020,8 +5019,13 @@ local function RoguemonTracker()
 
 	function self.applySpecialInsight(id)
 		local pokemon = PokemonData.Pokemon[id]
-		local ability = pokemon.abilities[1]
-		Tracker.TrackAbility(id, ability)
+		local bst = tonumber(pokemon.bst)
+		local myPokemon = PokemonData.Pokemon[Tracker.getPokemon(1).pokemonID]
+		local myBst = tonumber(myPokemon.bst)
+		if bst and bst > myBst then
+			local ability = pokemon.abilities[1]
+			Tracker.TrackAbility(id, ability)
+		end
 	end
 
 	function self.checkInBattleEffectsAgainstMon(index)
