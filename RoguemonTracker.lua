@@ -5053,21 +5053,24 @@ local function RoguemonTracker()
 				local preEvo = evolutionTable[id]
 				while preEvo ~= null do
 					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).sm then
+						local currentSm = Tracker.getOrCreateTrackedPokemon(id).sm
 						for stat,marking in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).sm) do
-							if marking > 0 then
+							if marking > 0 and currentSm[stat] == 0 then
 								Tracker.TrackStatMarking(id, stat, marking)
 							end
 						end
 					end
 					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).abilities then
-						for id, abil in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).abilities) do
+						local currentAbil = Tracker.getOrCreateTrackedPokemon(id).abilities
+						for abilIndex, abil in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).abilities) do
 							local abilId = abil.id or 0
-							if abilId > 0 then
+							if abilId > 0 and currentAbil[abilIndex] == 0 then
 								Tracker.TrackAbility(id, abilId)
 							end
 						end
 					end
-					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).note then
+					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).note and 
+					not (Tracker.getOrCreateTrackedPokemon(id) and Tracker.getOrCreateTrackedPokemon(id).note) then
 						Tracker.TrackNote(id, Tracker.getOrCreateTrackedPokemon(preEvo).note)
 					end
 					preEvo = evolutionTable[preEvo]
