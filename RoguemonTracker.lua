@@ -68,7 +68,7 @@ local function RoguemonTracker()
 		["Remodeler"] = {consumable = false, image = "remodeler.png", description = "May immediately teach a found TM over a move of the same type. This is reusable."},
 		["Choose 2"] = {consumable = true, image = "choose-2.png", description = "Choose 2 prizes at the next gym milestone."},
 		["Secret Dex"] = {consumable = false, image = "secret-dex.png", description = "Get stat info on all 570+ BST pokemon."},
-		["Special Insight"] = {consumable = false, image = "special-insight.png", description = "Learn every enemy pokemon's ability."},
+		["Special Insight"] = {consumable = false, image = "special-insight.png", description = "Learn the ability of enemy pokemon higher BST than yours."},
 		["Spidey Sense"] = {consumable = false, image = "spidey-sense.png", description = "Learn if enemies have Counter, Mirror Coat, or Destiny Bond."},
 		["Temporary Item Pass"] = {consumable = true, image = "tempvoucher.png", description = "All legal items are unlocked for the next two gyms."},
 		["Smuggler's Pouch"] = {consumable = false, image = "smugglers-pouch.png", description = "May choose one item not to cleanse each Cleansing Phase."},

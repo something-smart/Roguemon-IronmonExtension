@@ -87,7 +87,7 @@ Any Vitamin x3|3vit.png
 Potion & Clairvoyance: Learn all future curses, and can make one swap.|clairvoyance.png
 Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Remodeler: May immediately teach a found TM over a move of the same type. This is reusable.|remodeler.png
-Special Insight: Learn every enemy pokemon's ability.|special-insight.png
+Special Insight: Learn the ability of enemy pokemon higher BST than yours.|special-insight.png
 Midas Touch: If you trash a non-consumable HP heal, gain 30% of its value as HP cap.|midas-touch.png
 
 *Surge Prize
@@ -112,7 +112,7 @@ Any Vitamin x3|3vit.png
 Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
 Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Regenerator: Regain 3% of max HP after every fight.|leftovers.png
-Special Insight: Learn every pokemon's ability.|special-insight.png
+Special Insight: Learn the ability of enemy pokemon higher BST than yours.|special-insight.png
 Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
 Artiste: Learn Sketch.|artiste.png
 
@@ -135,7 +135,7 @@ TM Voucher: Teach 1 TM found in the future (immediate decision).|tmvoucher.png
 Rare Candy x2|2candy.png
 Regenerator: Regain 3% of max HP after every fight.|leftovers.png
 Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
-Special Insight: Learn every pokemon's ability.|special-insight.png
+Special Insight: Learn the ability of enemy pokemon higher BST than yours.|special-insight.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
 
 *Koga Prize
