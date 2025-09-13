@@ -5808,7 +5808,7 @@ local function RoguemonTracker()
 				if curse == "Safety Zone" then
 					local maxHP = Utils.getbits(Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsMaxHpAtk), 0, 16)
 					local currentHP = Utils.getbits(Memory.readdword(GameSettings.pstats + Program.Addresses.offsetPokemonStatsLvCurHp), 16, 16)
-					text = text .. " (" ..  math.floor(currentHP / maxHP * 100 + 0.5) .. "%)"
+					text = text .. " (" ..  math.floor(currentHP / maxHP * 100) .. "%)"
 				end
 				TrackerScreen.Buttons.RogueCurseCarousel.updatedText = text
 				if Main.IsOnBizhawk() then
