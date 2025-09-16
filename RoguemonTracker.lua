@@ -214,7 +214,7 @@ local function RoguemonTracker()
 		["Relay Race"] = {description = "Enemy stat stages carry over, with +1 Speed.", segment = true, gym = true,
 							longDescription = "All enemy pokemon start with +1 Speed, plus any stat changes that the previous pokemon in the fight had."},
 		["Resourceful"] = {description = "Lose 0-2 PP on last used move after fights; moves at 0 change.", segment = true, gym = false,
-							longDescription = "After each battle, lose 0-2 PP on your last used move. Then, if any moves are at 0 PP, they are changed to a random move."},
+							longDescription = "After each battle, lose 0-2 PP on your last used move. Then, if any moves are at 0 PP, they permanently change to a random move."},
 		["Safety Zone"] = {description = "If fighting at <75% HP, 30% to lose a healing item.", segment = true, gym = false,
 							longDescription = "If you start a fight with less than 75% of your max HP, 30% chance to lose a random HP heal from your bag."},
 		["Live Audience"] = {description = "When hit by a move, Encored for 2-3 turns.", segment = true, gym = false,
