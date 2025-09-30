@@ -22,7 +22,7 @@ Fight first 5 wilds in Forest: Can't heal in between. Can run but counts as 1 of
 Potion & Fight wilds in Rts 1/2/22: Fight the first encounter on each. You may PC heal anytime, but must stop there.|potionandexp.png
 Luck Incense: Instead of trashing heals over cap, may have your lead pokemon hold them and take them back later.|luck.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
-Berry Juice|berry-juice.png
+Berry Juice & Full Heal|berry-juice.png
 Clairvoyance: Learn all future curses, and can make one swap.|clairvoyance.png
 Starter Pack|starter-pack.png
 Notetaker: Notes on enemy pokemon transfer to their evolution.|notetaker.png
