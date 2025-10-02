@@ -289,8 +289,8 @@ local function RoguemonTracker()
 			["PP Up"] = 1,
 			["PP Max"] = 1,
 			["Rare Candy"] = 1,
-			["White Herb"] = 1,
-			["Mental Herb"] = 1
+			["White Herb"] = 3,
+			["Mental Herb"] = 3
 		}
 	}
 
@@ -1681,6 +1681,10 @@ local function RoguemonTracker()
 			elseif notifyOnPickup.candies[item] and not specialRedeems.unlocks["Goody Jar"] then
 				if item == "PP Max" and gymMapIds[TrackerAPI.getMapId()] then
 					return ("Tutor first, then PP Max!"), "supernerd.png", function() return self.itemNotPresent(itemId) end
+				elseif notifyOnPickup.candies[item] == 3 then
+					self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
+					self.NotificationScreen.itemInQuestion = item
+					return (item .. " must be equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
 					return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				end
