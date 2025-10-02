@@ -151,7 +151,7 @@ Found Item & Full Heal: Permanently unlock any non-revive item currently in the 
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
 Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
-Fight Route X: Treat the routes together as a segment.|exp-charm.png
+Fight Route X: Treat the routes together as a segment. Don't cleanse items found until the next Cleansing Phase.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in Fuchsia City. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
@@ -175,7 +175,7 @@ Revive: Gain a Revive which may be used. Keep your HM friend with you; send it o
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
 Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
-Fight Route X: Treat the routes together as a segment.|exp-charm.png
+Fight Route X: Treat the routes together as a segment. Don't cleanse items found until the next Cleansing Phase.|exp-charm.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 X Factor: You may keep and use Battle Items freely.|XFACTOR.png
@@ -195,7 +195,7 @@ Found Item & Full Heal: Permanently unlock any non-revive item currently in the 
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
 Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
-Fight Route X: Treat the routes together as a segment.|exp-charm.png
+Fight Route X: Treat the routes together as a segment. Don't cleanse items found until the next Cleansing Phase.|exp-charm.png
 HP Cap +50 & Move Tutor & Poke Doll: May use the Copycat move tutor. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
@@ -216,7 +216,7 @@ Found Item & Full Heal: Permanently unlock any non-revive item currently in the 
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
 Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
-Fight Route X: Treat the routes together as a segment.|exp-charm.png
+Fight Route X: Treat the routes together as a segment. Don't cleanse items found until the next Cleansing Phase.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in the Cinnabar Lab. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
@@ -237,7 +237,7 @@ Revive: Gain a Revive which may be used. Keep your HM friend with you; send it o
 HP Cap +100 & Status Cap +1|healing-pocket-statuscap.png
 HP Cap +50 & Super Potion|healing-pocket-super.png
 Item Voucher: Permanently unlock one non-revive item found in the future (immediate decision).|voucher.png
-Fight Route X: Treat the routes together as a segment.|exp-charm.png
+Fight Route X: Treat the routes together as a segment. Don't cleanse items found until the next Cleansing Phase.|exp-charm.png
 HP Cap +50 & Move Tutor: May use the move tutor in Viridian City. Cannot pre-scout.|hp50tutor.png
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
@@ -251,6 +251,6 @@ HP Cap +100 & Hyper Potion|hp100hyper.png
 Any Battle Item x2|twoxitems.png
 Revive: Gain a Revive which may be used. Keep your HM friend with you; send it out and revive if you faint.|revive.png
 Full Heal x2 & Elixir x2|twofulltwoelixir.png
-Fight Route X: Treat the routes together as a segment.|exp-charm.png
+Fight Route X: Treat the routes together as a segment. Don't cleanse items found until the next Cleansing Phase.|exp-charm.png
 Moomoo Milk & Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Tera Orb: Choose a type matching a move; 5 times, you may change to that type.|tera-orb.png
