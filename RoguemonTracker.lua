@@ -3879,7 +3879,7 @@ local function RoguemonTracker()
 						if specialRedeems.internal["Hyper Training"] then
 							choice = choice .. ": See your IVs and choose one to maximize."
 						else
-							choice = choice .. ": See your IVs and choose one to increase by 10."
+							choice = choice .. ": See your IVs and choose one to increase by 10. Further Hyper Training prizes will maximize instead."
 						end
 					end
 					for _,itm in pairs(MiscData.HealingItems) do
@@ -3906,7 +3906,7 @@ local function RoguemonTracker()
 					if rInd == 3 then
 						add = false
 					else
-						choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Keep items found."
+						choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Don't cleanse items found until the next Cleansing Phase."
 						if rInd == 1 then
 							choice = choice .. " (4 items, 1 TM)"
 						end
