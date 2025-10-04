@@ -127,7 +127,7 @@ local function RoguemonTracker()
 	local prizeAdditionalOptions = {
 		["Any Status Heal"] = {"Antidote", "Parlyz Heal", "Awakening", "Burn Heal", "Ice Heal"},
 		["Any Battle Item"] = {"X Attack", "X Defend", "X Special", "X Speed", "X Accuracy", "Dire Hit", "Guard Spec."},
-		["Any Vitamin"] = {"Hp Up (HP)", "Protein (Attack)", "Iron (Defense)", "Calcium (Sp. Atk)", "Zinc (Sp. Def)", "Carbos (Speed)"}
+		["Any Vitamin"] = {"HP Up (HP)", "Protein (Attack)", "Iron (Defense)", "Calcium (Sp. Atk)", "Zinc (Sp. Def)", "Carbos (Speed)"}
 	}
 
 	-- Segments will autofill the required and optional trainers from the route info. Some segments encompass part of a route and must be hard-coded.
