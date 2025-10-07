@@ -1948,7 +1948,7 @@ local function RoguemonTracker()
 
 		for c,info in pairs(specialRedeems.battle) do
 			if specialRedeemInfo[c] and specialRedeemInfo[c].charges and specialRedeemInfo[c].charges == -1 then
-				specialRedeems[c] = -1
+				specialRedeems.battle[c] = -1
 			end
 		end
 
