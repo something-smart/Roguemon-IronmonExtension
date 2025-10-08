@@ -1387,6 +1387,16 @@ local function RoguemonTracker()
 		Memory.writeword(addr, moveId)
 	end
 
+	function self.learnMove(moveName)
+		for i,move in MoveData.Moves do
+			if move.name == moveName then
+				self.triggerROMLearnMove(i)
+				return true
+			end
+		end
+		return false
+	end
+
 	-- Gets the address of the attempts byte for the given ascension and
 	-- typeIndex.
 	function self.getAttemptsAddr(ascension, typeIndex)
@@ -1684,7 +1694,14 @@ local function RoguemonTracker()
 				elseif notifyOnPickup.candies[item] == 3 then
 					self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
 					self.NotificationScreen.itemInQuestion = item
-					return (item .. " must be equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
+					local equipMessage = item .. " must be equipped or trashed"
+					local heldItem = Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem or 0
+					if heldItem > 0 then
+						equipMessage = equipMessage .. " @ (Current item: " .. TrackerAPI.getItemName(heldItem, true) .. ")"
+					else
+						equipMessage = equipMessage .. " @ (Current item: None)"
+					end
+					return (equipMessage), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
 					return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				end
