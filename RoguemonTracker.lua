@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.4.3-beta.13"
+	self.version = "1.4.3-beta.14"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -1387,6 +1387,16 @@ local function RoguemonTracker()
 		Memory.writeword(addr, moveId)
 	end
 
+	function self.learnMove(moveName)
+		for i,move in MoveData.Moves do
+			if move.name == moveName then
+				self.triggerROMLearnMove(i)
+				return true
+			end
+		end
+		return false
+	end
+
 	-- Gets the address of the attempts byte for the given ascension and
 	-- typeIndex.
 	function self.getAttemptsAddr(ascension, typeIndex)
@@ -1684,7 +1694,14 @@ local function RoguemonTracker()
 				elseif notifyOnPickup.candies[item] == 3 then
 					self.NotificationScreen.queuedAuxiliary = self.NotificationScreen.auxiliaryButtonInfo["EquipTrashPickup"]
 					self.NotificationScreen.itemInQuestion = item
-					return (item .. " must be equipped or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
+					local equipMessage = item .. " must be equipped or trashed"
+					local heldItem = Tracker.getPokemon(1, true) and Tracker.getPokemon(1, true).heldItem or 0
+					if heldItem > 0 then
+						equipMessage = equipMessage .. " @ (Current item: " .. TrackerAPI.getItemName(heldItem, true) .. ")"
+					else
+						equipMessage = equipMessage .. " @ (Current item: None)"
+					end
+					return (equipMessage), item .. ".png", function() return self.itemNotPresent(itemId) end
 				else
 					return (item .. " must be used or trashed"), item .. ".png", function() return self.itemNotPresent(itemId) end
 				end
@@ -1948,7 +1965,7 @@ local function RoguemonTracker()
 
 		for c,info in pairs(specialRedeems.battle) do
 			if specialRedeemInfo[c] and specialRedeemInfo[c].charges and specialRedeemInfo[c].charges == -1 then
-				specialRedeems[c] = -1
+				specialRedeems.battle[c] = -1
 			end
 		end
 
