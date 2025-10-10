@@ -184,6 +184,7 @@ local function RoguemonTracker()
 		["FREEFALL"] = 1 << 5,
 		["DISTORTED_HEART"] = 1 << 6,
 		["DISTORTED_SOUL"] = 1 << 7,
+		["KAIZO"] = 1 << 7,
 	}
 
 	local curseInfo = {
@@ -194,7 +195,7 @@ local function RoguemonTracker()
 		["Downsizing"] = {description = "If not full cleared, -1 prize option permanently.", segment = true, gym = false,
 							longDescription = "If this segment is not full cleared, all future prize spins will have only 2 options."},
 		["Tormented Soul"] = {description = "Cannot use the same move twice in a row.", segment = true, gym = true},
-		["Kaizo Curse"] = {description = "Cannot use healing items outside of battle.", segment = true, gym = true},
+		["Kaizo Curse"] = {description = "Cannot use healing items outside of battle.", segment = true, gym = true, romCurse = ROM_CURSES["KAIZO"]},
 		["Headwind"] = {description = "Start fights at -1 or -2 Speed.", segment = true, gym = true},
 		["Sharp Rocks"] = {description = "All enemies have +2 crit rate.", segment = true, gym = true},
 		["High Pressure"] = {description = "Start missing 50% PP on all moves.", segment = true, gym = true},
