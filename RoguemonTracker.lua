@@ -4415,7 +4415,7 @@ local function RoguemonTracker()
 			return nil
 		end
 		if segmentStarted and not (cursedSegments[currentSegment] == "Warded") then
-		return cursedSegments[segmentOrder[currentSegment]]
+			return cursedSegments[segmentOrder[currentSegment]]
 		end
 	end
 
@@ -4827,8 +4827,16 @@ local function RoguemonTracker()
 
 			local type = MoveData.Moves[strongestMove].type
 
-			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon, type)
-			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon + 1, type)
+			local typeIndex = 0
+			
+			for val,tp in pairs(PokemonData.TypeIndexMap) do
+				if type == tp then
+					typeIndex = val
+				end
+			end
+
+			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon, typeIndex)
+			Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon + 1, typeIndex)
 			curseData.currentEnemyMon = enemyMon
 		end
 	end
@@ -5009,8 +5017,16 @@ local function RoguemonTracker()
 
 				local type = MoveData.Moves[strongestMove].type
 
-				Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon, type)
-				Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon + 1, type)
+				local typeIndex = 0
+			
+				for val,tp in pairs(PokemonData.TypeIndexMap) do
+					if type == tp then
+						typeIndex = val
+					end
+				end
+
+				Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon, typeIndex)
+				Memory.writebyte(GameSettings.gBattleMons + Program.Addresses.offsetBattlePokemonTypes + Program.Addresses.sizeofBattlePokemon + 1, typeIndex)
 			end
 		end
 	end
