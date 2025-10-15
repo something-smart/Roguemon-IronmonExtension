@@ -1388,7 +1388,7 @@ local function RoguemonTracker()
 	end
 
 	function self.learnMove(moveName)
-		for i,move in MoveData.Moves do
+		for i,move in pairs(MoveData.Moves) do
 			if move.name == moveName then
 				self.triggerROMLearnMove(i)
 				return true
@@ -5075,17 +5075,23 @@ local function RoguemonTracker()
 				while preEvo ~= null do
 					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).sm then
 						local currentSm = Tracker.getOrCreateTrackedPokemon(id).sm
+						if not currentSm then
+							currentSm = {}
+						end
 						for stat,marking in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).sm) do
-							if marking > 0 and currentSm[stat] == 0 then
+							if marking > 0 and (not currentSm[stat]) then
 								Tracker.TrackStatMarking(id, stat, marking)
 							end
 						end
 					end
 					if Tracker.getOrCreateTrackedPokemon(preEvo) and Tracker.getOrCreateTrackedPokemon(preEvo).abilities then
 						local currentAbil = Tracker.getOrCreateTrackedPokemon(id).abilities
+						if not currentAbil then
+							currentAbil = {}
+						end
 						for abilIndex, abil in pairs(Tracker.getOrCreateTrackedPokemon(preEvo).abilities) do
 							local abilId = abil.id or 0
-							if abilId > 0 and currentAbil[abilIndex] == 0 then
+							if abilId > 0 and (not currentAbil[abilIndex]) then
 								Tracker.TrackAbility(id, abilId)
 							end
 						end
