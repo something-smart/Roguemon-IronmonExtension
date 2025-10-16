@@ -7,7 +7,18 @@ local utils = {}
 function utils.compare_semver(v1, v2)
     -- Parse versions
     local function parse_semver(version)
+        if not version or type(version) ~= "string" then
+            return nil
+        end
+
         local major, minor, patch, prerelease, build = version:match("^(%d+)%.(%d+)%.(%d+)(%-?[%w%-%.]*)(%+?[%w%.%-]*)")
+        if not major or not minor or not patch then
+            return nil
+        end
+
+        prerelease = prerelease or ""
+        build = build or ""
+
         if not prerelease:find("^%-") then
             prerelease = ""
         end
@@ -27,6 +38,12 @@ function utils.compare_semver(v1, v2)
 
     local v1_parts = parse_semver(v1)
     local v2_parts = parse_semver(v2)
+
+    -- Return 0 as a failsafe if either version is invalid
+    if not v1_parts or not v2_parts then
+        print(string.format("Invalid semvers provided. Cannot compare '%s' and '%s'.", v1, v2))
+        return 0
+    end
 
     -- Compare major, minor, patch
     if v1_parts.major ~= v2_parts.major then
@@ -94,6 +111,26 @@ function utils.compare_semver(v1, v2)
     end
 
     return 0 -- Versions are equal
+end
+
+function utils.bit_not(n)
+	local p,c=1,0
+	while n>0 do
+		local r=n%2
+		if r<1 then c=c+p end
+		n,p=(n-r)/2,p*2
+	end
+	return c
+end
+
+function utils.uint32_to_bytes(n)
+	n = n & 0xFFFFFFFF
+	local b1 = (n >> 24) & 0xFF
+	local b2 = (n >> 16) & 0xFF
+	local b3 = (n >> 8) & 0xFF
+	local b4 = n & 0xFF
+
+	return {b1, b2, b3, b4}
 end
 
 return utils
