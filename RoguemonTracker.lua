@@ -262,7 +262,7 @@ local function RoguemonTracker()
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.4.0-alpha2"
+	local bundledRomPatchVersion = "0.4.0-alpha3"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
