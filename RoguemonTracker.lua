@@ -4818,10 +4818,16 @@ local function RoguemonTracker()
 			local mon = Tracker.getPokemon(Battle.Combatants.LeftOther, false)
 			local moves = {mon.moves[1].id, mon.moves[2].id, mon.moves[3].id, mon.moves[4].id}
 
-			local strongestMove = moves[1]
+			local strongestMove = 1
+			local strongestPower = 0
 			for _,moveId in pairs(moves) do
-				if tonumber(MoveData.Moves[moveId].power) > tonumber(MoveData.Moves[strongestMove].power) then
+				local power = tonumber(MoveData.Moves[moveId].power)
+				if not power then
+					power = 80
+				end
+				if power > strongestPower then
 					strongestMove = moveId
+					strongestPower = power
 				end
 			end
 
@@ -5007,11 +5013,17 @@ local function RoguemonTracker()
 				local mon = Tracker.getPokemon(Battle.Combatants.LeftOther, false)
 				local types = {}
 				local moves = {mon.moves[1].id, mon.moves[2].id, mon.moves[3].id, mon.moves[4].id}
-				local strongestMove = moves[1]
-
+				
+				local strongestMove = 1
+				local strongestPower = 0
 				for _,moveId in pairs(moves) do
-					if tonumber(MoveData.Moves[moveId].power) > tonumber(MoveData.Moves[strongestMove].power) then
+					local power = tonumber(MoveData.Moves[moveId].power)
+					if not power then
+						power = 80
+					end
+					if power > strongestPower then
 						strongestMove = moveId
+						strongestPower = power
 					end
 				end
 
