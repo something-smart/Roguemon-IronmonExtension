@@ -77,14 +77,16 @@ local function RoguemonTracker()
 		["Notetaker"] = {consumable = false, image = "notetaker.png", description = "Notes on enemy pokemon transfer to their evolution."},
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash a non-consumable HP heal, gain 30% of its value as HP cap."},
 		["Clairvoyance"] = {consumable = true, image = "clairvoyance.png", description = "Learn all future curses, and can make one swap."},
+		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def."},
 	}
 
 	local ROM_REDEEMS = {
-		["Cooler Bag"]  = 1 << 0,
-		["Berry Pouch"] = 1 << 1,
-		["Goody Jar"]   = 1 << 2,
-		["Revive"]      = 1 << 3,
-		["Max Revive"]  = 1 << 4,
+		["Cooler Bag"]    = 1 << 0,
+		["Berry Pouch"]   = 1 << 1,
+		["Goody Jar"]     = 1 << 2,
+		["Revive"]        = 1 << 3,
+		["Max Revive"]    = 1 << 4,
+		["Armor Plating"] = 1 << 5,
 	}
 
 	local gymLeaders = {[414] = true, [415] = true, [416] = true, [417] = true, [418] = true, [420] = true, [419] = true, [350] = true}
@@ -1363,6 +1365,9 @@ local function RoguemonTracker()
 
 			-- offset from gBattleStruct
 			distortedSeed        = 0x11,
+
+            -- "Armor Plating" redeem: 0 for DEF, 1 for SPD
+            flagArmorPlatingRedeem    = 0x4ae,
 		}
 
 		local roguemonSettingPointers = {
@@ -4117,6 +4122,14 @@ local function RoguemonTracker()
 					additionalOptionsRemaining = 1
 					nextScreen = self.OptionSelectionScreen
 				end
+                if reward == "Armor Plating" then
+                    local STATS_ORDERED = { "Boost DEF", "Boost SPD" }
+                    for i,stat in pairs(STATS_ORDERED) do
+                        additionalOptions[i] = stat
+                    end
+                    additionalOptionsRemaining = 1
+                    nextScreen = self.OptionSelectionScreen
+                end
 				if string.sub(reward, 1, 3) == 'Any' then
 					-- This reward is a choice of items
 					for key,choices in pairs(prizeAdditionalOptions) do
@@ -4313,6 +4326,19 @@ local function RoguemonTracker()
 			additionalOptionsRemaining = additionalOptionsRemaining - 1
 			special = true
 		end
+        if option == "Boost DEF" or option == "Boost SPD" then
+            self.setROMRedeem("Armor Plating")
+            if option == "Boost SPD" then
+                local flagIdx = GameSettings.roguemon.flagArmorPlatingRedeem
+                local flagBit = flagIdx % 8
+                local flagOffset = math.floor((flagIdx - flagBit) / 8)
+
+                local flagAddr = Utils.getSaveBlock1Addr() + GameSettings.gameFlagsOffset + flagOffset
+
+                local newFlags = Memory.readbyte(flagAddr) | (1 << flagBit)
+                Memory.writebyte(flagAddr, newFlags)
+            end
+        end
 		-- Regular item option
 		if not special and option ~= "" and additionalOptionsRemaining > 0 then
 			self.AddItemImproved(option, 1)
