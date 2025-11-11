@@ -78,6 +78,7 @@ local function RoguemonTracker()
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash a non-consumable HP heal, gain 30% of its value as HP cap."},
 		["Clairvoyance"] = {consumable = true, image = "clairvoyance.png", description = "Learn all future curses, and can make one swap."},
 		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def."},
+		["Booster Shot"] = {consumable = false, image = "assault-vest.png", description = "Slightly boosts the power or accuracy of a single move."},
 	}
 
 	local ROM_REDEEMS = {
@@ -87,6 +88,7 @@ local function RoguemonTracker()
 		["Revive"]        = 1 << 3,
 		["Max Revive"]    = 1 << 4,
 		["Armor Plating"] = 1 << 5,
+		["Booster Shot"]  = 1 << 6,
 	}
 
 	local gymLeaders = {[414] = true, [415] = true, [416] = true, [417] = true, [418] = true, [420] = true, [419] = true, [350] = true}
@@ -1349,6 +1351,11 @@ local function RoguemonTracker()
 			varCurse                  = 0x7e,
 			varMilestone              = 0x82,
 
+            -- "Booster Shot" stored values
+            varBoosterShotMove        = 0x118,
+            varBoosterShotPow         = 0x11a,
+            varBoosterShotAcc         = 0x11c,
+
 			-- these are offset from SaveBlock2Addr
 			optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
 
@@ -1364,10 +1371,13 @@ local function RoguemonTracker()
 			queuedMoveLearn           = 0xa,
 
 			-- offset from gBattleStruct
-			distortedSeed        = 0x11,
+			distortedSeed             = 0x11,
 
             -- "Armor Plating" redeem: 0 for DEF, 1 for SPD
-            flagArmorPlatingRedeem    = 0x4ae,
+            flagArmorPlatingMode      = 0x4ae,
+
+            -- "Booster Shot" redeem: 0 for ATK, 1 for ACC
+            flagBoosterShotMode       = 0x4ad,
 		}
 
 		local roguemonSettingPointers = {
@@ -4130,6 +4140,19 @@ local function RoguemonTracker()
                     additionalOptionsRemaining = 1
                     nextScreen = self.OptionSelectionScreen
                 end
+                if reward == "Booster Shot" then
+                    local BOOSTER_SHOT_MODE = { "Boost Power", "Boost Accuracy" }
+                    for i,mode in pairs(BOOSTER_SHOT_MODE) do
+                        additionalOptions[i] = mode
+                    end
+                    local optIndex = 3
+                    while optIndex < 9 do
+                        additionalOptions[optIndex] = ""
+                        optIndex = optIndex + 1
+                    end
+                    additionalOptionsRemaining = 1
+                    nextScreen = self.OptionSelectionScreen
+                end
 				if string.sub(reward, 1, 3) == 'Any' then
 					-- This reward is a choice of items
 					for key,choices in pairs(prizeAdditionalOptions) do
@@ -4326,17 +4349,66 @@ local function RoguemonTracker()
 			additionalOptionsRemaining = additionalOptionsRemaining - 1
 			special = true
 		end
-        if option == "Boost DEF" or option == "Boost SPD" then
+        if option == "Boost DEF" or option == "Boost SPD" then  -- "Armor Plating" redeem
             self.setROMRedeem("Armor Plating")
             if option == "Boost SPD" then
-                local flagIdx = GameSettings.roguemon.flagArmorPlatingRedeem
-                local flagBit = flagIdx % 8
-                local flagOffset = math.floor((flagIdx - flagBit) / 8)
+                self.setGameFlag(GameSettings.roguemon.flagArmorPlatingMode)
+            end
+        end
+        if option == "Boost Power" or option == "Boost Accuracy" then  -- "Booster Shot" redeem
+            self.setROMRedeem("Booster Shot")
+            local mode = "POW +10: "
+            print("Set ROM Redeem")
+            if option == "Boost Accuracy" then
+                self.setGameFlag(GameSettings.roguemon.flagBoosterShotMode)
+                print("Set Booster Shot mode flag")
+                mode = "ACC +10: "
+            end
 
-                local flagAddr = Utils.getSaveBlock1Addr() + GameSettings.gameFlagsOffset + flagOffset
+            local pkmn = self.readLeadPokemonData()
+            local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
+            local moveChoices = {}
+            for _,m in pairs(moves) do
+                move = MoveData.Moves[m]
+                if option == "Boost Accuracy" or tonumber(move.power) >= 10
+                then
+                    local moveName = string.format("%s%s", mode, move.name)
+                    moveChoices[moveName] = true
+                end
+            end
+            local optIndex = 1
+            for i,_ in pairs(moveChoices) do
+                additionalOptions[optIndex] = i
+                optIndex = optIndex + 1
+            end
+            while optIndex < 9 do
+                additionalOptions[optIndex] = ""
+                optIndex = optIndex + 1
+            end
+            additionalOptionsRemaining = 1
+            special = true
+            nextScreen = self.OptionSelectionScreen
+        end
+		if string.sub(option, 5, 9) == "+10: " then  -- "Booster Shot" move selection
+            local pkmn = self.readLeadPokemonData()
+            local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
+            local selected_move = string.sub(option, 10)
+            for _,m in pairs(moves) do
+                movedata = MoveData.Moves[m]
+                if movedata.name == selected_move then
+                    self.writeGameVar(GameSettings.roguemon.varBoosterShotMove, m)
+                    if self.getGameFlag(GameSettings.roguemon.flagBoosterShotMode) then
+                        local acc = tonumber(MoveData.Moves[m].accuracy) + 10
 
-                local newFlags = Memory.readbyte(flagAddr) | (1 << flagBit)
-                Memory.writebyte(flagAddr, newFlags)
+                        print(string.format("Setting accuracy of %s (%d) to %d", selected_move, m, acc))
+                        self.writeGameVar(GameSettings.roguemon.varBoosterShotAcc, acc)
+                    else
+                        local pow = tonumber(MoveData.Moves[m].power) + 10
+
+                        print(string.format("Setting power of %s (%d) to %d", selected_move, m, pow))
+                        self.writeGameVar(GameSettings.roguemon.varBoosterShotPow, pow)
+                    end
+                end
             end
         end
 		-- Regular item option
@@ -6663,6 +6735,32 @@ local function RoguemonTracker()
 		return Memory.writeword(Utils.getSaveBlock1Addr() + GameSettings.gameVarsOffset + offset, value)
 	end
 
+    function self.getFlagAddr(flagIdx)
+        local flagBit = flagIdx % 8
+        local flagOffset = math.floor((flagIdx - flagBit) / 8)
+
+        local flagAddr = Utils.getSaveBlock1Addr() + GameSettings.gameFlagsOffset + flagOffset
+        return flagAddr, flagBit
+    end
+
+    function self.getGameFlag(flagIdx)
+        local flagAddr, flagBit = self.getFlagAddr(flagIdx)
+        return Memory.readbyte(flagAddr) & (1 << flagBit)
+    end
+
+    function self.setGameFlag(flagIdx)
+        local flagAddr, flagBit = self.getFlagAddr(flagIdx)
+        local newFlags = Memory.readbyte(flagAddr) | (1 << flagBit)
+        Memory.writebyte(flagAddr, newFlags)
+    end
+
+    function self.clearGameFlag(flagIdx)
+        local flagAddr, flagBit = self.getFlagAddr(flagIdx)
+        local curFlags = Memory.readbyte(flagAddr)
+        local newFlags = curFlags & ~(1 << (flagBit & 7));
+        Memory.writebyte(flagAdr, newFlags)
+    end
+
 	function self.getROMRunType()
 		return self.readGameVar(GameSettings.roguemon.varType)
 	end
@@ -7138,6 +7236,15 @@ local function RoguemonTracker()
 		else
 			originalCoreFunctions.MoveData.adjustVariableMoveValues(move, sourcePokemon, targetPokemon)
 		end
+        if Battle.isViewingOwn and move.id == self.readGameVar(GameSettings.roguemon.varBoosterShotMove)
+        then
+            if self.getGameFlag(GameSettings.roguemon.flagBoosterShotMode)
+            then
+                move.accuracy = self.readGameVar(GameSettings.roguemon.varBoosterShotAcc)
+            else
+                move.power = self.readGameVar(GameSettings.roguemon.varBoosterShotPow)
+            end
+        end
 	end
 
 	-- Overrides the given function from the given module with `newFunc`.
