@@ -115,6 +115,7 @@ Regenerator: Regain 3% of max HP after every fight.|leftovers.png
 Special Insight: Learn the ability of enemy pokemon higher BST than yours.|special-insight.png
 Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
 Artiste: Learn Sketch.|artiste.png
+Booster Shot: Choose 1: Gain +10 ACC or +10 PWR to one move|boost.png
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and teach one (or none).|tm.png
@@ -137,6 +138,7 @@ Regenerator: Regain 3% of max HP after every fight.|leftovers.png
 Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
 Special Insight: Learn the ability of enemy pokemon higher BST than yours.|special-insight.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Booster Shot: Choose 1: Gain +10 ACC or +10 PWR to one move|boost.png
 
 *Koga Prize
 Teach 1 currently held TM|tm.png

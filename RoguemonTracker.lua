@@ -78,7 +78,7 @@ local function RoguemonTracker()
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash a non-consumable HP heal, gain 30% of its value as HP cap."},
 		["Clairvoyance"] = {consumable = true, image = "clairvoyance.png", description = "Learn all future curses, and can make one swap."},
 		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def."},
-		["Booster Shot"] = {consumable = false, image = "assault-vest.png", description = "Slightly boosts the power or accuracy of a single move."},
+		["Booster Shot"] = {consumable = false, image = "boost.png", description = "Slightly boosts the power or accuracy of a single move."},
 	}
 
 	local ROM_REDEEMS = {
