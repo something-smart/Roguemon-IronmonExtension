@@ -13,7 +13,7 @@ local function RoguemonTracker()
 	local RoguemonRevo = dofile(EXTENSION_DIRECTORY .. "RoguemonRevo.lua")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = true
+	local DEBUG_MODE = false
 
 	-- turn this on to be noisy about any io.open failures (except "No such file")
 	self.DEBUG_IO_OPEN_ERRORS = false
