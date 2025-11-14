@@ -4186,6 +4186,7 @@ local function RoguemonTracker()
                         additionalOptions[optIndex] = ""
                         optIndex = optIndex + 1
                     end
+                    print(additionalOptions)
                     additionalOptionsRemaining = 1
                     nextScreen = self.OptionSelectionScreen
                 end
@@ -6795,7 +6796,7 @@ local function RoguemonTracker()
 
     function self.getGameFlag(flagIdx)
         local flagAddr, flagBit = self.getFlagAddr(flagIdx)
-        return Memory.readbyte(flagAddr) & (1 << flagBit)
+        return Memory.readbyte(flagAddr) & (1 << flagBit) > 0
     end
 
     function self.setGameFlag(flagIdx)
@@ -6808,7 +6809,7 @@ local function RoguemonTracker()
         local flagAddr, flagBit = self.getFlagAddr(flagIdx)
         local curFlags = Memory.readbyte(flagAddr)
         local newFlags = curFlags & ~(1 << (flagBit & 7));
-        Memory.writebyte(flagAdr, newFlags)
+        Memory.writebyte(flagAddr, newFlags)
     end
 
     function self.incrementRerollCounter()
