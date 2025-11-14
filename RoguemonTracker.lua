@@ -13,7 +13,7 @@ local function RoguemonTracker()
 	local RoguemonRevo = dofile(EXTENSION_DIRECTORY .. "RoguemonRevo.lua")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = false
+	local DEBUG_MODE = true
 
 	-- turn this on to be noisy about any io.open failures (except "No such file")
 	self.DEBUG_IO_OPEN_ERRORS = false
@@ -79,6 +79,7 @@ local function RoguemonTracker()
 		["Clairvoyance"] = {consumable = true, image = "clairvoyance.png", description = "Learn all future curses, and can make one swap."},
 		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def."},
 		["Booster Shot"] = {consumable = false, image = "boost.png", description = "Slightly boosts the power or accuracy of a single move."},
+		["Reroll Pack"] = {consumable = true, button = "", image = "rerollpack.png", description = "Gain 3 reroll chips - Use to reroll for 3 new prizes when offered. (1 time per chip)"},
 	}
 
 	local ROM_REDEEMS = {
@@ -391,6 +392,8 @@ local function RoguemonTracker()
 
 	local wildBattleCounter = 0
 	local wildBattlesStarted = false
+    local rerollCounter = 0
+    local rerollBans = {}
 	local needToBuy = false
 	local needToCleanse = 0
 	local shouldDismissNotification = nil
@@ -1080,6 +1083,7 @@ local function RoguemonTracker()
 		if wheelName then
 			wheels[wheelName] = currentWheel
 		end
+        rerollCounter = tonumber(self.readGameVar(GameSettings.roguemon.varRerollChipCount))
 	end
 
 	-- Autofill remaining information about segments.
@@ -1378,6 +1382,9 @@ local function RoguemonTracker()
 
             -- "Booster Shot" redeem: 0 for ATK, 1 for ACC
             flagBoosterShotMode       = 0x4ad,
+
+            -- "Reroll Chip" redeem count
+            varRerollChipCount        = 0x122,
 		}
 
 		local roguemonSettingPointers = {
@@ -2238,7 +2245,7 @@ local function RoguemonTracker()
 			Drawing.drawButton(button)
 		end
 
-		self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 45, 5)
+		self.drawCapsAt(DataHelper.buildTrackerScreenDisplay(), Constants.SCREEN.WIDTH + 51, 5)
 
 		-- Draw the images
 		if option1 ~= "" then
@@ -2318,7 +2325,7 @@ local function RoguemonTracker()
 		NextButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "Next" end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 110, 137, 22, 12 },
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 116, 141, 22, 12 },
 			onClick = function()
 				self.returnToHomeScreen()
 				milestone = milestone + 1
@@ -2330,7 +2337,7 @@ local function RoguemonTracker()
 		BackButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
 			getText = function() return "Back" end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 108, 8, 22, 10},
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 116, 7, 22, 12},
 			onClick = function()
 				self.returnToHomeScreen()
 			end,
@@ -2339,11 +2346,18 @@ local function RoguemonTracker()
 		-- Reroll button-- only visible if the player has a Reroll Chip
 		RerollButton = {
 			type = Constants.ButtonTypes.FULL_BORDER,
-			getText = function() return "Reroll" end,
-			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 5, 7, 27, 12 },
+			getText = function() return string.format("Reroll (%d)", rerollCounter) end,
+			box = { Constants.SCREEN.WIDTH + Constants.SCREEN.MARGIN + 2, 7, 41, 12 },
 			onClick = function()
-				self.removeSpecialRedeem("Reroll Chip")
-				self.spinReward(lastMilestone, true)
+				local rerollCt = self.decrementRerollCounter()
+				if rerollCt >= 0
+                then
+                    self.spinReward(lastMilestone, true)
+                end
+                if rerollCt <= 0
+                then
+                    self.removeSpecialRedeem("Reroll Chip")
+                end
 			end,
 			isVisible = function() return 
 				specialRedeems.consumable["Reroll Chip"] 
@@ -3810,12 +3824,34 @@ local function RoguemonTracker()
 		if milestoneName == "Mt. Moon" then
 			minHealingPrizes = 0
 		end
-		local rerollBans = nil
-		if rerolled then
-			rerollBans = {[option1] = true,
-						[option2] = true,
-						[option3] = true}
+		if not rerolled then
+            rerollBans = {}
+        else
+            -- Check if adding these items would leave 0 remaining rewards; 
+            -- if so, clear the ban list before adding them
+            rerollLen = 0
+            for _,i in pairs(rerollBans) do
+                rerollLen = rerollLen + 1
+            end
+
+            totalLen = 0
+			local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
+            for _,i in pairs(rewardOptions) do
+                totalLen = totalLen + 1
+            end
+
+            if rerollLen + 6 >= totalLen then  -- 6: 3 current options + 3 next options
+                rerollBans = {}
+                print("Cleared rerollBans")
+            end
+
+			rerollBans[option1] = true
+            rerollBans[option2] = true
+            rerollBans[option3] = true
 		end
+        print("--")
+        print(rerollBans)
+        print("--")
 		if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
 			GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
 			LogOverlay.isGameOver = false
@@ -3853,7 +3889,7 @@ local function RoguemonTracker()
 				local healingPrize = false
 				local prospectiveStarterPackMove = nil
 				for _,part in pairs(choiceParts) do
-					if specialRedeems.unlocks[part] or specialRedeems.consumable[part] or specialRedeems.internal[part] or specialRedeems.battle[part] or 
+					if specialRedeems.unlocks[part] or (specialRedeems.consumable[part] and not part == "Reroll Chip") or specialRedeems.internal[part] or specialRedeems.battle[part] or 
 						(part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"]) then
 						add = false
 					end
@@ -4174,7 +4210,6 @@ local function RoguemonTracker()
 					-- This reward is a special redeem
 					if specialRedeemInfo[reward].consumable then 
 						specialRedeems.consumable[reward] = true
-						specialRedeems.consumable[#specialRedeems.consumable + 1] = reward
 						if reward == "Potion Investment" then
 							specialRedeems.consumable[reward] = 20
 						end
@@ -4192,6 +4227,18 @@ local function RoguemonTracker()
 						if reward == "Temporary Found Item" then
 							specialRedeems.consumable[reward] = 2
 						end
+                        if reward == "Reroll Chip" then
+                            self.incrementRerollCounter()
+                        end
+                        if reward == "Reroll Pack" then
+                            specialRedeems.consumable["Reroll Pack"] = nil
+                            specialRedeems.consumable["Reroll Chip"] = true
+
+                            for i = 1, 3, 1
+                            do
+                                self.incrementRerollCounter()
+                            end
+                        end
 					elseif specialRedeemInfo[reward].button == "Use" then
 						-- Battle redeem
 						specialRedeems.battle[reward] = true
@@ -5352,6 +5399,9 @@ local function RoguemonTracker()
 						if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
 							Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
 						end
+                        if r == "Reroll Chip" or r == "Reroll Pack" then
+                            Drawing.drawText(dx*imageGap + imageSize - 12, dy + imageSize - 12, rerollCounter, 0xFF000000)
+                        end
 						dx = dx + 1
 					end
 				end
@@ -6759,6 +6809,20 @@ local function RoguemonTracker()
         local curFlags = Memory.readbyte(flagAddr)
         local newFlags = curFlags & ~(1 << (flagBit & 7));
         Memory.writebyte(flagAdr, newFlags)
+    end
+
+    function self.incrementRerollCounter()
+        local rerollVar = GameSettings.roguemon.varRerollChipCount
+        rerollCounter = tonumber(self.readGameVar(rerollVar)) + 1
+        self.writeGameVar(rerollVar, rerollCounter)
+        return rerollCounter
+    end
+
+    function self.decrementRerollCounter()
+        local rerollVar = GameSettings.roguemon.varRerollChipCount
+        rerollCounter = tonumber(self.readGameVar(rerollVar)) - 1
+        self.writeGameVar(rerollVar, rerollCounter)
+        return rerollCounter
     end
 
 	function self.getROMRunType()

@@ -116,6 +116,7 @@ Special Insight: Learn the ability of enemy pokemon higher BST than yours.|speci
 Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
 Artiste: Learn Sketch.|artiste.png
 Booster Shot: Choose 1: Gain +10 ACC or +10 PWR to one move|boost.png
+Reroll Pack: Gain 3 reroll chips - Use to reroll for 3 new prizes when offered. (1 time per chip)|rerollpack.png
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and teach one (or none).|tm.png
