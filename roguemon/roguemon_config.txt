@@ -115,6 +115,8 @@ Regenerator: Regain 3% of max HP after every fight.|leftovers.png
 Special Insight: Learn the ability of enemy pokemon higher BST than yours.|special-insight.png
 Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
 Artiste: Learn Sketch.|artiste.png
+Booster Shot: Choose 1: Gain +10 ACC or +10 PWR to one move|boost.png
+Reroll Pack: Gain 3 reroll chips - Use to reroll for 3 new prizes when offered. (1 time per chip)|rerollpack.png
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and teach one (or none).|tm.png
@@ -137,6 +139,7 @@ Regenerator: Regain 3% of max HP after every fight.|leftovers.png
 Cooler Bag: Drinks don't count against HP cap, and Berry Juices may be saved.|coolerbag.png
 Special Insight: Learn the ability of enemy pokemon higher BST than yours.|special-insight.png
 Spidey Sense: Learn if enemies have Counter, Mirror Coat, or Destiny Bond.|spidey-sense.png
+Booster Shot: Choose 1: Gain +10 ACC or +10 PWR to one move|boost.png
 
 *Koga Prize
 Teach 1 currently held TM|tm.png
@@ -222,6 +225,7 @@ HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 Max Ether & Pocket Sand: Once per segment, may reduce enemy's accuracy to -6.|pocket-sand.png
 Hyper Training|hyper-training.png
+Armor Plating|assault-vest.png
 
 *Giovanni Prize
 Teach 1 currently held TM|tm.png
@@ -242,6 +246,7 @@ HP Cap +50 & Move Tutor: May use the move tutor in Viridian City. Cannot pre-sco
 HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 Hyper Training|hyper-training.png
+Armor Plating|assault-vest.png
 
 *Victory Road Prize
 Full Restore|full-restore.png
@@ -254,3 +259,4 @@ Full Heal x2 & Elixir x2|twofulltwoelixir.png
 Fight Route X: Treat the routes together as a segment. Don't cleanse items found until the next Cleansing Phase.|exp-charm.png
 Moomoo Milk & Ancestral Gift: Choose and unlock a type-boosting item matching one of your moves.|ancestral-gift.png
 Tera Orb: Choose a type matching a move; 5 times, you may change to that type.|tera-orb.png
+Armor Plating|assault-vest.png
