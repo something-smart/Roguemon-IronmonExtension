@@ -3849,9 +3849,6 @@ local function RoguemonTracker()
             rerollBans[option2] = true
             rerollBans[option3] = true
 		end
-        print("--")
-        print(rerollBans)
-        print("--")
 		if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
 			GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
 			LogOverlay.isGameOver = false
@@ -4406,10 +4403,10 @@ local function RoguemonTracker()
         if option == "Boost Power" or option == "Boost Accuracy" then  -- "Booster Shot" redeem
             self.setROMRedeem("Booster Shot")
             local mode = "POW +10: "
-            print("Set ROM Redeem")
+            self.debugLog("Set ROM Redeem")
             if option == "Boost Accuracy" then
                 self.setGameFlag(GameSettings.roguemon.flagBoosterShotMode)
-                print("Set Booster Shot mode flag")
+                self.debugLog("Set Booster Shot mode flag")
                 mode = "ACC +10: "
             end
 
@@ -4448,12 +4445,12 @@ local function RoguemonTracker()
                     if self.getGameFlag(GameSettings.roguemon.flagBoosterShotMode) then
                         local acc = tonumber(MoveData.Moves[m].accuracy) + 10
 
-                        print(string.format("Setting accuracy of %s (%d) to %d", selected_move, m, acc))
+                        self.debugLog(string.format("Setting accuracy of %s (%d) to %d", selected_move, m, acc))
                         self.writeGameVar(GameSettings.roguemon.varBoosterShotAcc, acc)
                     else
                         local pow = tonumber(MoveData.Moves[m].power) + 10
 
-                        print(string.format("Setting power of %s (%d) to %d", selected_move, m, pow))
+                        self.debugLog(string.format("Setting power of %s (%d) to %d", selected_move, m, pow))
                         self.writeGameVar(GameSettings.roguemon.varBoosterShotPow, pow)
                     end
                 end
