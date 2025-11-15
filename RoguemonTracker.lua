@@ -4208,6 +4208,7 @@ local function RoguemonTracker()
 					-- This reward is a special redeem
 					if specialRedeemInfo[reward].consumable then 
 						specialRedeems.consumable[reward] = true
+						specialRedeems.consumable[#specialRedeems.consumable+1] = reward
 						if reward == "Potion Investment" then
 							specialRedeems.consumable[reward] = 20
 						end
@@ -4401,9 +4402,14 @@ local function RoguemonTracker()
             end
         end
         if option == "Boost Power" or option == "Boost Accuracy" then  -- "Booster Shot" redeem
+            -- Clear existing values for more consistent testing
+            self.clearGameFlag(GameSettings.roguemon.flagBoosterShotMode)
+            self.writeGameVar(GameSettings.roguemon.varBoosterShotMove, 0)
+            self.writeGameVar(GameSettings.roguemon.varBoosterShotPow, 0)
+            self.writeGameVar(GameSettings.roguemon.varBoosterShotAcc, 0)
+
             self.setROMRedeem("Booster Shot")
             local mode = "POW +10: "
-            self.debugLog("Set ROM Redeem")
             if option == "Boost Accuracy" then
                 self.setGameFlag(GameSettings.roguemon.flagBoosterShotMode)
                 self.debugLog("Set Booster Shot mode flag")
@@ -5382,25 +5388,25 @@ local function RoguemonTracker()
 						dx = dx + 1
 					end
 					for _,r in ipairs(specialRedeems.consumable) do
-						local imageButton = {
-							type = Constants.ButtonTypes.IMAGE,
-							box = {dx*imageGap, dy, imageSize, imageSize},
-							onClick = function()
-								specialRedeemToDescribe = r
-								Program.changeScreenView(self.SpecialRedeemScreen)
-							end
-						}
-						Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
-						if screen.Buttons then
-							screen.Buttons["RoguemonPrize" .. dx] = imageButton
-						end
-						if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
-							Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
-						end
-                        if r == "Reroll Chip" or r == "Reroll Pack" then
-                            Drawing.drawText(dx*imageGap + imageSize - 12, dy + imageSize - 12, rerollCounter, 0xFF000000)
-                        end
-						dx = dx + 1
+                                            local imageButton = {
+                                                    type = Constants.ButtonTypes.IMAGE,
+                                                    box = {dx*imageGap, dy, imageSize, imageSize},
+                                                    onClick = function()
+                                                            specialRedeemToDescribe = r
+                                                            Program.changeScreenView(self.SpecialRedeemScreen)
+                                                    end
+                                            }
+                                            Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+                                            if screen.Buttons then
+                                                    screen.Buttons["RoguemonPrize" .. dx] = imageButton
+                                            end
+                                            if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
+                                                    Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
+                                            end
+                                            if r == "Reroll Chip" then
+                                                Drawing.drawText(dx*imageGap + imageSize - 12, dy + imageSize - 12, rerollCounter, 0xFF000000)
+                                            end
+                                            dx = dx + 1
 					end
 				end
 				while dx < 8 do
