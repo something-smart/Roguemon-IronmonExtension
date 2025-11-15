@@ -13,7 +13,7 @@ local function RoguemonTracker()
 	local RoguemonRevo = dofile(EXTENSION_DIRECTORY .. "RoguemonRevo.lua")
 
 	-- turn this on to have the reward screen accessible at any time
-	local DEBUG_MODE = false
+	local DEBUG_MODE = true
 
 	-- turn this on to be noisy about any io.open failures (except "No such file")
 	self.DEBUG_IO_OPEN_ERRORS = false
@@ -3941,6 +3941,15 @@ local function RoguemonTracker()
 						prospectiveStarterPackMove = validMoves[math.random(#validMoves)]
 						choice = choice .. ": Learn a weak move (" .. MoveData.Moves[prospectiveStarterPackMove].name .. ")."
 					end
+                                        if part == "Armor Plating" or part == "Booster Shot" then
+                                            -- Don't allow multiple offers of Armor Plating or Booster Shot
+                                            if specialRedeems.internal[part] then
+                                                add = false
+                                                if DEBUG_MODE then
+                                                    print(string.format("Not offering %s because it's already been redeemed", part))
+                                                end
+                                            end
+                                        end
 					if part == "Hyper Training" then
 						if specialRedeems.internal["Hyper Training"] then
 							choice = choice .. ": See your IVs and choose one to maximize."
@@ -4166,6 +4175,7 @@ local function RoguemonTracker()
 					nextScreen = self.OptionSelectionScreen
 				end
                 if reward == "Armor Plating" then
+                    specialRedeems.internal["Armor Plating"] = true
                     local STATS_ORDERED = { "Boost DEF", "Boost SPD" }
                     for i,stat in pairs(STATS_ORDERED) do
                         additionalOptions[i] = stat
@@ -4179,6 +4189,7 @@ local function RoguemonTracker()
                     nextScreen = self.OptionSelectionScreen
                 end
                 if reward == "Booster Shot" then
+                    specialRedeems.internal["Booster Shot"] = true
                     local BOOSTER_SHOT_MODE = { "Boost Power", "Boost Accuracy" }
                     for i,mode in pairs(BOOSTER_SHOT_MODE) do
                         additionalOptions[i] = mode
@@ -4429,19 +4440,25 @@ local function RoguemonTracker()
                 if option == "Boost Power" then
                     if move.variablepower then
                         isMoveEligible = false
-                        print(string.format("Excluding move %s because it has variable power", move.name))
+                        if DEBUG_MODE then
+                            print(string.format("Excluding move %s because it has variable power", move.name))
+                        end
                     end
                     local movePower = tonumber(move.power)
                     if move.power and movePower and movePower < 10 then
                         isMoveEligible = false
-                        print(string.format("Excluding move %s because its power is < 10", move.name))
+                        if DEBUG_MODE then
+                            print(string.format("Excluding move %s because its power is < 10", move.name))
+                        end
                     end
                 end
                 if option == "Boost Accuracy" then
                     local moveAcc = tonumber(move.accuracy)
                     if moveAcc and moveAcc == 0 then
                         isMoveEligible = false
-                        print(string.format("Excluding move %s because its accuracy is either non-standard or fixed", move.name))
+                        if DEBUG_MODE then
+                            print(string.format("Excluding move %s because its accuracy is either non-standard or fixed", move.name))
+                        end
                     end
 
                     local sleepMoves = {
@@ -4454,7 +4471,9 @@ local function RoguemonTracker()
                     }
                     if sleepMoves[move.name] then
                         isMoveEligible = false
-                        print(string.format("Excluding move %s because it is a sleep effect", move.name))
+                        if DEBUG_MODE then
+                            print(string.format("Excluding move %s because it is a sleep effect", move.name))
+                        end
                     end
                 end
                 if isMoveEligible then
