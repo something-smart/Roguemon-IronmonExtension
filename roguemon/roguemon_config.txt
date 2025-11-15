@@ -225,7 +225,7 @@ HP Cap +150|healing-pocket.png
 Super Potion & Secret Dex: Get stat info on all 570+ BST pokemon.|secret-dex.png
 Max Ether & Pocket Sand: Once per segment, may reduce enemy's accuracy to -6.|pocket-sand.png
 Hyper Training|hyper-training.png
-Armor Plating|assault-vest.png
+Armor Plating: Gain +1 stage of either DEF or SPD per turn, up to a max of 2 stages|assault-vest.png
 
 *Giovanni Prize
 Teach 1 currently held TM|tm.png
