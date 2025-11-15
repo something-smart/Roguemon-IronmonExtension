@@ -4223,7 +4223,8 @@ local function RoguemonTracker()
                         -- This reward is a special redeem
                         if specialRedeemInfo[reward].consumable then 
                             specialRedeems.consumable[reward] = true
-                            specialRedeems.consumable[#specialRedeems.consumable+1] = reward
+                            local rewardIdx = #specialRedeems.consumable+1
+                            specialRedeems.consumable[rewardIdx] = reward
                             if reward == "Potion Investment" then
                                 specialRedeems.consumable[reward] = 20
                             end
@@ -4247,6 +4248,7 @@ local function RoguemonTracker()
                             if reward == "Reroll Pack" then
                                 specialRedeems.consumable["Reroll Pack"] = nil
                                 specialRedeems.consumable["Reroll Chip"] = true
+                                specialRedeems.consumable[rewardIdx] = "Reroll Chip"
 
                                 for i = 1, 3, 1
                                     do
@@ -5426,7 +5428,10 @@ local function RoguemonTracker()
 			end
 			if not Battle.inBattle then
 				if screen ~= StartupScreen then
+                                        local displayedUnlocks = {}
 					for _,r in ipairs(specialRedeems.unlocks) do
+                                            if not displayedUnlocks[r] then
+                                                displayedUnlocks[r] = true
 						local imageButton = {
 							type = Constants.ButtonTypes.IMAGE,
 							box = {dx*imageGap, dy, imageSize, imageSize},
@@ -5440,27 +5445,32 @@ local function RoguemonTracker()
 							screen.Buttons["RoguemonPrize" .. dx] = imageButton
 						end
 						dx = dx + 1
+                                            end
 					end
+                                        local displayedConsumables = {}
 					for _,r in ipairs(specialRedeems.consumable) do
-                                            local imageButton = {
-                                                    type = Constants.ButtonTypes.IMAGE,
-                                                    box = {dx*imageGap, dy, imageSize, imageSize},
-                                                    onClick = function()
-                                                            specialRedeemToDescribe = r
-                                                            Program.changeScreenView(self.SpecialRedeemScreen)
-                                                    end
-                                            }
-                                            Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
-                                            if screen.Buttons then
-                                                    screen.Buttons["RoguemonPrize" .. dx] = imageButton
+                                            if not displayedConsumables[r] then
+                                                displayedConsumables[r] = true
+                                                local imageButton = {
+                                                        type = Constants.ButtonTypes.IMAGE,
+                                                        box = {dx*imageGap, dy, imageSize, imageSize},
+                                                        onClick = function()
+                                                                specialRedeemToDescribe = r
+                                                                Program.changeScreenView(self.SpecialRedeemScreen)
+                                                        end
+                                                }
+                                                Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+                                                if screen.Buttons then
+                                                        screen.Buttons["RoguemonPrize" .. dx] = imageButton
+                                                end
+                                                if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
+                                                        Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
+                                                end
+                                                if r == "Reroll Chip" then
+                                                    Drawing.drawText(dx*imageGap + imageSize - 12, dy + imageSize - 12, rerollCounter, 0xFF000000)
+                                                end
+                                                dx = dx + 1
                                             end
-                                            if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
-                                                    Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
-                                            end
-                                            if r == "Reroll Chip" then
-                                                Drawing.drawText(dx*imageGap + imageSize - 12, dy + imageSize - 12, rerollCounter, 0xFF000000)
-                                            end
-                                            dx = dx + 1
 					end
 				end
 				while dx < 8 do
