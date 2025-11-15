@@ -4170,6 +4170,11 @@ local function RoguemonTracker()
                     for i,stat in pairs(STATS_ORDERED) do
                         additionalOptions[i] = stat
                     end
+                    local optIndex = 3
+                    while optIndex < 9 do
+                        additionalOptions[optIndex] = ""
+                        optIndex = optIndex + 1
+                    end
                     additionalOptionsRemaining = 1
                     nextScreen = self.OptionSelectionScreen
                 end
@@ -4183,7 +4188,6 @@ local function RoguemonTracker()
                         additionalOptions[optIndex] = ""
                         optIndex = optIndex + 1
                     end
-                    print(additionalOptions)
                     additionalOptionsRemaining = 1
                     nextScreen = self.OptionSelectionScreen
                 end
