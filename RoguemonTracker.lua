@@ -4043,275 +4043,275 @@ local function RoguemonTracker()
 
 	end
 
-	-- Select a particular reward option.
-	function self.selectReward(option)
-		runSummary[#runSummary + 1] = {
-			type = "Prize",
-			options = {option1, option2, option3},
-			chosen = {[option] = true},
-			title = self.baseMilestone(lastMilestone) .. " Prize"
-		}
+        -- Select a particular reward option.
+        function self.selectReward(option)
+            runSummary[#runSummary + 1] = {
+                type = "Prize",
+                options = {option1, option2, option3},
+                chosen = {[option] = true},
+                title = self.baseMilestone(lastMilestone) .. " Prize"
+            }
 
-		local nextScreen = TrackerScreen -- by default we return to the main screen, unless the reward needs us to make another choice
+            local nextScreen = TrackerScreen -- by default we return to the main screen, unless the reward needs us to make another choice
 
-		local rewards = Utils.split(option, '&', true) -- split the string up into its separate parts
-		for _, reward in pairs(rewards) do
-			-- Cover the route reward separately
-			if string.sub(reward, 1, 11) == 'Fight Route' then
-				local route = string.sub(reward, 7)
-				specialRedeems.internal[route] = true
-				if segmentStarted then
-					table.insert(segmentOrder, currentSegment + 1, route)
-				else
-					table.insert(segmentOrder, currentSegment, route)
-				end
-			else
-				-- Check cap increases first
-				if string.sub(reward, 1, 8) == 'HP Cap +' then
-					hpCapModifier = hpCapModifier + tonumber(string.sub(reward, 9, #reward))
-				end
-				if string.sub(reward, 1, 12) == 'Status Cap +' then
-					statusCapModifier = statusCapModifier + tonumber(string.sub(reward, 13, #reward))
-				end
+            local rewards = Utils.split(option, '&', true) -- split the string up into its separate parts
+            for _, reward in pairs(rewards) do
+                -- Cover the route reward separately
+                if string.sub(reward, 1, 11) == 'Fight Route' then
+                    local route = string.sub(reward, 7)
+                    specialRedeems.internal[route] = true
+                    if segmentStarted then
+                        table.insert(segmentOrder, currentSegment + 1, route)
+                    else
+                        table.insert(segmentOrder, currentSegment, route)
+                    end
+                else
+                    -- Check cap increases first
+                    if string.sub(reward, 1, 8) == 'HP Cap +' then
+                        hpCapModifier = hpCapModifier + tonumber(string.sub(reward, 9, #reward))
+                    end
+                    if string.sub(reward, 1, 12) == 'Status Cap +' then
+                        statusCapModifier = statusCapModifier + tonumber(string.sub(reward, 13, #reward))
+                    end
 
-				-- Determine item name and item count
-				local itemCount = 1
-				local split = Utils.split(reward, " ", true)
-				if string.sub(split[#split], 1, 1) == 'x' then
-					local s = split[1]
-					for i = 2,#split-1 do s = s .. " " .. split[i] end
-					reward = s
-					itemCount = tonumber(string.sub(split[#split], 2, #(split[#split])))
-				end
-				local itemId = self.getItemId(reward)
-				if reward == "Berry Pouch" then itemId = 0 end -- this is an item in the game, but not what we want
-				if itemId ~= 0 then
-					-- This reward simply yields items, so provide them
-					itemsFromPrize[#itemsFromPrize + 1] = reward
-					self.AddItemImproved(reward, itemCount)
-					if reward == "Max Revive" then
-						self.removeSpecialRedeem("Revive")
-						self.removeItem("Revive", 1)
-					end
-				end
-				if reward == "Nature Mint" then
-					additionalOptions = {"+Atk", "+Def", "+SpAtk", "+SpDef", "+Speed", "", "", ""}
-					additionalOptionsRemaining = 1
-					nextScreen = self.OptionSelectionScreen
-					specialRedeems.internal["Nature Mint"] = true
-				end
-				if reward == "Ability Capsule" then
-					self.flipAbility()
-					specialRedeems.internal["Ability Capsule"] = true
-				end
-				if reward == "Found Item" then
-					foundItemPrizeActive = true
-				end
-				if reward == "Clairvoyance" then
-					specialRedeems.internal["Clairvoyance"] = true
-				end
-				if reward == "Ancestral Gift" then
-					local pkmn = self.readLeadPokemonData()
-		        	local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
-					local itemChoices = {}
-					for _,m in pairs(moves) do
-						if MoveData.Moves[m].category ~= MoveData.Categories.STATUS then
-							local type = MoveData.Moves[m].type
-							itemChoices[ancestralItems[type]] = true
-						end
-					end
-					specialRedeems.internal["Ancestral Gift"] = true
-					local optIndex = 1
-					for i,_ in pairs(itemChoices) do
-						additionalOptions[optIndex] = i
-						optIndex = optIndex + 1
-					end
-					while optIndex < 9 do
-						additionalOptions[optIndex] = ""
-						optIndex = optIndex + 1
-					end
-					additionalOptionsRemaining = 1
-					nextScreen = self.OptionSelectionScreen
-				end
-				if reward == "Tera Orb" then
-					local pkmn = self.readLeadPokemonData()
-		        	local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
-					local teraChoices = {}
-					for _,m in pairs(moves) do
-						local type = (MoveData.Moves[m].type:gsub("^%l", string.upper))
-						teraChoices[type] = true
-					end
-					local optIndex = 1
-					for i,_ in pairs(teraChoices) do
-						additionalOptions[optIndex] = i
-						optIndex = optIndex + 1
-					end
-					while optIndex < 9 do
-						additionalOptions[optIndex] = ""
-						optIndex = optIndex + 1
-					end
-					additionalOptionsRemaining = 1
-					nextScreen = self.OptionSelectionScreen
-				end
-				if reward == "Artiste" then
-					-- learn sketch
-					self.triggerROMLearnMove(166)
-				end
-				if reward == "Starter Pack" then
-					self.triggerROMLearnMove(starterPackMove)
-					starterPackMove = nil
-				end
-				if reward == "Hyper Training" then
-					local pkmn = self.readLeadPokemonData()
-					local STATS_ORDERED = { "hp", "atk", "def", "spa", "spd", "spe"}
-					local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
-					for i,stat in pairs(STATS_ORDERED) do
-						local iv = ivs[stat]
-						additionalOptions[i] = string.upper(stat) .. " (" .. iv .. ")"
-					end
-					additionalOptions[7] = ""
-					additionalOptions[8] = ""
-					additionalOptionsRemaining = 1
-					nextScreen = self.OptionSelectionScreen
-				end
-                if reward == "Armor Plating" then
-                    specialRedeems.internal["Armor Plating"] = true
-                    local STATS_ORDERED = { "Boost DEF", "Boost SPD" }
-                    for i,stat in pairs(STATS_ORDERED) do
-                        additionalOptions[i] = stat
+                    -- Determine item name and item count
+                    local itemCount = 1
+                    local split = Utils.split(reward, " ", true)
+                    if string.sub(split[#split], 1, 1) == 'x' then
+                        local s = split[1]
+                        for i = 2,#split-1 do s = s .. " " .. split[i] end
+                        reward = s
+                        itemCount = tonumber(string.sub(split[#split], 2, #(split[#split])))
                     end
-                    local optIndex = 3
-                    while optIndex < 9 do
-                        additionalOptions[optIndex] = ""
-                        optIndex = optIndex + 1
-                    end
-                    additionalOptionsRemaining = 1
-                    nextScreen = self.OptionSelectionScreen
-                end
-                if reward == "Booster Shot" then
-                    specialRedeems.internal["Booster Shot"] = true
-                    local BOOSTER_SHOT_MODE = { "Boost Power", "Boost Accuracy" }
-                    for i,mode in pairs(BOOSTER_SHOT_MODE) do
-                        additionalOptions[i] = mode
-                    end
-                    local optIndex = 3
-                    while optIndex < 9 do
-                        additionalOptions[optIndex] = ""
-                        optIndex = optIndex + 1
-                    end
-                    additionalOptionsRemaining = 1
-                    nextScreen = self.OptionSelectionScreen
-                end
-				if string.sub(reward, 1, 3) == 'Any' then
-					-- This reward is a choice of items
-					for key,choices in pairs(prizeAdditionalOptions) do
-						if key == reward then
-							for i,_ in pairs(additionalOptions) do
-								if i > #choices then 
-									additionalOptions[i] = ""
-								else 
-									additionalOptions[i] = choices[i]
-								end
-							end
-							additionalOptionsRemaining = itemCount
-							nextScreen = self.OptionSelectionScreen
-						end
-					end
-				end
-				if specialRedeemInfo[reward] then
-					self.setROMRedeem(reward)
-					-- This reward is a special redeem
-					if specialRedeemInfo[reward].consumable then 
-						specialRedeems.consumable[reward] = true
-						specialRedeems.consumable[#specialRedeems.consumable+1] = reward
-						if reward == "Potion Investment" then
-							specialRedeems.consumable[reward] = 20
-						end
-						if reward == "Revive" then
-							specialRedeems.internal["Revive"] = true
-						end
-						if reward == "Fight first 5 wilds in Forest" then
-							wildBattleCounter = 5
-							wildBattlesStarted = false
-						end
-						if reward == "Fight wilds in Rts 1/2/22" then
-							wildBattleCounter = 3
-							wildBattlesStarted = false
-						end
-						if reward == "Temporary Found Item" then
-							specialRedeems.consumable[reward] = 2
-						end
-                        if reward == "Reroll Chip" then
-                            self.incrementRerollCounter()
+                    local itemId = self.getItemId(reward)
+                    if reward == "Berry Pouch" then itemId = 0 end -- this is an item in the game, but not what we want
+                    if itemId ~= 0 then
+                        -- This reward simply yields items, so provide them
+                        itemsFromPrize[#itemsFromPrize + 1] = reward
+                        self.AddItemImproved(reward, itemCount)
+                        if reward == "Max Revive" then
+                            self.removeSpecialRedeem("Revive")
+                            self.removeItem("Revive", 1)
                         end
-                        if reward == "Reroll Pack" then
-                            specialRedeems.consumable["Reroll Pack"] = nil
-                            specialRedeems.consumable["Reroll Chip"] = true
-
-                            for i = 1, 3, 1
-                            do
-                                self.incrementRerollCounter()
+                    end
+                    if reward == "Nature Mint" then
+                        additionalOptions = {"+Atk", "+Def", "+SpAtk", "+SpDef", "+Speed", "", "", ""}
+                        additionalOptionsRemaining = 1
+                        nextScreen = self.OptionSelectionScreen
+                        specialRedeems.internal["Nature Mint"] = true
+                    end
+                    if reward == "Ability Capsule" then
+                        self.flipAbility()
+                        specialRedeems.internal["Ability Capsule"] = true
+                    end
+                    if reward == "Found Item" then
+                        foundItemPrizeActive = true
+                    end
+                    if reward == "Clairvoyance" then
+                        specialRedeems.internal["Clairvoyance"] = true
+                    end
+                    if reward == "Ancestral Gift" then
+                        local pkmn = self.readLeadPokemonData()
+                        local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
+                        local itemChoices = {}
+                        for _,m in pairs(moves) do
+                            if MoveData.Moves[m].category ~= MoveData.Categories.STATUS then
+                                local type = MoveData.Moves[m].type
+                                itemChoices[ancestralItems[type]] = true
                             end
                         end
-					elseif specialRedeemInfo[reward].button == "Use" then
-						-- Battle redeem
-						specialRedeems.battle[reward] = true
-						specialRedeems.battle[#specialRedeems.battle + 1] = reward
-						if specialRedeemInfo[reward].charges then
-							specialRedeems.battle[reward] = specialRedeemInfo[reward].charges
-						end
-					else
-						specialRedeems.unlocks[reward] = true
-						specialRedeems.unlocks[#specialRedeems.unlocks + 1] = reward
-						if reward == "Midas Touch" then
-							specialRedeems.unlocks["Midas Touch"] = 0
-						end
-						if reward == "Notetaker" then
-							self.loadEvolutionTable()
-						end
-					end
-				end
-			end
-		end
+                        specialRedeems.internal["Ancestral Gift"] = true
+                        local optIndex = 1
+                        for i,_ in pairs(itemChoices) do
+                            additionalOptions[optIndex] = i
+                            optIndex = optIndex + 1
+                        end
+                        while optIndex < 9 do
+                            additionalOptions[optIndex] = ""
+                            optIndex = optIndex + 1
+                        end
+                        additionalOptionsRemaining = 1
+                        nextScreen = self.OptionSelectionScreen
+                    end
+                    if reward == "Tera Orb" then
+                        local pkmn = self.readLeadPokemonData()
+                        local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
+                        local teraChoices = {}
+                        for _,m in pairs(moves) do
+                            local type = (MoveData.Moves[m].type:gsub("^%l", string.upper))
+                            teraChoices[type] = true
+                        end
+                        local optIndex = 1
+                        for i,_ in pairs(teraChoices) do
+                            additionalOptions[optIndex] = i
+                            optIndex = optIndex + 1
+                        end
+                        while optIndex < 9 do
+                            additionalOptions[optIndex] = ""
+                            optIndex = optIndex + 1
+                        end
+                        additionalOptionsRemaining = 1
+                        nextScreen = self.OptionSelectionScreen
+                    end
+                    if reward == "Artiste" then
+                        -- learn sketch
+                        self.triggerROMLearnMove(166)
+                    end
+                    if reward == "Starter Pack" then
+                        self.triggerROMLearnMove(starterPackMove)
+                        starterPackMove = nil
+                    end
+                    if reward == "Hyper Training" then
+                        local pkmn = self.readLeadPokemonData()
+                        local STATS_ORDERED = { "hp", "atk", "def", "spa", "spd", "spe"}
+                        local ivs = Utils.convertIVNumberToTable(pkmn.misc2)
+                        for i,stat in pairs(STATS_ORDERED) do
+                            local iv = ivs[stat]
+                            additionalOptions[i] = string.upper(stat) .. " (" .. iv .. ")"
+                        end
+                        additionalOptions[7] = ""
+                        additionalOptions[8] = ""
+                        additionalOptionsRemaining = 1
+                        nextScreen = self.OptionSelectionScreen
+                    end
+                    if reward == "Armor Plating" then
+                        specialRedeems.internal["Armor Plating"] = true
+                        local STATS_ORDERED = { "Boost DEF", "Boost SPD" }
+                        for i,stat in pairs(STATS_ORDERED) do
+                            additionalOptions[i] = stat
+                        end
+                        local optIndex = 3
+                        while optIndex < 9 do
+                            additionalOptions[optIndex] = ""
+                            optIndex = optIndex + 1
+                        end
+                        additionalOptionsRemaining = 1
+                        nextScreen = self.OptionSelectionScreen
+                    end
+                    if reward == "Booster Shot" then
+                        specialRedeems.internal["Booster Shot"] = true
+                        local BOOSTER_SHOT_MODE = { "Boost Power", "Boost Accuracy" }
+                        for i,mode in pairs(BOOSTER_SHOT_MODE) do
+                            additionalOptions[i] = mode
+                        end
+                        local optIndex = 3
+                        while optIndex < 9 do
+                            additionalOptions[optIndex] = ""
+                            optIndex = optIndex + 1
+                        end
+                        additionalOptionsRemaining = 1
+                        nextScreen = self.OptionSelectionScreen
+                    end
+                    if string.sub(reward, 1, 3) == 'Any' then
+                        -- This reward is a choice of items
+                        for key,choices in pairs(prizeAdditionalOptions) do
+                            if key == reward then
+                                for i,_ in pairs(additionalOptions) do
+                                    if i > #choices then 
+                                        additionalOptions[i] = ""
+                                    else 
+                                        additionalOptions[i] = choices[i]
+                                    end
+                                end
+                                additionalOptionsRemaining = itemCount
+                                nextScreen = self.OptionSelectionScreen
+                            end
+                        end
+                    end
+                    if specialRedeemInfo[reward] then
+                        self.setROMRedeem(reward)
+                        -- This reward is a special redeem
+                        if specialRedeemInfo[reward].consumable then 
+                            specialRedeems.consumable[reward] = true
+                            specialRedeems.consumable[#specialRedeems.consumable+1] = reward
+                            if reward == "Potion Investment" then
+                                specialRedeems.consumable[reward] = 20
+                            end
+                            if reward == "Revive" then
+                                specialRedeems.internal["Revive"] = true
+                            end
+                            if reward == "Fight first 5 wilds in Forest" then
+                                wildBattleCounter = 5
+                                wildBattlesStarted = false
+                            end
+                            if reward == "Fight wilds in Rts 1/2/22" then
+                                wildBattleCounter = 3
+                                wildBattlesStarted = false
+                            end
+                            if reward == "Temporary Found Item" then
+                                specialRedeems.consumable[reward] = 2
+                            end
+                            if reward == "Reroll Chip" then
+                                self.incrementRerollCounter()
+                            end
+                            if reward == "Reroll Pack" then
+                                specialRedeems.consumable["Reroll Pack"] = nil
+                                specialRedeems.consumable["Reroll Chip"] = true
+
+                                for i = 1, 3, 1
+                                    do
+                                        self.incrementRerollCounter()
+                                    end
+                                end
+                            elseif specialRedeemInfo[reward].button == "Use" then
+                                -- Battle redeem
+                                specialRedeems.battle[reward] = true
+                                specialRedeems.battle[#specialRedeems.battle + 1] = reward
+                                if specialRedeemInfo[reward].charges then
+                                    specialRedeems.battle[reward] = specialRedeemInfo[reward].charges
+                                end
+                            else
+                                specialRedeems.unlocks[reward] = true
+                                specialRedeems.unlocks[#specialRedeems.unlocks + 1] = reward
+                                if reward == "Midas Touch" then
+                                    specialRedeems.unlocks["Midas Touch"] = 0
+                                end
+                                if reward == "Notetaker" then
+                                    self.loadEvolutionTable()
+                                end
+                            end
+                        end
+                    end
+                end
 
 		descriptionText = ""
 
 		self.updateCaps(false)
 
-		if option ~= "Choose 2" and specialRedeems.consumable["Choose 2"] and not milestoneTrainers[self.baseMilestone(lastMilestone)] then
-			self.removeSpecialRedeem("Choose 2")
-			self.readyScreen(self.RewardScreen)
-			if option1 == option then
-				option1 = ""
-				option1Desc = ""
-			end
-			if option2 == option then
-				option2 = ""
-				option2Desc = ""
-			end
-			if option3 == option then
-				option3 = ""
-				option3Desc = ""
-			end
-		else
-			if milestonesByName[lastMilestone .. " 2"] then
-				self.spinReward(lastMilestone .. " 2", false)
-				milestone = milestone + 1
-			end
-		end
+                if option ~= "Choose 2" and specialRedeems.consumable["Choose 2"] and not milestoneTrainers[self.baseMilestone(lastMilestone)] then
+                    self.removeSpecialRedeem("Choose 2")
+                    self.readyScreen(self.RewardScreen)
+                    if option1 == option then
+                        option1 = ""
+                        option1Desc = ""
+                    end
+                    if option2 == option then
+                        option2 = ""
+                        option2Desc = ""
+                    end
+                    if option3 == option then
+                        option3 = ""
+                        option3Desc = ""
+                    end
+                else
+                    if milestonesByName[lastMilestone .. " 2"] then
+                        self.spinReward(lastMilestone .. " 2", false)
+                        milestone = milestone + 1
+                    end
+                end
 
-		if nextScreen == TrackerScreen then
-			currentRoguemonScreen = self.RunSummaryScreen
-			self.returnToHomeScreen()
-		else
-			currentRoguemonScreen = nextScreen
-			Program.changeScreenView(nextScreen)
-		end
+                if nextScreen == TrackerScreen then
+                    currentRoguemonScreen = self.RunSummaryScreen
+                    self.returnToHomeScreen()
+                else
+                    currentRoguemonScreen = nextScreen
+                    Program.changeScreenView(nextScreen)
+                end
 
-		Program.redraw(true)
+                Program.redraw(true)
 
-		self.saveData()
-	end
+                self.saveData()
+            end
 
 	local prefixHandlers = {
 		["Duplicate "] = function(value)
