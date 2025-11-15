@@ -4425,8 +4425,39 @@ local function RoguemonTracker()
             local moveChoices = {}
             for _,m in pairs(moves) do
                 move = MoveData.Moves[m]
-                if option == "Boost Accuracy" or tonumber(move.power) >= 10
-                then
+                local isMoveEligible = true
+                if option == "Boost Power" then
+                    if move.variablepower then
+                        isMoveEligible = false
+                        print(string.format("Excluding move %s because it has variable power", move.name))
+                    end
+                    local movePower = tonumber(move.power)
+                    if move.power and movePower and movePower < 10 then
+                        isMoveEligible = false
+                        print(string.format("Excluding move %s because its power is < 10", move.name))
+                    end
+                end
+                if option == "Boost Accuracy" then
+                    local moveAcc = tonumber(move.accuracy)
+                    if moveAcc and moveAcc == 0 then
+                        isMoveEligible = false
+                        print(string.format("Excluding move %s because its accuracy is either non-standard or fixed", move.name))
+                    end
+
+                    local sleepMoves = {
+                        ["GrassWhistle"] = true,
+                        ["Hypnosis"] = true,
+                        ["Lovely Kiss"] = true,
+                        ["Sing"] = true,
+                        ["Sleep Powder"] = true,
+                        ["Spore"] = true,
+                    }
+                    if sleepMoves[move.name] then
+                        isMoveEligible = false
+                        print(string.format("Excluding move %s because it is a sleep effect", move.name))
+                    end
+                end
+                if isMoveEligible then
                     local moveName = string.format("%s%s", mode, move.name)
                     moveChoices[moveName] = true
                 end
