@@ -4228,8 +4228,8 @@ local function RoguemonTracker()
                             if reward == "Potion Investment" then
                                 specialRedeems.consumable[reward] = 20
                             end
-                            if reward == "Revive" then
-                                specialRedeems.internal["Revive"] = true
+                            if reward == "Revive" or reward == "Warding Charm" then
+                                specialRedeems.internal[reward] = true
                             end
                             if reward == "Fight first 5 wilds in Forest" then
                                 wildBattleCounter = 5
