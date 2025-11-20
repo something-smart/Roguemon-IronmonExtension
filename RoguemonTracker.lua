@@ -5480,6 +5480,7 @@ local function RoguemonTracker()
                         local overlayButton = {
                             type = Constants.ButtonTypes.NO_BORDER,
                             box = { 0, 0, Constants.SCREEN.WIDTH, Constants.SCREEN.HEIGHT },
+                            boxColors = nil,
                             onClick = function()
                                 if not Battle.inBattle then
                                     local mouse = input.getmouse()
