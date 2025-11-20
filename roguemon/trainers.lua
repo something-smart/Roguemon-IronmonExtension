@@ -1,7 +1,12 @@
 local TrainerData = {}
 function TrainerData.CheckCoord(area, x, y)
 
-    for _,coord in pairs(TrainerData.mapData[area]) do
+    local areaData = TrainerData.mapData[area]
+    if not areaData then
+        return 0
+    end
+
+    for _,coord in pairs(areaData) do
         if x == coord.x and y == coord.y then
             return coord.num
         end
