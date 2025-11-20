@@ -1084,7 +1084,6 @@ local function RoguemonTracker()
 		if wheelName then
 			wheels[wheelName] = currentWheel
 		end
-        rerollCounter = tonumber(self.readGameVar(GameSettings.roguemon.varRerollChipCount))
 	end
 
 	-- Autofill remaining information about segments.
@@ -6623,6 +6622,11 @@ local function RoguemonTracker()
 		if Program.currentScreen == TrackerScreen then
 			itemsFromPrize = {}
 		end
+
+                if specialRedeems.consumable["Reroll Chip"] and rerollCounter == 0 then
+                    rerollCounter = tonumber(self.readGameVar(GameSettings.roguemon.varRerollChipCount))
+                    self.debugLog("Update rerollCounter")
+                end
 	end
 
 	-- Tracker function to setup checks for new updates and download of those updates.
