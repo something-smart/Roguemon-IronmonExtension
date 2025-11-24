@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.5.1-alpha.2"
+	self.version = "1.5.1-alpha.3"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -267,7 +267,7 @@ local function RoguemonTracker()
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.4.1-alpha2"
+	local bundledRomPatchVersion = "0.4.1-alpha3"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
@@ -3945,9 +3945,6 @@ local function RoguemonTracker()
                                             -- Don't allow multiple offers of Armor Plating or Booster Shot
                                             if specialRedeems.internal[part] then
                                                 add = false
-                                                if DEBUG_MODE then
-                                                    print(string.format("Not offering %s because it's already been redeemed", part))
-                                                end
                                             end
                                         end
 					if part == "Hyper Training" then
