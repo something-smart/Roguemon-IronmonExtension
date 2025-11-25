@@ -5474,42 +5474,44 @@ local function RoguemonTracker()
 					screen.Buttons["RoguemonPrize" .. dx] = nil
 					dx = dx + 1
 				end
-                        local overlayButton = {
-                            type = Constants.ButtonTypes.NO_BORDER,
-                            box = { 0, 0, Constants.SCREEN.WIDTH, Constants.SCREEN.HEIGHT },
-                            boxColors = nil,
-                            onClick = function()
-                                if not Battle.inBattle then
-                                    local mouse = input.getmouse()
-                                    local mouseX = tonumber(mouse.X)
-                                    local mouseY = tonumber(mouse.Y)
-                                    self.debugLog(string.format("Mouse click event at (%d, %d)", mouseX, mouseY))
+                            local overlayButton = {
+                                type = Constants.ButtonTypes.NO_BORDER,
+                                box = { 0, 0, Constants.SCREEN.WIDTH, Constants.SCREEN.HEIGHT },
+                                boxColors = {},
+                                onClick = function()
+                                    if not Battle.inBattle then
+                                        local mouse = input.getmouse()
+                                        local mouseX = tonumber(mouse.X)
+                                        local mouseY = tonumber(mouse.Y)
+                                        self.debugLog(string.format("Mouse click event at (%d, %d)", mouseX, mouseY))
 
-                                    local playerCoordAddr = 0x02036ca0
-                                    local playerX = Memory.readbyte(playerCoordAddr + 0x14) - 0x7 - 0x7
-                                    local playerY = Memory.readbyte(playerCoordAddr + 0x12) - 0x7 - 0x5
-                                    self.debugLog(string.format("Player is at map location (%d, %d)", playerX, playerY))
+                                        local playerCoordAddr = 0x02036ca0
+                                        local playerX = Memory.readbyte(playerCoordAddr + 0x14) - 0x7 - 0x7
+                                        local playerY = Memory.readbyte(playerCoordAddr + 0x12) - 0x7 - 0x5
+                                        self.debugLog(string.format("Player is at map location (%d, %d)", playerX, playerY))
 
-                                    local screenTileX = math.floor(mouseX / 16)
-                                    local screenTileY = math.floor((8 + mouseY) / 16)
-                                    local clickedX = screenTileX + playerX
-                                    local clickedY = screenTileY + playerY
-                                    self.debugLog(string.format("Clicked map tile is (%d, %d)", clickedX, clickedY))
+                                        local screenTileX = math.floor(mouseX / 16)
+                                        local screenTileY = math.floor((8 + mouseY) / 16)
+                                        local clickedX = screenTileX + playerX
+                                        local clickedY = screenTileY + playerY
+                                        self.debugLog(string.format("Clicked map tile is (%d, %d)", clickedX, clickedY))
 
-                                    local trainerNum = trainerData.CheckCoord(Program.GameData.mapId, clickedX, clickedY)
-                                    if trainerNum > 0 then
-                                        self.debugLog(string.format("Clicked trainer ID is %d", trainerNum))
-                                        if not Program.currentScreen == TrainerInfoScreen then
-                                            TrainerInfoScreen.previousScreen = Program.currentScreen
+                                        local trainerNum = trainerData.CheckCoord(Program.GameData.mapId, clickedX, clickedY)
+                                        if trainerNum > 0 then
+                                            self.debugLog(string.format("Clicked trainer ID is %d", trainerNum))
+                                            if not Program.currentScreen == TrainerInfoScreen then
+                                                TrainerInfoScreen.previousScreen = Program.currentScreen
+                                            end
+                                            TrainerInfoScreen.buildScreen(trainerNum)
+                                            Program.changeScreenView(TrainerInfoScreen)
                                         end
-                                        TrainerInfoScreen.buildScreen(trainerNum)
-                                        Program.changeScreenView(TrainerInfoScreen)
                                     end
                                 end
-                            end
-                        }
+                            }
 
-                        screen.Buttons["Overlay"] = overlayButton
+                            if screen ~= StartupScreen then
+                                screen.Buttons["Overlay"] = overlayButton
+                            end
 			end
 		end
 	end
