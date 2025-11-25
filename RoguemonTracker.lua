@@ -4188,10 +4188,17 @@ local function RoguemonTracker()
                     if reward == "Booster Shot" then
                         specialRedeems.internal["Booster Shot"] = true
                         local BOOSTER_SHOT_MODE = { "Boost Power", "Boost Accuracy" }
+                        optIndex = 1
                         for i,mode in pairs(BOOSTER_SHOT_MODE) do
-                            additionalOptions[i] = mode
+                            if self.CheckBoosterShotMoves(mode) then
+                                additionalOptions[i] = mode
+                                optIndex = optIndex + 1
+                            else
+                                if DEBUG_MODE then
+                                    print(string.format("No eligible moves found for Booster Shot mode '%s'", mode))
+                                end
+                            end
                         end
-                        local optIndex = 3
                         while optIndex < 9 do
                             additionalOptions[optIndex] = ""
                             optIndex = optIndex + 1
@@ -4437,50 +4444,10 @@ local function RoguemonTracker()
                 move = MoveData.Moves[m]
                 local isMoveEligible = true
                 if option == "Boost Power" then
-                    if move.variablepower then
-                        isMoveEligible = false
-                        if DEBUG_MODE then
-                            print(string.format("Excluding move %s because it has variable power", move.name))
-                        end
-                    end
-                    local movePower = tonumber(move.power)
-                    if move.power and movePower and movePower < 10 then
-                        isMoveEligible = false
-                        if DEBUG_MODE then
-                            print(string.format("Excluding move %s because its power is < 10", move.name))
-                        end
-                    end
+                    isMoveEligible = self.IsBoosterShotEligiblePOW(move)
                 end
                 if option == "Boost Accuracy" then
-                    local moveAcc = tonumber(move.accuracy)
-                    if moveAcc and moveAcc == 0 then
-                        isMoveEligible = false
-                        if DEBUG_MODE then
-                            print(string.format("Excluding move %s because its accuracy is either non-standard or fixed", move.name))
-                        end
-                    end
-
-                    if MoveData.IsOHKOMove[tostring(m)] then
-                        isMoveEligible = false
-                        if DEBUG_MODE then
-                            print(string.format("Excluding move %s because it is an OHKO move", move.name))
-                        end
-                    end
-
-                    local sleepMoves = {
-                        ["GrassWhistle"] = true,
-                        ["Hypnosis"] = true,
-                        ["Lovely Kiss"] = true,
-                        ["Sing"] = true,
-                        ["Sleep Powder"] = true,
-                        ["Spore"] = true,
-                    }
-                    if sleepMoves[move.name] then
-                        isMoveEligible = false
-                        if DEBUG_MODE then
-                            print(string.format("Excluding move %s because it is a sleep effect", move.name))
-                        end
-                    end
+                    isMoveEligible = self.IsBoosterShotEligibleACC(move)
                 end
                 if isMoveEligible then
                     local moveName = string.format("%s%s", mode, move.name)
@@ -4548,6 +4515,82 @@ local function RoguemonTracker()
 		end
 		self.saveData()
 	end
+
+        function self.CheckBoosterShotMoves(mode)
+            --if mode == "Boost Power" then
+            local pkmn = self.readLeadPokemonData()
+            local moves = {Utils.getbits(pkmn.attack1, 0, 16), Utils.getbits(pkmn.attack1, 16, 16), Utils.getbits(pkmn.attack2, 0, 16), Utils.getbits(pkmn.attack2, 16, 16)}
+            for _,m in pairs(moves) do
+                move = MoveData.Moves[m]
+                if mode == "Boost Power" then
+                    if self.IsBoosterShotEligiblePOW(move) then
+                        return true
+                    end
+                elseif mode == "Boost Accuracy" then
+                    if self.IsBoosterShotEligibleACC(move) then
+                        return true
+                    end
+                end
+            end
+
+            return false
+        end
+
+        function self.IsBoosterShotEligiblePOW(move)
+            local isMoveEligible = true
+
+            if move.variablepower then
+                isMoveEligible = false
+                if DEBUG_MODE then
+                    print(string.format("Excluding move %s because it has variable power", move.name))
+                end
+            end
+            local movePower = tonumber(move.power)
+            if move.power and movePower and movePower < 10 then
+                isMoveEligible = false
+                if DEBUG_MODE then
+                    print(string.format("Excluding move %s because its power is < 10", move.name))
+                end
+            end
+
+            return isMoveEligible
+        end
+
+        function self.IsBoosterShotEligibleACC(move)
+            local moveAcc = tonumber(move.accuracy)
+            local isMoveEligible = true
+            if moveAcc and moveAcc == 0 then
+                isMoveEligible = false
+                if DEBUG_MODE then
+                    print(string.format("Excluding move %s because its accuracy is either non-standard or fixed", move.name))
+                end
+            end
+
+            if MoveData.IsOHKOMove[move.id] then
+                isMoveEligible = false
+                if DEBUG_MODE then
+                    print(string.format("Excluding move %s because it is an OHKO move", move.name))
+                end
+            end
+
+            local sleepMoves = {
+                ["GrassWhistle"] = true,
+                ["Hypnosis"] = true,
+                ["Lovely Kiss"] = true,
+                ["Sing"] = true,
+                ["Sleep Powder"] = true,
+                ["Spore"] = true,
+            }
+            if sleepMoves[move.name] then
+                isMoveEligible = false
+                if DEBUG_MODE then
+                    print(string.format("Excluding move %s because it is a sleep effect", move.name))
+                end
+            end
+
+            return isMoveEligible
+        end
+
 
 	-- CURSE RELATED FUNCTIONS -- 
 
