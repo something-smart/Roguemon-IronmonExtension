@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.5.1-alpha.3"
+	self.version = "1.5.1-alpha.4"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -267,7 +267,7 @@ local function RoguemonTracker()
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.4.1-alpha3"
+	local bundledRomPatchVersion = "0.4.1-alpha4"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
@@ -391,10 +391,10 @@ local function RoguemonTracker()
 	local lastVisitedMap = nil
 
 	local wildBattleCounter = 0
-	local wildBattlesStarted = false
-    local rerollCounter = 0
-    local rerollBans = {}
-	local needToBuy = false
+        local wildBattlesStarted = false
+        local rerollCounter = 0
+        local rerollBans = {}
+        local needToBuy = false
 	local needToCleanse = 0
 	local shouldDismissNotification = nil
 	local foundItemPrizeActive = false
@@ -3818,227 +3818,227 @@ local function RoguemonTracker()
 	end
 
 	-- Spin the reward for a given milestone.
-	function self.spinReward(milestoneName, rerolled)
-		local minHealingPrizes = 1
-		local maxHealingPrizes = 2
-		if milestoneName == "Mt. Moon" then
-			minHealingPrizes = 0
-		end
-		if not rerolled then
-            rerollBans = {}
-        else
-            -- Check if adding these items would leave 0 remaining rewards; 
-            -- if so, clear the ban list before adding them
-            rerollLen = 0
-            for _,i in pairs(rerollBans) do
-                rerollLen = rerollLen + 1
+        function self.spinReward(milestoneName, rerolled)
+            local minHealingPrizes = 1
+            local maxHealingPrizes = 2
+            if milestoneName == "Mt. Moon" then
+                minHealingPrizes = 0
             end
-
-            totalLen = 0
-			local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
-            for _,i in pairs(rewardOptions) do
-                totalLen = totalLen + 1
-            end
-
-            if rerollLen + 6 >= totalLen then  -- 6: 3 current options + 3 next options
+            if not rerolled then
                 rerollBans = {}
-                print("Cleared rerollBans")
+            else
+                -- Check if adding these items would leave 0 remaining rewards; 
+                -- if so, clear the ban list before adding them
+                rerollLen = 0
+                for _,i in pairs(rerollBans) do
+                    rerollLen = rerollLen + 1
+                end
+
+                totalLen = 0
+                local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
+                for _,i in pairs(rewardOptions) do
+                    totalLen = totalLen + 1
+                end
+
+                if rerollLen + 6 >= totalLen then  -- 6: 3 current options + 3 next options
+                    rerollBans = {}
+                    print("Cleared rerollBans")
+                end
+
+                rerollBans[option1] = true
+                rerollBans[option2] = true
+                rerollBans[option3] = true
+            end
+            if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
+                GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
+                LogOverlay.isGameOver = false
+                LogOverlay.isDisplayed = false
+                Program.GameTimer:unpause()
+                GameOverScreen.refreshButtons()
+                GameOverScreen.Buttons.SaveGameFiles:reset()
+            end
+            if milestonesByName[milestoneName] then
+                lastMilestone = milestoneName
+                local pkmn = self.readLeadPokemonData()
+                local isShiny = Utils.bit_xor(Utils.bit_xor(Utils.bit_xor(Utils.getbits(pkmn.otid, 0, 16), Utils.getbits(pkmn.otid, 16, 16)), math.floor(pkmn.personality / 65536)), pkmn.personality % 65536) < Program.Values.ShinyOdds
+
+                self.updateCaps(true)
+                local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
+                local choices = {}
+                local choiceCount = downsized and 2 or 3
+                if haunted and haunted["2 Prize Options"] then
+                    haunted["2 Prize Options"] = nil
+                    choiceCount = 2
+                end
+
+                local healingPrizes = 0
+                local nonHealingPrizes = 0
+
+                local loopCount = 0
+                while #choices < choiceCount and loopCount < 10000 do
+                    local choice = rewardOptions[math.random(#rewardOptions)]
+                    if string.sub(choice, 1, 6) == "Revive" and specialRedeems.consumable["Revive"] then
+                        choice = "Max Revive: Upgrade your Revive to a Max Revive."
+                    end
+                    local choiceName = Utils.split(choice, ":", true)[1]
+                    local choiceParts = Utils.split(choiceName, '&', true)
+                    local add = true
+                    local healingPrize = false
+                    local prospectiveStarterPackMove = nil
+                    for _,part in pairs(choiceParts) do
+                        if specialRedeems.unlocks[part] or (specialRedeems.consumable[part] and not part == "Reroll Chip") or specialRedeems.internal[part] or specialRedeems.battle[part] or 
+                            (part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"]) then
+                            add = false
+                        end
+                        if (part == "Warding Charm" or part == "Clairvoyance") and not (self.ascensionLevel() > 1) then
+                            add = false
+                        end
+                        if part == "Nature Mint" and isShiny then
+                            add = false
+                        end
+                        if(part == "Ability Capsule") then
+                            local otherAbil = AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name
+                            if (self.ascensionLevel() > 1) and (otherAbil == "Huge Power" or otherAbil == "Pure Power") then
+                                add = false
+                            else
+                                choice = choice .. ": Change ability to " .. otherAbil .. "."
+                            end
+                        end
+                        if(part == "Starter Pack") then
+                            local starterPackMoves = {
+                                [PokemonData.Types.NORMAL] = 10, -- Scratch
+                                [PokemonData.Types.FIGHTING] = 183, -- Mach Punch
+                                [PokemonData.Types.FLYING] = 16, -- Gust
+                                [PokemonData.Types.POISON] = 51, -- Acid
+                                [PokemonData.Types.GROUND] = 91, -- Dig
+                                [PokemonData.Types.ROCK] = 317, -- Rock Tomb
+                                [PokemonData.Types.BUG] = 318, -- Silver Wind
+                                [PokemonData.Types.GHOST] = 310, -- Astonish
+                                [PokemonData.Types.STEEL] = 232, -- Metal Claw
+                                [PokemonData.Types.FIRE] = 52, -- Ember
+                                [PokemonData.Types.WATER] = 55, -- Water Gun
+                                [PokemonData.Types.GRASS] = 22, -- Vine Whip
+                                [PokemonData.Types.ELECTRIC] = 84, -- Thunder Shock
+                                [PokemonData.Types.PSYCHIC] = 93, -- Confusion
+                                [PokemonData.Types.ICE] = 181, -- Powder Snow
+                                [PokemonData.Types.DRAGON] = 239, -- Twister
+                                [PokemonData.Types.DARK] = 228, -- Pursuit
+                                ["fairy"] = 358 -- Fairy Wind
+                            }
+                            local monTypes = PokemonData.Pokemon[Tracker.getPokemon(1).pokemonID].types
+                            local pkmn = self.readLeadPokemonData()
+                            local currentMoves = {[Utils.getbits(pkmn.attack1, 0, 16)] = true, 
+                            [Utils.getbits(pkmn.attack1, 16, 16)] = true, 
+                            [Utils.getbits(pkmn.attack2, 0, 16)] = true, 
+                            [Utils.getbits(pkmn.attack2, 16, 16)] = true}
+                            local validMoves = {}
+                            for val,type in pairs(PokemonData.TypeIndexMap) do
+                                local move = starterPackMoves[type]
+                                if type ~= PokemonData.Types.UNKNOWN and type ~= monTypes[1] and type ~= monTypes[2] and not currentMoves[move] then
+                                    validMoves[#validMoves + 1] = starterPackMoves[type]
+                                end
+                            end
+                            prospectiveStarterPackMove = validMoves[math.random(#validMoves)]
+                            choice = choice .. ": Learn a weak move (" .. MoveData.Moves[prospectiveStarterPackMove].name .. ")."
+                        end
+                        if part == "Armor Plating" or part == "Booster Shot" then
+                            -- Don't allow multiple offers of Armor Plating or Booster Shot
+                            if specialRedeems.internal[part] then
+                                add = false
+                            end
+                        end
+                        if part == "Hyper Training" then
+                            if specialRedeems.internal["Hyper Training"] then
+                                choice = choice .. ": See your IVs and choose one to maximize."
+                            else
+                                choice = choice .. ": See your IVs and choose one to increase by 10. Further Hyper Training prizes will maximize instead."
+                            end
+                        end
+                        for _,itm in pairs(MiscData.HealingItems) do
+                            if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name and not (part == "Potion Investment") then
+                                healingPrize = true
+                            end
+                        end
+                    end
+                    if healingPrize and healingPrizes == maxHealingPrizes then
+                        add = false
+                    end
+                    if not healingPrize and nonHealingPrizes == (choiceCount - minHealingPrizes) then
+                        add = false
+                    end
+                    if rerollBans and rerollBans[choiceName] then
+                        add = false
+                    end
+                    if add and choiceName == "Fight Route X" then
+                        local routes = {"Route 12 + 13", "Route 14 + 15"}
+                        local rInd = 1
+                        while rInd <= 2 and specialRedeems.internal[routes[rInd]] do
+                            rInd = rInd + 1
+                        end
+                        if rInd == 3 then
+                            add = false
+                        else
+                            choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Don't cleanse items found until the next Cleansing Phase."
+                            if rInd == 1 then
+                                choice = choice .. " (4 items, 1 TM)"
+                            end
+                            if rInd == 2 then
+                                choice = choice .. " (2 items, 1 TM)"
+                            end
+                        end
+                    end
+                    for _, v in pairs(choices) do
+                        if Utils.split(v, ":", true)[1] == Utils.split(choice, ":", true)[1] then
+                            add = false
+                        end
+                    end
+                    if add and choice then 
+                        choices[#choices + 1] = choice
+                        if healingPrize then
+                            healingPrizes = healingPrizes + 1
+                        else
+                            nonHealingPrizes = nonHealingPrizes + 1
+                        end
+                        if prospectiveStarterPackMove then
+                            starterPackMove = prospectiveStarterPackMove
+                        end
+                    end
+                    loopCount = loopCount + 1
+                end
+
+                local option1Split = Utils.split(choices[1], ":", true)
+                option1 = option1Split[1]
+                option1Desc = option1Split[2] or ""
+                local option2Split = Utils.split(choices[2], ":", true)
+                option2 = option2Split[1]
+                option2Desc = option2Split[2] or ""
+                if choiceCount < 3 then
+                    option3 = ""
+                    option3Desc = ""
+                else
+                    local option3Split = Utils.split(choices[3], ":", true)
+                    option3 = option3Split[1]
+                    option3Desc = option3Split[2] or ""
+                end
+
+                descriptionText = ""
+
+                if rerolled then
+                    Program.changeScreenView(self.RewardScreen)
+                else
+                    self.readyScreen(self.RewardScreen)
+                end
+                Program.redraw(true)
             end
 
-			rerollBans[option1] = true
-            rerollBans[option2] = true
-            rerollBans[option3] = true
-		end
-		if LogOverlay.isGameOver and Program.currentScreen == GameOverScreen then
-			GameOverScreen.status = GameOverScreen.Statuses.STILL_PLAYING
-			LogOverlay.isGameOver = false
-			LogOverlay.isDisplayed = false
-			Program.GameTimer:unpause()
-			GameOverScreen.refreshButtons()
-			GameOverScreen.Buttons.SaveGameFiles:reset()
-		end
-		if milestonesByName[milestoneName] then
-			lastMilestone = milestoneName
-			local pkmn = self.readLeadPokemonData()
-			local isShiny = Utils.bit_xor(Utils.bit_xor(Utils.bit_xor(Utils.getbits(pkmn.otid, 0, 16), Utils.getbits(pkmn.otid, 16, 16)), math.floor(pkmn.personality / 65536)), pkmn.personality % 65536) < Program.Values.ShinyOdds
+            if phases[self.baseMilestone(milestoneName)] then
+                if phases[self.baseMilestone(milestoneName)].buy then
+                    needToBuy = true
+                end
+                needToCleanse = phases[self.baseMilestone(milestoneName)].cleansing and 1 or 2
+            end
 
-			self.updateCaps(true)
-			local rewardOptions = wheels[milestonesByName[milestoneName]['wheel']]
-			local choices = {}
-			local choiceCount = downsized and 2 or 3
-			if haunted and haunted["2 Prize Options"] then
-				haunted["2 Prize Options"] = nil
-				choiceCount = 2
-			end
-
-			local healingPrizes = 0
-			local nonHealingPrizes = 0
-
-			local loopCount = 0
-			while #choices < choiceCount and loopCount < 10000 do
-				local choice = rewardOptions[math.random(#rewardOptions)]
-				if string.sub(choice, 1, 6) == "Revive" and specialRedeems.consumable["Revive"] then
-					choice = "Max Revive: Upgrade your Revive to a Max Revive."
-				end
-				local choiceName = Utils.split(choice, ":", true)[1]
-				local choiceParts = Utils.split(choiceName, '&', true)
-				local add = true
-				local healingPrize = false
-				local prospectiveStarterPackMove = nil
-				for _,part in pairs(choiceParts) do
-					if specialRedeems.unlocks[part] or (specialRedeems.consumable[part] and not part == "Reroll Chip") or specialRedeems.internal[part] or specialRedeems.battle[part] or 
-						(part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"]) then
-						add = false
-					end
-					if (part == "Warding Charm" or part == "Clairvoyance") and not (self.ascensionLevel() > 1) then
-						add = false
-					end
-					if part == "Nature Mint" and isShiny then
-						add = false
-					end
-					if(part == "Ability Capsule") then
-						local otherAbil = AbilityData.Abilities[PokemonData.getAbilityId(Tracker.getPokemon(1).pokemonID, 1 - Tracker.getPokemon(1).abilityNum)].name
-						if (self.ascensionLevel() > 1) and (otherAbil == "Huge Power" or otherAbil == "Pure Power") then
-							add = false
-						else
-							choice = choice .. ": Change ability to " .. otherAbil .. "."
-						end
-					end
-					if(part == "Starter Pack") then
-						local starterPackMoves = {
-							[PokemonData.Types.NORMAL] = 10, -- Scratch
-							[PokemonData.Types.FIGHTING] = 183, -- Mach Punch
-							[PokemonData.Types.FLYING] = 16, -- Gust
-							[PokemonData.Types.POISON] = 51, -- Acid
-							[PokemonData.Types.GROUND] = 91, -- Dig
-							[PokemonData.Types.ROCK] = 317, -- Rock Tomb
-							[PokemonData.Types.BUG] = 318, -- Silver Wind
-							[PokemonData.Types.GHOST] = 310, -- Astonish
-							[PokemonData.Types.STEEL] = 232, -- Metal Claw
-							[PokemonData.Types.FIRE] = 52, -- Ember
-							[PokemonData.Types.WATER] = 55, -- Water Gun
-							[PokemonData.Types.GRASS] = 22, -- Vine Whip
-							[PokemonData.Types.ELECTRIC] = 84, -- Thunder Shock
-							[PokemonData.Types.PSYCHIC] = 93, -- Confusion
-							[PokemonData.Types.ICE] = 181, -- Powder Snow
-							[PokemonData.Types.DRAGON] = 239, -- Twister
-							[PokemonData.Types.DARK] = 228, -- Pursuit
-							["fairy"] = 358 -- Fairy Wind
-						}
-						local monTypes = PokemonData.Pokemon[Tracker.getPokemon(1).pokemonID].types
-						local pkmn = self.readLeadPokemonData()
-						local currentMoves = {[Utils.getbits(pkmn.attack1, 0, 16)] = true, 
-										[Utils.getbits(pkmn.attack1, 16, 16)] = true, 
-										[Utils.getbits(pkmn.attack2, 0, 16)] = true, 
-										[Utils.getbits(pkmn.attack2, 16, 16)] = true}
-						local validMoves = {}
-						for val,type in pairs(PokemonData.TypeIndexMap) do
-							local move = starterPackMoves[type]
-							if type ~= PokemonData.Types.UNKNOWN and type ~= monTypes[1] and type ~= monTypes[2] and not currentMoves[move] then
-								validMoves[#validMoves + 1] = starterPackMoves[type]
-							end
-						end
-						prospectiveStarterPackMove = validMoves[math.random(#validMoves)]
-						choice = choice .. ": Learn a weak move (" .. MoveData.Moves[prospectiveStarterPackMove].name .. ")."
-					end
-                                        if part == "Armor Plating" or part == "Booster Shot" then
-                                            -- Don't allow multiple offers of Armor Plating or Booster Shot
-                                            if specialRedeems.internal[part] then
-                                                add = false
-                                            end
-                                        end
-					if part == "Hyper Training" then
-						if specialRedeems.internal["Hyper Training"] then
-							choice = choice .. ": See your IVs and choose one to maximize."
-						else
-							choice = choice .. ": See your IVs and choose one to increase by 10. Further Hyper Training prizes will maximize instead."
-						end
-					end
-					for _,itm in pairs(MiscData.HealingItems) do
-						if string.len(itm.name) <= string.len(part) and string.sub(part, 1, string.len(itm.name)) == itm.name and not (part == "Potion Investment") then
-							healingPrize = true
-						end
-					end
-				end
-				if healingPrize and healingPrizes == maxHealingPrizes then
-					add = false
-				end
-				if not healingPrize and nonHealingPrizes == (choiceCount - minHealingPrizes) then
-					add = false
-				end
-				if rerollBans and rerollBans[choiceName] then
-					add = false
-				end
-				if add and choiceName == "Fight Route X" then
-					local routes = {"Route 12 + 13", "Route 14 + 15"}
-					local rInd = 1
-					while rInd <= 2 and specialRedeems.internal[routes[rInd]] do
-						rInd = rInd + 1
-					end
-					if rInd == 3 then
-						add = false
-					else
-						choice = "Fight " .. routes[rInd] .. ": Treat the route as a segment. Don't cleanse items found until the next Cleansing Phase."
-						if rInd == 1 then
-							choice = choice .. " (4 items, 1 TM)"
-						end
-						if rInd == 2 then
-							choice = choice .. " (2 items, 1 TM)"
-						end
-					end
-				end
-				for _, v in pairs(choices) do
-					if Utils.split(v, ":", true)[1] == Utils.split(choice, ":", true)[1] then
-						add = false
-					end
-				end
-				if add and choice then 
-					choices[#choices + 1] = choice
-					if healingPrize then
-						healingPrizes = healingPrizes + 1
-					else
-						nonHealingPrizes = nonHealingPrizes + 1
-					end
-					if prospectiveStarterPackMove then
-						starterPackMove = prospectiveStarterPackMove
-					end
-				end
-				loopCount = loopCount + 1
-			end
-
-			local option1Split = Utils.split(choices[1], ":", true)
-			option1 = option1Split[1]
-			option1Desc = option1Split[2] or ""
-			local option2Split = Utils.split(choices[2], ":", true)
-			option2 = option2Split[1]
-			option2Desc = option2Split[2] or ""
-			if choiceCount < 3 then
-				option3 = ""
-				option3Desc = ""
-			else
-				local option3Split = Utils.split(choices[3], ":", true)
-				option3 = option3Split[1]
-				option3Desc = option3Split[2] or ""
-			end
-
-			descriptionText = ""
-
-			if rerolled then
-				Program.changeScreenView(self.RewardScreen)
-			else
-				self.readyScreen(self.RewardScreen)
-			end
-			Program.redraw(true)
-		end
-
-		if phases[self.baseMilestone(milestoneName)] then
-			if phases[self.baseMilestone(milestoneName)].buy then
-				needToBuy = true
-			end
-			needToCleanse = phases[self.baseMilestone(milestoneName)].cleansing and 1 or 2
-		end
-
-	end
+        end
 
         -- Select a particular reward option.
         function self.selectReward(option)
