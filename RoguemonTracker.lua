@@ -4460,6 +4460,13 @@ local function RoguemonTracker()
                         end
                     end
 
+                    if MoveData.IsOHKOMove[tostring(m)] then
+                        isMoveEligible = false
+                        if DEBUG_MODE then
+                            print(string.format("Excluding move %s because it is an OHKO move", move.name))
+                        end
+                    end
+
                     local sleepMoves = {
                         ["GrassWhistle"] = true,
                         ["Hypnosis"] = true,
