@@ -105,7 +105,7 @@ Temporary Item Voucher: Permanently unlock one future non-revive item found befo
 Goody Jar: You may save PP Ups, PP Maxes, Rare Candies, and herbs to use at any time.|candy-jar.png
 Warding Charm: Cancel the effect of any one Curse.|warding-charm.png
 X Speed & Super Potion|xspesuper.png
-X Defend & Super Potion x2|xdef2super.png
+Super Potion x2 & Reroll Chip|xdef2super.png
 Guard Spec. & Dire Hit & Ether|direguardether.png
 HP Cap +50 & Rare Candy|hp50candy.png
 Any Vitamin x3|3vit.png
@@ -116,6 +116,7 @@ Special Insight: Learn the ability of enemy pokemon higher BST than yours.|speci
 Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
 Artiste: Learn Sketch.|artiste.png
 Booster Shot: Choose 1 - Gain +10 ACC or +10 PWR to one move|boost.png
+Super Potion x2 & Reroll Chip - Use to reroll for 3 new prizes when offered. (1 time)|2superreroll.png
 Reroll Pack: Gain 3 reroll chips - Use to reroll for 3 new prizes when offered. (1 time per chip)|rerollpack.png
 
 *Erika Prize
@@ -129,7 +130,7 @@ Move Tutor 3F & PP Max: May teach the Move Tutor's move on the 3rd floor of Dept
 Super Potion & Any Battle Item|superandx.png
 Found Item: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem.png
 HP Cap +100|healing-pocket.png
-HP Cap +50 & X Accuracy|hp50xacc.png
+HP Cap +50 & Reroll Chip|hpcapreroll.png
 HP Cap +50 & Elixir|healing-pocketandelixir.png
 Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
 Temporary Item Voucher: Permanently unlock one future non-revive item found before next gym (immediate decision).|tempvoucher.png
