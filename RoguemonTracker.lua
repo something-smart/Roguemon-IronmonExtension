@@ -3886,8 +3886,12 @@ local function RoguemonTracker()
                     local healingPrize = false
                     local prospectiveStarterPackMove = nil
                     for _,part in pairs(choiceParts) do
-                        if specialRedeems.unlocks[part] or (specialRedeems.consumable[part] and not part == "Reroll Chip") or specialRedeems.internal[part] or specialRedeems.battle[part] or 
-                            (part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"]) then
+                        if specialRedeems.unlocks[part]
+                            or (specialRedeems.consumable[part] and not part == "Reroll Chip")
+                            or (specialRedeems.internal[part] and not part == "Hyper Training")
+                            or specialRedeems.battle[part]
+                            or (part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"])
+                        then
                             add = false
                         end
                         if (part == "Warding Charm" or part == "Clairvoyance") and not (self.ascensionLevel() > 1) then
