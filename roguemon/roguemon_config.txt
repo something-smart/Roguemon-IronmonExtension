@@ -63,7 +63,7 @@ Reroll Chip|rerollchip.png
 
 *Misty Prize
 Super Potion x2|twosupers.png
-Full Heal & Any Status Heal|allfourstatus.png
+Full Heal & Any Status Heal|fullchoice.png
 Potion x3 & Any Status Heal|threepotionandchoice.png
 Super Potion & Any Status Heal x2|superandchoice.png
 Temporary Found Item: Temporarily unlock an item in your bag for 2 gym badges.|grounditem.png
