@@ -249,6 +249,8 @@ local function RoguemonTracker()
 								longDescription = "Your moves' typings are randomized for each battle. This cannot give you STAB on your attacks."},
 		["Distorted Soul"] = {description = "Your moves' powers are randomized.", segment = true, gym = false, romCurse = ROM_CURSES["DISTORTED_SOUL"],
 								longDescription = "Your moves' powers are randomized for each battle, between 30 and 90."},
+		["Unleash the Beast"] = {description = "No FC = Shedinja becomes EternatusE.", segment = true, gym = false,
+	                             longDescription = "If this segment isn't full cleared, all future Shedinja encounters become Eternamax Eternatus instead"},
 	}
 
 	local FIRERED_11_SHA1SUM = "dd5945db9b930750cb39d00c84da8571feebf417"
@@ -1363,6 +1365,9 @@ local function RoguemonTracker()
 
 			-- offset from gBattleStruct
 			distortedSeed        = 0x11,
+
+			-- used to track persistent state of "Unleash the Beast" curse
+			flagCurseUnleash          = 0x4AF,
 		}
 
 		local roguemonSettingPointers = {
@@ -1957,6 +1962,9 @@ local function RoguemonTracker()
 			end
 			if curse == "Poltergeist" then
 				haunted = {}
+			end
+			if curse == "Unleash the Beast" then
+			    self.applyUnleashCurse()
 			end
 		end
 
@@ -7159,6 +7167,18 @@ local function RoguemonTracker()
 		restoreFunctions(LogOverlay, "LogOverlay")
 		restoreFunctions(MoveData, "MoveData")
 		restoreFunctions(io, "io")
+	end
+
+	-- enables the flag turning Shedinja into Eternamax Eternatus.
+	function self.applyUnleashCurse()
+		local flagIdx = GameSettings.roguemon.flagCurseUnleash
+		local flagBit = flagIdx % 8
+		local flagOffset = math.floor((flagIdx - flagBit) / 8)
+
+		local flagAddr = Utils.getSaveBlock1Addr() + GameSettings.gameFlagsOffset + flagOffset
+
+		local newFlags = Memory.readbyte(flagAddr) | (1 << flagBit)
+		Memory.writebyte(flagAddr, newFlags)
 	end
 
 	return self
