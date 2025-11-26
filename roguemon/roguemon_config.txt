@@ -29,7 +29,7 @@ Notetaker: Notes on enemy pokemon transfer to their evolution.|notetaker.png
 
 *Brock Prize
 Potion x2 & Ether|twopotionether.png
-Full Heal & Any Status Heal|allfourstatus.png
+Full Heal & Any Status Heal|fullchoice.png
 Potion & Reroll Chip: May be used to reroll any reward spin once.|potionandreroll.png
 Potion & Ether & Any Status Heal|potionstatusether.png
 Potion x2 & Any Status Heal|twopotionandchoice.png
@@ -116,13 +116,13 @@ Special Insight: Learn the ability of enemy pokemon higher BST than yours.|speci
 Smuggler's Pouch: May choose one item not to cleanse each Cleansing Phase.|smugglers-pouch.png
 Artiste: Learn Sketch.|artiste.png
 Booster Shot: Choose 1 - Gain +10 ACC or +10 PWR to one move|boost.png
-Super Potion x2 & Reroll Chip - Use to reroll for 3 new prizes when offered. (1 time)|2superreroll.png
+Super Potion x2 & Reroll Chip: Use to reroll for 3 new prizes when offered. (1 time)|2superreroll.png
 Reroll Pack: Gain 3 reroll chips - Use to reroll for 3 new prizes when offered. (1 time per chip)|rerollpack.png
 
 *Erika Prize
 1 TM from the Department Store: Cannot pre-scout, but you may see them all and teach one (or none).|tm.png
 Hyper Potion & Move Tutor 3F: May teach the Move Tutor's move on the 3rd floor of Dept Store. Cannot pre-scout.|hyperrelearner.png
-Hyper Potion & White Herb|hyper-potion.png
+Hyper Potion & White Herb|hyperwhiteherb.png
 Full Heal x2 & Super Potion|twofull-heal-super.png
 Super Potion x2 & Full Heal|twosuperandfull.png
 Any Battle Item x2|twoxitems.png
@@ -130,7 +130,7 @@ Move Tutor 3F & PP Max: May teach the Move Tutor's move on the 3rd floor of Dept
 Super Potion & Any Battle Item|superandx.png
 Found Item: Permanently unlock any non-revive item currently in the bag (before cleansing).|grounditem.png
 HP Cap +100|healing-pocket.png
-HP Cap +50 & Reroll Chip|hpcapreroll.png
+HP Cap +50 & Reroll Chip: Use to reroll for 3 new prizes when offered. (1 time)|hpcapreroll.png
 HP Cap +50 & Elixir|healing-pocketandelixir.png
 Berry Pouch: HP Berries may be saved instead of equipped; status berries don't count against cap.|berry-pouch.png
 Temporary Item Voucher: Permanently unlock one future non-revive item found before next gym (immediate decision).|tempvoucher.png
