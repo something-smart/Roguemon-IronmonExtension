@@ -1346,41 +1346,41 @@ local function RoguemonTracker()
 			GameSettings[setting] = address
 		end
 
-		GameSettings.roguemon = {
-			romCompat                 = 0x08000200,
-			romUid                    = 0x08000175,
+                GameSettings.roguemon = {
+                    romCompat                 = 0x08000200,
+                    romUid                    = 0x08000175,
 
-			-- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
-			varRedeems                = 0x58,
-			varType                   = 0x5c,
-			varAscension              = 0x5e,
-			varCurse                  = 0x7e,
-			varMilestone              = 0x82,
+                    -- these are offset from SaveBlock1Addr + GameSettings.gameVarsOffset
+                    varRedeems                = 0x58,
+                    varType                   = 0x5c,
+                    varAscension              = 0x5e,
+                    varCurse                  = 0x7e,
+                    varMilestone              = 0x82,
 
-            -- "Booster Shot" stored values
-            varBoosterShotMove        = 0x118,
-            varBoosterShotPow         = 0x11a,
-            varBoosterShotAcc         = 0x11c,
+                    -- "Booster Shot" stored values
+                    varBoosterShotMove        = 0x118,
+                    varBoosterShotPow         = 0x11a,
+                    varBoosterShotAcc         = 0x11c,
 
-			-- these are offset from SaveBlock2Addr
-			optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
+                    -- these are offset from SaveBlock2Addr
+                    optionsRoguemonRules      = 0x15, -- bit flag at 1 << 5; 0=Unenforced, 1=Enforced (default)
 
-			-- these are offset from SaveBlock3
-			ascensionTypeStats        = 0x73e4,
+                    -- these are offset from SaveBlock3
+                    ascensionTypeStats        = 0x73e4,
 
-			-- these are offset from sSpecialFlags, in bits
-			flagAwaitingRandomization = 0x2,
-			flagBackToTower           = 0x3,
-			flagSentToTower           = 0x4,
+                    -- these are offset from sSpecialFlags, in bits
+                    flagAwaitingRandomization = 0x2,
+                    flagBackToTower           = 0x3,
+                    flagSentToTower           = 0x4,
 
-			-- these are offset from gRoguemonTrackerData
-			queuedMoveLearn           = 0xa,
+                    -- these are offset from gRoguemonTrackerData
+                    queuedMoveLearn           = 0xa,
 
-			-- offset from gBattleStruct
-		  distortedSeed             = 0x11,
+                    -- offset from gBattleStruct
+                    distortedSeed             = 0x11,
 
-			-- used to track persistent state of "Unleash the Beast" curse
-			flagCurseUnleash          = 0x4AF,
+                    -- used to track persistent state of "Unleash the Beast" curse
+                        flagCurseUnleash          = 0x4AF,
 
       -- "Armor Plating" redeem: 0 for DEF, 1 for SPD
       flagArmorPlatingMode      = 0x4ae,
