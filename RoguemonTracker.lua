@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.5.1-beta.3"
+	self.version = "v1.5.2-alpha.2"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -269,7 +269,7 @@ local function RoguemonTracker()
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.4.1-beta3"
+	local bundledRomPatchVersion = "0.4.2-alpha0"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
@@ -3895,8 +3895,8 @@ local function RoguemonTracker()
                     local prospectiveStarterPackMove = nil
                     for _,part in pairs(choiceParts) do
                         if specialRedeems.unlocks[part]
-                            or (specialRedeems.consumable[part] and not part == "Reroll Chip")
-                            or (specialRedeems.internal[part] and not part == "Hyper Training")
+                            or (specialRedeems.consumable[part] and part ~= "Reroll Chip")
+                            or (specialRedeems.internal[part] and part ~= "Hyper Training")
                             or specialRedeems.battle[part]
                             or (part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"])
                         then
@@ -7301,6 +7301,7 @@ local function RoguemonTracker()
 	-- the running ROM, then restarts the tracker.
 	function self.LoadNextRom(v1, v2)
 		Main.loadNextSeed = false
+                local startTime = os.clock()
 
 		-- In this case, someone used the New Run Combo buttons. We don't
 		-- actually want to randomize in this case. Instead, tell the
@@ -7316,7 +7317,6 @@ local function RoguemonTracker()
 
 		Program.GameTimer:reset()
 		Utils.tempDisableBizhawkSound()
-
 		if Main.IsOnBizhawk() then
 			Drawing.clearImageCache()
 			Utils.printDebug("--------Randomizing--------")
@@ -7364,6 +7364,9 @@ local function RoguemonTracker()
 		end
 
 		Utils.tempEnableBizhawkSound()
+                local endTime = os.clock()
+                local totalTime = endTime - startTime
+                print(string.format("Randomization took %3.2f seconds", totalTime))
 
 		Main.Run()
 	end
