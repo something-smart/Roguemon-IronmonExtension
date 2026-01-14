@@ -77,7 +77,7 @@ local function RoguemonTracker()
 		["Notetaker"] = {consumable = false, image = "notetaker.png", description = "Notes on enemy pokemon transfer to their evolution."},
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash a non-consumable HP heal, gain 30% of its value as HP cap."},
 		["Clairvoyance"] = {consumable = true, image = "clairvoyance.png", description = "Learn all future curses, and can make one swap."},
-		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def."},
+		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def. to a max of 2 stages."},
 		["Booster Shot"] = {consumable = false, image = "boost.png", description = "Slightly boosts the power or accuracy of a single move."},
 		["Reroll Pack"] = {consumable = true, button = "", image = "rerollpack.png", description = "Gain 3 reroll chips - Use to reroll for 3 new prizes when offered. (1 time per chip)"},
 	}
