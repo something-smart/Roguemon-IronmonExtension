@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "1.5.1-beta.3"
+	self.version = "v1.5.2-beta.1"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -77,7 +77,7 @@ local function RoguemonTracker()
 		["Notetaker"] = {consumable = false, image = "notetaker.png", description = "Notes on enemy pokemon transfer to their evolution."},
 		["Midas Touch"] = {consumable = false, image = "midas-touch.png", description = "If you trash a non-consumable HP heal, gain 30% of its value as HP cap."},
 		["Clairvoyance"] = {consumable = true, image = "clairvoyance.png", description = "Learn all future curses, and can make one swap."},
-		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def."},
+		["Armor Plating"] = {consumable = false, image = "assault-vest.png", description = "Gradually increases Defense or Sp. Def. to a max of 2 stages."},
 		["Booster Shot"] = {consumable = false, image = "boost.png", description = "Slightly boosts the power or accuracy of a single move."},
 		["Reroll Pack"] = {consumable = true, button = "", image = "rerollpack.png", description = "Gain 3 reroll chips - Use to reroll for 3 new prizes when offered. (1 time per chip)"},
 	}
@@ -269,7 +269,7 @@ local function RoguemonTracker()
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.4.1-beta3"
+	local bundledRomPatchVersion = "0.4.2-beta1"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
@@ -3895,8 +3895,8 @@ local function RoguemonTracker()
                     local prospectiveStarterPackMove = nil
                     for _,part in pairs(choiceParts) do
                         if specialRedeems.unlocks[part]
-                            or (specialRedeems.consumable[part] and not part == "Reroll Chip")
-                            or (specialRedeems.internal[part] and not part == "Hyper Training")
+                            or (specialRedeems.consumable[part] and part ~= "Reroll Chip")
+                            or (specialRedeems.internal[part] and part ~= "Hyper Training")
                             or specialRedeems.battle[part]
                             or (part == "Fight Route X" and specialRedeems.internal["Route 14 + 15"])
                         then
@@ -5453,126 +5453,92 @@ local function RoguemonTracker()
 	-- Draw special redeem images on the main screen.
 	function self.redrawScreenImages()
 		if RoguemonOptions["Display prizes on screen"] and not self.isInAscensionTower() then
-			local screen = Program.currentScreen
-			--local dx = 180 - (#specialRedeems.unlocks + #specialRedeems.consumable)*30 - use this for top right display
-			local dx = 0
-			local dy = 0
-			local imageSize = 32
-			local imageGap = 30
-			if RoguemonOptions["Display small prizes"] then
-				imageSize = 20
-				imageGap = 18
-			end
-			if screen ~= StartupScreen then
-				for _,r in ipairs(specialRedeems.battle) do
-					local imageButton = {
-						type = Constants.ButtonTypes.IMAGE,
-						box = {dx*imageGap, dy, imageSize, imageSize},
-						onClick = function()
-							specialRedeemToDescribe = r
-							Program.changeScreenView(self.SpecialRedeemScreen)
-						end
-					}
-					Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
-					if screen.Buttons then
-						screen.Buttons["RoguemonPrize" .. dx] = imageButton
-					end
-					local count = specialRedeems.battle[r]
-					if count < 0 then
-						count = count + 2
-					end
-					Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, count, 0xFF000000)
-					dx = dx + 1
-				end
-			end
-			if not Battle.inBattle then
-				if screen ~= StartupScreen then
-                                        local displayedUnlocks = {}
-					for _,r in ipairs(specialRedeems.unlocks) do
-                                            if not displayedUnlocks[r] then
-                                                displayedUnlocks[r] = true
-						local imageButton = {
-							type = Constants.ButtonTypes.IMAGE,
-							box = {dx*imageGap, dy, imageSize, imageSize},
-							onClick = function()
-								specialRedeemToDescribe = r
-								Program.changeScreenView(self.SpecialRedeemScreen)
-							end
-						}
-						Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
-						if screen.Buttons then
-							screen.Buttons["RoguemonPrize" .. dx] = imageButton
-						end
-						dx = dx + 1
+                    local screen = Program.currentScreen
+                    --local dx = 180 - (#specialRedeems.unlocks + #specialRedeems.consumable)*30 - use this for top right display
+                    local dx = 0
+                    local dy = 0
+                    local imageSize = 32
+                    local imageGap = 30
+                    if RoguemonOptions["Display small prizes"] then
+                            imageSize = 20
+                            imageGap = 18
+                    end
+                    if screen ~= StartupScreen then
+                            for _,r in ipairs(specialRedeems.battle) do
+                                    local imageButton = {
+                                            type = Constants.ButtonTypes.IMAGE,
+                                            box = {dx*imageGap, dy, imageSize, imageSize},
+                                            onClick = function()
+                                                    specialRedeemToDescribe = r
+                                                    Program.changeScreenView(self.SpecialRedeemScreen)
                                             end
-					end
-                                        local displayedConsumables = {}
-					for _,r in ipairs(specialRedeems.consumable) do
-                                            if not displayedConsumables[r] then
-                                                displayedConsumables[r] = true
-                                                local imageButton = {
-                                                        type = Constants.ButtonTypes.IMAGE,
-                                                        box = {dx*imageGap, dy, imageSize, imageSize},
-                                                        onClick = function()
-                                                                specialRedeemToDescribe = r
-                                                                Program.changeScreenView(self.SpecialRedeemScreen)
-                                                        end
-                                                }
-                                                Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
-                                                if screen.Buttons then
-                                                        screen.Buttons["RoguemonPrize" .. dx] = imageButton
-                                                end
-                                                if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
-                                                        Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
-                                                end
-                                                if r == "Reroll Chip" then
-                                                    Drawing.drawText(dx*imageGap + imageSize - 12, dy + imageSize - 12, rerollCounter, 0xFF000000)
-                                                end
-                                                dx = dx + 1
+                                    }
+                                    Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+                                    if screen.Buttons then
+                                            screen.Buttons["RoguemonPrize" .. dx] = imageButton
+                                    end
+                                    local count = specialRedeems.battle[r]
+                                    if count < 0 then
+                                            count = count + 2
+                                    end
+                                    Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, count, 0xFF000000)
+                                    dx = dx + 1
+                            end
+                    end
+                    if not Battle.inBattle then
+                            if screen ~= StartupScreen then
+                                    local displayedUnlocks = {}
+                                    for _,r in ipairs(specialRedeems.unlocks) do
+                                        if not displayedUnlocks[r] then
+                                            displayedUnlocks[r] = true
+                                            local imageButton = {
+                                                    type = Constants.ButtonTypes.IMAGE,
+                                                    box = {dx*imageGap, dy, imageSize, imageSize},
+                                                    onClick = function()
+                                                            specialRedeemToDescribe = r
+                                                            Program.changeScreenView(self.SpecialRedeemScreen)
+                                                    end
+                                            }
+                                            Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+                                            if screen.Buttons then
+                                                    screen.Buttons["RoguemonPrize" .. dx] = imageButton
                                             end
-					end
-				end
-				while dx < 8 do
-					screen.Buttons["RoguemonPrize" .. dx] = nil
-					dx = dx + 1
-				end
-                            local overlayButton = {
-                                type = Constants.ButtonTypes.NO_BORDER,
-                                box = { 0, 0, Constants.SCREEN.WIDTH, Constants.SCREEN.HEIGHT },
-                                boxColors = {},
-                                onClick = function()
-                                    if not Battle.inBattle then
-                                        local mouse = input.getmouse()
-                                        local mouseX = tonumber(mouse.X)
-                                        local mouseY = tonumber(mouse.Y)
-                                        self.debugLog(string.format("Mouse click event at (%d, %d)", mouseX, mouseY))
-
-                                        local playerCoordAddr = 0x02036ca0
-                                        local playerX = Memory.readbyte(playerCoordAddr + 0x14) - 0x7 - 0x7
-                                        local playerY = Memory.readbyte(playerCoordAddr + 0x12) - 0x7 - 0x5
-                                        self.debugLog(string.format("Player is at map location (%d, %d)", playerX, playerY))
-
-                                        local screenTileX = math.floor(mouseX / 16)
-                                        local screenTileY = math.floor((8 + mouseY) / 16)
-                                        local clickedX = screenTileX + playerX
-                                        local clickedY = screenTileY + playerY
-                                        self.debugLog(string.format("Clicked map tile is (%d, %d)", clickedX, clickedY))
-
-                                        local trainerNum = trainerData.CheckCoord(Program.GameData.mapId, clickedX, clickedY)
-                                        if trainerNum > 0 then
-                                            self.debugLog(string.format("Clicked trainer ID is %d", trainerNum))
-                                            if not Program.currentScreen == TrainerInfoScreen then
-                                                TrainerInfoScreen.previousScreen = Program.currentScreen
-                                            end
-                                            TrainerInfoScreen.buildScreen(trainerNum)
-                                            Program.changeScreenView(TrainerInfoScreen)
+                                            dx = dx + 1
                                         end
                                     end
-                                end
-                            }
+                                    local displayedConsumables = {}
+                                    for _,r in ipairs(specialRedeems.consumable) do
+                                        if not displayedConsumables[r] then
+                                            displayedConsumables[r] = true
+                                            local imageButton = {
+                                                    type = Constants.ButtonTypes.IMAGE,
+                                                    box = {dx*imageGap, dy, imageSize, imageSize},
+                                                    onClick = function()
+                                                            specialRedeemToDescribe = r
+                                                            Program.changeScreenView(self.SpecialRedeemScreen)
+                                                    end
+                                            }
+                                            Drawing.drawImage(self.Paths.IMAGES_DIRECTORY .. specialRedeemInfo[r].image, dx*imageGap, dy, imageSize, imageSize)
+                                            if screen.Buttons then
+                                                    screen.Buttons["RoguemonPrize" .. dx] = imageButton
+                                            end
+                                            if r == "Fight wilds in Rts 1/2/22" or r == "Fight first 5 wilds in Forest" then
+                                                    Drawing.drawText(dx*imageGap + imageSize - 7, dy + imageSize - 7, wildBattleCounter, 0xFF000000)
+                                            end
+                                            if r == "Reroll Chip" then
+                                                Drawing.drawText(dx*imageGap + imageSize - 12, dy + imageSize - 12, rerollCounter, 0xFF000000)
+                                            end
+                                            dx = dx + 1
+                                        end
+                                    end
+                            end
+                            while dx < 8 do
+                                    screen.Buttons["RoguemonPrize" .. dx] = nil
+                                    dx = dx + 1
+                            end
 
                             if screen ~= StartupScreen then
-                                screen.Buttons["Overlay"] = overlayButton
+                                screen.Buttons["Overlay"] = self.overlayButton
                             end
 			end
 		end
@@ -6374,6 +6340,15 @@ local function RoguemonTracker()
 		MiscData.Items[94] = "RogueStone"
 		MiscData.EvolutionStones[94].name = "RogueStone"
 
+                self.overlayButton = self.overlayButton or {
+                    type = Constants.ButtonTypes.NO_BORDER,
+                    box = { 0, 0, Constants.SCREEN.WIDTH, Constants.SCREEN.HEIGHT },
+                    boxColors = {},
+                    onClick = function()
+                        self:handleOverlayClick()
+                    end
+                }
+
 		loadedExtension = true
 	end
 
@@ -6724,6 +6699,36 @@ local function RoguemonTracker()
 		local isUpdateAvailable = Utils.checkForVersionUpdate(versionCheckUrl, self.version, versionResponsePattern, compareFunc)
 		return isUpdateAvailable, releaseNotesUrl
 	end
+
+        function self:handleOverlayClick()
+            if not Battle.inBattle then
+                local mouse = input.getmouse()
+                local mouseX = tonumber(mouse.X)
+                local mouseY = tonumber(mouse.Y)
+                self.debugLog(string.format("Mouse click event at (%d, %d)", mouseX, mouseY))
+
+                local playerCoordAddr = 0x02036ca0
+                local playerX = Memory.readbyte(playerCoordAddr + 0x14) - 0x7 - 0x7
+                local playerY = Memory.readbyte(playerCoordAddr + 0x12) - 0x7 - 0x5
+                self.debugLog(string.format("Player is at map location (%d, %d)", playerX, playerY))
+
+                local screenTileX = math.floor(mouseX / 16)
+                local screenTileY = math.floor((8 + mouseY) / 16)
+                local clickedX = screenTileX + playerX
+                local clickedY = screenTileY + playerY
+                self.debugLog(string.format("Clicked map tile is (%d, %d)", clickedX, clickedY))
+
+                local trainerNum = trainerData.CheckCoord(Program.GameData.mapId, clickedX, clickedY)
+                if trainerNum > 0 then
+                    self.debugLog(string.format("Clicked trainer ID is %d", trainerNum))
+                    if not Program.currentScreen == TrainerInfoScreen then
+                        TrainerInfoScreen.previousScreen = Program.currentScreen
+                    end
+                    TrainerInfoScreen.buildScreen(trainerNum)
+                    Program.changeScreenView(TrainerInfoScreen)
+                end
+            end
+        end
 
 	-- Helper function for accessing roguemon data from the console
 	function RoguemonObj()
@@ -7296,6 +7301,7 @@ local function RoguemonTracker()
 	-- the running ROM, then restarts the tracker.
 	function self.LoadNextRom(v1, v2)
 		Main.loadNextSeed = false
+                local startTime = os.clock()
 
 		-- In this case, someone used the New Run Combo buttons. We don't
 		-- actually want to randomize in this case. Instead, tell the
@@ -7311,7 +7317,6 @@ local function RoguemonTracker()
 
 		Program.GameTimer:reset()
 		Utils.tempDisableBizhawkSound()
-
 		if Main.IsOnBizhawk() then
 			Drawing.clearImageCache()
 			Utils.printDebug("--------Randomizing--------")
@@ -7359,6 +7364,9 @@ local function RoguemonTracker()
 		end
 
 		Utils.tempEnableBizhawkSound()
+                local endTime = os.clock()
+                local totalTime = endTime - startTime
+                print(string.format("Randomization took %3.2f seconds", totalTime))
 
 		Main.Run()
 	end
