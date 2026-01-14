@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "v1.5.2-beta.1"
+	self.version = "1.5.2-beta.1"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
