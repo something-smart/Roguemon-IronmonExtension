@@ -1,6 +1,6 @@
 local function RoguemonTracker()
     local self = {}
-	self.version = "v1.5.2-alpha.2"
+	self.version = "v1.5.2-beta.1"
 	self.name = "Roguemon Tracker"
 	self.author = "Croz & Smart"
 	self.description = "Tracker extension for tracking & automating Roguemon rewards & caps."
@@ -269,7 +269,7 @@ local function RoguemonTracker()
 	-- This is the version of the ROM patch which has been bundled with the
 	-- Tracker. If the ROM is older than this, we prompt the user to patch.
 	-- This should be updated whenever `roguemon.bps` is updated.
-	local bundledRomPatchVersion = "0.4.2-alpha2"
+	local bundledRomPatchVersion = "0.4.2-beta1"
 
 	-- This is set by the ROM. We track it to apply complementary rule enforcement in the tracker.
 	local enforceRules = false
